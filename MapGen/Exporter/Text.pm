@@ -1,4 +1,4 @@
-# $Id: Text.pm,v 1.7 2005/03/23 17:46:35 jettero Exp $
+# $Id: Text.pm,v 1.8 2005/03/23 18:47:33 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::Visualization::Text;
@@ -46,50 +46,7 @@ sub _genmap {
     my $m    = $opts->{_the_map};
     my $g    = $opts->{_the_groups};
 
-    my $map       = "";
-    my $room_list = "";
-
-    my @rooms = &filter( @$g, sub { $_[0]->{type} eq "room" } );
-    for my $r (@rooms) {
-        $room_list .= "$r->{name} $r->{loc_size}\n";
-        for my $i ($r->{loc}[1]..$r->{loc}[1]+($r->{size}[1]-1)) {
-            for my $j ($r->{loc}[0]..$r->{loc}[0]+($r->{size}[0]-1)) {
-                my $tile  = $m->[$i][$j];
-
-                my ($n, $e, $s, $w) = map($tile->{od}{$_}, qw(n e s w));
-
-                $tile->{_sym} = "?";
-                if( $n and $s and $e and $w ) {
-                    $tile->{_sym} = ".";
-
-                } elsif( $n and $s and $e and not $w ) {
-                    $tile->{_sym} = "{";
-
-                } elsif( $n and $s and $w and not $e ) {
-                    $tile->{_sym} = "}";
-
-                } elsif( $e and $w and $n and not $s ) {
-                    $tile->{_sym} = "v";
-
-                } elsif( $e and $w and $s and not $n ) {
-                    $tile->{_sym} = "^";
-
-                } elsif( $s and $e and not $w and not $n ) {
-                    $tile->{_sym} = "/";
-
-                } elsif( $n and $w and not $s and not $e ) {
-                    $tile->{_sym} = "/";
-
-                } elsif( $w and $s and not $n and not $e ) {
-                    $tile->{_sym} = "\\";
-
-                } elsif( $n and $e and not $s and not $w ) {
-                    $tile->{_sym} = "\\";
-
-                }
-            }
-        }
-    }
+    my $map  = "";
 
     for my $i (0..$#$m) {
         for my $j (0..$#{ $m->[$i] }) {
@@ -101,7 +58,7 @@ sub _genmap {
         $map .= "\n";
     }
 
-    return $map . $room_list;
+    return $map;
 }
 
 __END__
@@ -124,7 +81,8 @@ Games::RolePlay::MapGen::Visualization::Text - A pure text mapgen visualization.
 
 =head1 DESCRIPTION
 
-    This simple plugin shows maps like so:
+    This is how they'd look in a rogue-like... Unfortunately, this design won't
+    work with a cell based map... It'll have to look more like that below.
 
                  #.#         #.#  
                  #.#         #.#  
@@ -136,6 +94,23 @@ Games::RolePlay::MapGen::Visualization::Text - A pure text mapgen visualization.
                #.....#       #.#########
                #######       #..........
                              ###########
+
+    Sadly, since every cell has up to 4 exits and adjacent cells aren't necessarilly open to eachother, 
+    the text based map has to have a little more space init.
+
+                 |.|             |.| 
+                   
+                 |.|             |.| 
+    - - - - - - - + - - - - - - - + - - - 
+    . . . . . . . . . . . . . . . . . . .
+    - - - - - - - + - - - - - - - + - - - 
+             |. . . . .|         |.|
+
+             |. . . . .|         |.|
+                                    - - -
+             |. . . . .|         |. . . .
+              - - - - -           - - - - 
+
 =head1 SEE ALSO
 
 Games::RolePlay::MapGen

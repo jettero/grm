@@ -1,21 +1,40 @@
-# $Id: 05_generate.t,v 1.5 2005/03/20 16:42:49 jettero Exp $
+# $Id: 05_generate.t,v 1.6 2005/03/23 18:47:33 jettero Exp $
 
 use strict;
 use Test;
 
-my $tests = 1;
-plan tests => $tests;
+my ($x, $y) = (30, 30);
+
+plan tests => 1 + (4 * $x * $y);
 
 use Games::RolePlay::MapGen;
 
-my $map = new Games::RolePlay::MapGen({bounding_box => "90x35"});
+my $map = new Games::RolePlay::MapGen({bounding_box => join("x", $x, $y) });
 
-generate  $map;
+generate $map;
+
+CHECK_OPEN_DIRECTIONS_FOR_SANITY: { # they should really be the same from each direction ... or there's a problem.
+    my $m = $map->{_the_map};
+    for my $i (0..$y-1) {
+        for my $j (0..$x-1) {
+            my $here  = $m->[$i][$j]{tile}{od};
+            my $above = ($i==0  ? undef : $m->[$i-1][$j]{tile}{od});
+            my $below = ($i==$y ? undef : $m->[$i+1][$j]{tile}{od});
+            my $left  = ($j==0  ? undef : $m->[$i][$j-1]{tile}{od});
+            my $right = ($j==$x ? undef : $m->[$i][$j+1]{tile}{od});
+
+            if( $above ) { ok( $above->{s}, $here->{n} ) } else { ok(1) }
+            if( $below ) { ok( $below->{n}, $here->{s} ) } else { ok(1) }
+            if( $left  ) { ok(  $left->{e}, $here->{w} ) } else { ok(1) }
+            if( $right ) { ok( $right->{w}, $here->{e} ) } else { ok(1) }
+        }
+    }
+}
+
 visualize $map ("map.txt");
-
 if( -f "map.txt" ) {
     ok( 1 );
 
 } else {
-    ok( 0 ) for 1 .. $tests; # no map.txt, means no tests!
+    ok( 0 );
 }
