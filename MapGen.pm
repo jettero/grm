@@ -1,4 +1,4 @@
-# $Id: MapGen.pm,v 1.31 2005/03/27 12:53:43 jettero Exp $
+# $Id: MapGen.pm,v 1.33 2005/03/28 13:42:34 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::_group;
@@ -19,7 +19,7 @@ use strict;
 use AutoLoader;
 use Carp;
 
-our $VERSION = "0.15";
+our $VERSION = "0.16";
 our $AUTOLOAD;
 
 our %known_opts = (
@@ -38,7 +38,10 @@ our %known_opts = (
          same_node_percent => 30,
     remove_deadend_percent => 60,
 
-    open_room_corridor_door_percent => [ 80, 0, 20, 50 ]
+      open_room_corridor_door_percent     => { door => 95, secret =>  2, stuck => 25, locked => 50 },
+    closed_room_corridor_door_percent     => { door =>  5, secret => 95, stuck => 10, locked => 30 },
+      open_corridor_corridor_door_percent => { door =>  1, secret => 10, stuck => 25, locked => 50 },
+    closed_corridor_corridor_door_percent => { door =>  1, secret => 95, stuck => 10, locked => 30 },
 );
 
 1;

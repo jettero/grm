@@ -1,6 +1,7 @@
-# $Id: Tools.pm,v 1.12 2005/03/25 21:19:12 jettero Exp $
+# $Id: Tools.pm,v 1.13 2005/03/28 13:42:34 jettero Exp $
 # vi:tw=0 syntax=perl:
 
+# package ::_interconnected_map {{{
 package Games::RolePlay::MapGen::_interconnected_map;
 
 use strict;
@@ -56,7 +57,8 @@ sub DESTROY {
     # search for "Two-Phased" in the perlobj man page.
 }
 # }}}
-
+# }}}
+# package ::_group; {{{
 package Games::RolePlay::MapGen::_group;
 
 use strict;
@@ -64,7 +66,8 @@ use strict;
 1;
 
 sub new { my $class = shift; bless {@_}, $class }
-
+# }}}
+# package ::_tile; {{{
 package Games::RolePlay::MapGen::_tile;
 
 use strict;
@@ -73,6 +76,27 @@ use strict;
 
 sub new { my $class = shift; bless { @_, v=>0, od=>{n=>0, s=>0, e=>0, w=>0} }, $class }
 sub DESTROY { warn "tile verbosely dying" if $ENV{VERBOSE_TILE_DEATH} }  # search for VERBOSE above...
+# }}}
+# package ::_door; {{{
+package Games::RolePlay::MapGen::_door;
+
+use strict;
+
+1;
+
+sub new {
+    my $class = shift; 
+    my $this  = bless { @_ }, $class; 
+
+    $this->{locked}   = 0 unless $this->{locked};
+    $this->{stuck}    = 0 unless $this->{stuck};
+    $this->{secret}   = 0 unless $this->{secret};
+    $this->{open_dir} = { major=>$this->{open_dir}{major}, minor=>$this->{open_dir}{minor} } unless ref($this->{open_dir});
+
+    return $this;
+}
+
+# }}}
 
 package Games::RolePlay::MapGen::Tools;
 
@@ -80,7 +104,7 @@ use strict;
 use Carp;
 use base q(Exporter);
 
-our @EXPORT_OK = qw(choice roll random irange range str_eval _group _tile);
+our @EXPORT_OK = qw(choice roll random irange range str_eval _group _tile _door);
 
 1;
 
@@ -163,6 +187,7 @@ sub str_eval {
 
 sub _group { return new Games::RolePlay::MapGen::_group(@_) }
 sub _tile  { return new Games::RolePlay::MapGen::_tile(@_) }
+sub _door  { return new Games::RolePlay::MapGen::_door(@_) }
 
 __END__
 # Below is stub documentation for your module. You better edit it!
@@ -217,6 +242,22 @@ $tile = $map->[$y][$x] and $tile->{nb} is an array of neighboring tiles.
 Example: $east_neighbor = $map->[$y][$x]->{nb}{e};
 
 (It also cleans up self-referencing loops at DESTROY time.)
+
+=head1 Games::RolePlay::MapGen::_door
+
+A simple object that stores information about a door.  Example:
+
+    my $door = &_door(
+        stuck    => 0,
+        locked   => 0,
+        secret   => 0,
+        open_dir => {
+            major => "n", # the initial direction of the opening door
+            minor => "w", # the final direction of the opening door (think 90 degree swing)
+        },
+    );
+
+    print "The door is locked.\n" if $door->{locked};
 
 =head1 AUTHOR
 
