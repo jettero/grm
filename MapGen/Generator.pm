@@ -1,4 +1,4 @@
-# $Id: Generator.pm,v 1.3 2005/03/29 16:22:08 jettero Exp $
+# $Id: Generator.pm,v 1.4 2005/04/02 13:13:06 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::Generator;
@@ -79,6 +79,14 @@ sub trapgen      {}
 sub doorgen      {}
 sub encountergen {}
 sub treasuregen  {}
+
+sub add_plugin {
+    my $this   = shift;
+    my $plugin = shift;
+
+    eval "use base q($plugin)";
+    croak $@ if $@;
+}
 
 __END__
 # Below is stub documentation for your module. You better edit it!
