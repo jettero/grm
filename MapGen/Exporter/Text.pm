@@ -1,4 +1,4 @@
-# $Id: Text.pm,v 1.15 2005/04/04 15:17:20 jettero Exp $
+# $Id: Text.pm,v 1.16 2005/04/04 15:47:46 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::Exporter::Text;
@@ -38,6 +38,35 @@ sub go {
     return $map;
 }
 # }}}
+sub _show_by_od {
+    my $this = shift;
+    my $tile = shift;
+    my $dir  = shift;
+    my $od   = $tile->{od}{$dir};
+
+    if( $od == 1 ) {
+        return " ";
+
+    } elsif( $od ) {
+        # A door!
+        my $color = ( ($od->{locked} and $od->{stuck}) ? "[35m" : $od->{locked} ? "[31m" : $od->{stuck} ? "[m" : "" );
+        my $reset = ($color ? "[m" : "");
+
+        if( $od->{secret} ) {
+            my $wall = {n=>"-", s=>"-", e=>"|", w=>"|"}->{$dir};
+
+            return "$color$wall$reset";
+
+        } else {
+            return "$color+$reset";
+        }
+
+    } else {
+        return {n=>"-", s=>"-", e=>"|", w=>"|"}->{$dir};
+    }
+
+    return "?"; # this should be visually borked looking.
+}
 # genmap {{{
 sub genmap {
     my $this = shift;
@@ -46,7 +75,7 @@ sub genmap {
     my $g    = $opts->{_the_groups};
 
     my @above    = ();
-    my $map      = "";
+    my $map      = "[m";
     my $rooms    = "";
        $rooms   .= "$_->{name} $_->{loc_size}\n" for (grep /^room$/, @$g);
 
@@ -148,8 +177,8 @@ Games::RolePlay::MapGen::Exporter::Text - A pure text mapgen exporter.
 
 =head1 DESCRIPTION
 
-    This is how they'd look in a rogue-like... Unfortunately, this design won't
-    work with a cell based map... It'll have to look more like that below.
+This is how they'd look in a rogue-like... Unfortunately, this design won't
+work with a cell based map... It'll have to look more like that below.
 
                  #.#         #.#  
                  #.#         #.#  
@@ -162,8 +191,8 @@ Games::RolePlay::MapGen::Exporter::Text - A pure text mapgen exporter.
                #######       #..........
                              ###########
 
-    Sadly, since every cell has up to 4 exits and adjacent cells aren't necessarilly open to eachother, 
-    the text based map has to have a little more space init.
+Sadly, since every cell has up to 4 exits and adjacent cells aren't necessarilly open to eachother, 
+the text based map has to have a little more space init.
 
                  |.|             |.| 
                    
@@ -177,6 +206,13 @@ Games::RolePlay::MapGen::Exporter::Text - A pure text mapgen exporter.
                                     - - -
              |. . . . .|         |. . . .
               - - - - -           - - - - 
+
+Also, there's really no good visual way to show what kind of door we're looking at.  I've chosen to use ANSI colors.
+
+    brown   - a door
+    red     - locked
+    blue    - stuck
+    magenta - locked and stuck
 
 =head1 SEE ALSO
 

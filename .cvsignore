@@ -4,7 +4,8 @@ blib
 Makefile
 *.txt
 *.map
+*.xml
+*.png
 maze.log
 tmon.out
-map.png
 debug.log

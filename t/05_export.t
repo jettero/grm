@@ -1,4 +1,4 @@
-# $Id: 05_export.t,v 1.1 2005/04/04 15:17:20 jettero Exp $
+# $Id: 05_export.t,v 1.2 2005/04/04 15:47:46 jettero Exp $
 
 use strict;
 use Test;
@@ -7,7 +7,7 @@ use Games::RolePlay::MapGen;
 my $map = new Games::RolePlay::MapGen({bounding_box => join("x", 25, 25) });
 generate $map;
 
-plan tests => 2;
+plan tests => 3;
 
 # if you know of a way to actually test these, you go ahead and email me, ok?
 
