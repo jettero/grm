@@ -1,9 +1,9 @@
-# $Id: 05_perfect.t,v 1.2 2005/03/24 21:29:45 jettero Exp $
+# $Id: 05_perfect.t,v 1.3 2005/03/30 15:39:24 jettero Exp $
 
 use strict;
 use Test;
 
-my ($x, $y) = (63, 22);
+my ($x, $y) = (25, 25);
 
 plan tests => 1 + (5 * $x * $y);
 

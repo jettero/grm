@@ -1,10 +1,10 @@
 
-# $Id: 03_tools.t,v 1.6 2005/03/24 16:06:55 jettero Exp $
+# $Id: 03_tools.t,v 1.7 2005/03/30 15:39:24 jettero Exp $
 
 use strict;
 use Test;
 
-plan tests => 4 + 8 + 8 + 4 + 4 + (2) + 8 + 604 + 2;
+plan tests => 4 + 8 + 8 + 4 + 4 + 8 + 604 + 2;
 
 use Games::RolePlay::MapGen::Tools qw(choice roll random irange range str_eval _group _tile);
 
@@ -89,8 +89,6 @@ while( not( $h{0} and $h{1} and $h{2} and $h{3} and $h{4} and $h{5} and $h{6} an
 alarm 30; # this is far more than should be needed.
 1 while sprintf('%0.4f', range(0, 7)) != "0.0"; ok( 1 );
 1 while sprintf('%0.4f', range(0, 7)) != "7.0"; ok( 1 );
-1 while irange(0, 7) != 0; ok(1);
-1 while irange(0, 7) != 7; ok(1);
 
 for(1..200) {
     my $num = range(37, 99);

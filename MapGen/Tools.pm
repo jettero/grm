@@ -1,4 +1,4 @@
-# $Id: Tools.pm,v 1.13 2005/03/28 13:42:34 jettero Exp $
+# $Id: Tools.pm,v 1.14 2005/03/30 15:39:24 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 # package ::_interconnected_map {{{
@@ -168,7 +168,17 @@ sub range {
 # }}}
 # irange {{{
 sub irange {
-    return sprintf('%0.0f', range(@_));
+    my $il = shift;
+    my $ir = shift;
+
+    $il -= 0.4999999999;
+    $ir += 0.4999999999;
+
+    my $s = sprintf('%0.0f', range($il, $ir, @_));
+
+    $s = 0 if $s eq "-0";
+
+    return $s;
 }
 # }}}
 # str_eval {{{

@@ -9,3 +9,4 @@ t/05_perfect.t
 t/03_tools.t
 TODO
 t/07_basic.t
+t/04_irange.t

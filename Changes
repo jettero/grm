@@ -1,3 +1,7 @@
+0.18:  Wed Mar 30 10:39:38 EST 2005
+   - jettero improved the irange tests... it was behaving
+     statistically stupidly and the tests missed it
+
 0.17:  Mon Mar 28 08:58:07 EST 2005
    - jettero fixed the in-room tick marks
 

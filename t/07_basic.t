@@ -1,9 +1,9 @@
-# $Id: 07_basic.t,v 1.1 2005/03/27 02:04:14 jettero Exp $
+# $Id: 07_basic.t,v 1.2 2005/03/30 15:39:24 jettero Exp $
 
 use strict;
 use Test;
 
-my ($x, $y) = (63, 22);
+my ($x, $y) = (25, 25);
 
 plan tests => (5 * $x * $y);
 
