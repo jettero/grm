@@ -1,4 +1,4 @@
-# $Id: BasicImage.pm,v 1.12 2005/03/30 20:00:51 jettero Exp $
+# $Id: BasicImage.pm,v 1.13 2005/04/02 17:26:17 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::Visualization::BasicImage;
@@ -56,11 +56,11 @@ sub gen_cell_size {
 sub genmap {
     my $this = shift;
     my $opts = shift;
-    my $m    = $opts->{_the_map};
+    my $map  = $opts->{_the_map};
 
     $this->gen_cell_size($opts);
 
-    my $gd    = new GD::Image(1+($opts->{x_size} * @{$m->[0]}), 1+($opts->{y_size} * @$m));
+    my $gd    = new GD::Image(1+($opts->{x_size} * @{$map->[0]}), 1+($opts->{y_size} * @$map));
 
     my $white  = $gd->colorAllocate(0xff, 0xff, 0xff);
     my $black  = $gd->colorAllocate(0x00, 0x00, 0x00);
@@ -78,11 +78,11 @@ sub genmap {
 
     $gd->interlaced('true');
 
-    for my $i (0..$#$m) {
-        my $jend = $#{$m->[$i]};
+    for my $i (0..$#$map) {
+        my $jend = $#{$map->[$i]};
 
         for my $j (0..$jend) {
-            my $t = $m->[$i][$j];
+            my $t = $map->[$i][$j];
             my $xp =  $j    * $opts->{x_size};
             my $yp =  $i    * $opts->{y_size};
             my $Xp = ($j+1) * $opts->{x_size};
@@ -105,6 +105,21 @@ sub genmap {
                 }
             }
 
+            for my $dir (qw(n e s w)) {
+                if( ref(my $door = $t->{od}{$dir}) ) {
+                    unless( $door->{_drawn}{$dir} ) {
+
+                        # regular old unlocked, open, unstock, unhid doors
+                        $gd->rectangle( $xp+ 3, $yp+ 2 => $Xp- 3, $yp- 2, $black ) if $dir eq "n";
+                        $gd->rectangle( $Xp+ 2, $yp+ 3 => $Xp- 2, $Yp- 3, $black ) if $dir eq "e";
+                        $gd->rectangle( $xp+ 3, $Yp+ 2 => $Xp- 3, $Yp- 2, $black ) if $dir eq "s";
+                        $gd->rectangle( $xp+ 2, $yp+ 3 => $xp- 2, $Yp- 3, $black ) if $dir eq "w";
+
+                        $door->{_drawn}{$dir} = 1;
+                    }
+                }
+            }
+
             if( not $t->{type} ) {
                 $gd->filledRectangle( $xp+$B, $yp+$B => $Xp-$B, $Yp-$B, $dgrey );
             }
@@ -123,6 +138,14 @@ sub genmap {
 
             if( $t->{DEBUG_purple_mark} ) {
                 $gd->filledRectangle( $xp+$D, $yp+$D => $Xp-$D, $Yp-$D, $purple );
+            }
+        }
+    }
+
+    for my $t (map(@$_, @$map)) {
+        for my $d (keys %{ $t->{od} }) {
+            if( ref( my $door = $t->{od}{$d} ) ) {
+                delete $door->{_drawn};
             }
         }
     }

@@ -1,4 +1,4 @@
-# $Id: 05_perfect.t,v 1.3 2005/03/30 15:39:24 jettero Exp $
+# $Id: 05_perfect.t,v 1.4 2005/04/02 17:26:17 jettero Exp $
 
 use strict;
 use Test;
@@ -11,7 +11,7 @@ use Games::RolePlay::MapGen;
 
 my $map = new Games::RolePlay::MapGen({bounding_box => join("x", $x, $y) });
 
-$map->set_generator("Games::RolePlay::MapGen::Generator::Perfect");
+$map->set_generator("Perfect");
 
 generate $map;
 

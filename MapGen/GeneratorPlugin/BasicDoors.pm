@@ -1,16 +1,16 @@
-# $Id: BasicDoors.pm,v 1.2 2005/04/02 15:43:36 jettero Exp $
+# $Id: BasicDoors.pm,v 1.3 2005/04/02 17:26:17 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::GeneratorPlugin::BasicDoors;
 
 use strict;
 use Carp;
-use Games::RolePlay::MapGen::Tools qw( choice roll _group irange str_eval );
+use Games::RolePlay::MapGen::Tools qw( roll _door );
 
-$Games::RolePlay::MapGen::known_opts{open_room_corridor_door_percent}       => { door => 95, secret =>  2, stuck => 25, locked => 50 };
-$Games::RolePlay::MapGen::known_opts{closed_room_corridor_door_percent}     => { door =>  5, secret => 95, stuck => 10, locked => 30 };
-$Games::RolePlay::MapGen::known_opts{open_corridor_corridor_door_percent}   => { door =>  1, secret => 10, stuck => 25, locked => 50 };
-$Games::RolePlay::MapGen::known_opts{closed_corridor_corridor_door_percent} => { door =>  1, secret => 95, stuck => 10, locked => 30 };
+$Games::RolePlay::MapGen::known_opts{       "open_room_corridor_door_percent" } = { door => 95, secret =>  2, stuck => 25, locked => 50 };
+$Games::RolePlay::MapGen::known_opts{     "closed_room_corridor_door_percent" } = { door =>  5, secret => 95, stuck => 10, locked => 30 };
+$Games::RolePlay::MapGen::known_opts{   "open_corridor_corridor_door_percent" } = { door =>  1, secret => 10, stuck => 25, locked => 50 };
+$Games::RolePlay::MapGen::known_opts{ "closed_corridor_corridor_door_percent" } = { door =>  1, secret => 95, stuck => 10, locked => 30 };
 
 1;
 
@@ -44,16 +44,40 @@ sub doorgen {
                         my ($ttype, $ntype) = ($t->{type}, $n->{type});
 
                         if( $ttype eq "room" and $ntype eq "room" ) {
+                            if( $t->{group}{name} eq $n->{group}{name} ) {
+                                next;
+
+                            } else {
+                                $ntype = "corridor";
+                            }
                         }
 
-                        my $tkey  = ( $n->{od}{$dir} ? "open" : "closed" );
+                        my $tkey  = ( $t->{od}{$dir} ? "open" : "closed" );
                            $tkey .= "_" . join("_", reverse sort( $ttype, $ntype ));
                            $tkey .= "_door_percent";
 
                         my $chances = $opts->{$tkey};
                         die "chances error for $tkey" unless defined $chances;
 
-                        print STDERR "dooring ($j, $i):$dir -- $tkey?\n";
+                        if( (my $r = roll(1, 10000)) <= (my $c = $chances->{door}*100) ) {
+                            my $d1 = sprintf("%40s: (%5d, %5d)", $tkey, $r, $c);
+                            my $d2 = sprintf("(%2d, %2d, $dir)", $j, $i);
+
+                            print STDERR "$d1 dooring $d2\n";
+
+                            $t->{od}{$dir} = $n->{od}{$Games::RolePlay::MapGen::opp{$dir}} = &_door(
+
+                                # these are the exact defaults...
+                                locked   => 0,
+                                stuck    => 0,
+                                secret   => 0,
+                                open_dir => {
+                                    major => undef,
+                                    minor => undef,
+                                },
+
+                            );
+                        }
 
                         $t->{_bchkt}{$dir} = 1;
                     }
@@ -65,7 +89,6 @@ sub doorgen {
     delete $_->{_bchkt} for map(@$_, @$map); # btw, bchkt stands for: basic doors checked tile [direction]
 }
 # }}}
-
 
 __END__
 # Below is stub documentation for your module. You better edit it!
@@ -95,14 +118,13 @@ It takes the following options (defaults shown):
       open_corridor_corridor_door_percent => { door => 0.1, secret => 10, stuck => 25, locked => 50 },
     closed_corridor_corridor_door_percent => { door =>   1, secret => 95, stuck => 10, locked => 30 },
                                                        
-Here I would enumerate the precise meaning of each option, but it seems
-pretty clear to me.  Here's an example instead. The default options listed
-above state that there's a 95% chance that a door would be placed on a
-room/corridor boundary (without a wall) and that it'd be stuck about 25% of
-the time.
+Here I would enumerate the precise meaning of each option, but it seems pretty
+clear to me.  Here's an example instead. The default options listed above state
+that there's a 95.00% chance that a door would be placed on a room/corridor
+boundary (without a wall) and that it'd be stuck about 25.00% of the time.
 
-OK, another?  There would be a 0.1% chance of finding a door in the middle of
-an open corridor and said door would be hidden 10% of the time.
+OK, another?  There would be a 0.10% chance of finding a door in the middle of
+an open corridor and said door would be hidden 10.00% of the time.
 
 =head2 The Special Case
 

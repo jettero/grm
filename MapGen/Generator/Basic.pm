@@ -1,4 +1,4 @@
-# $Id: Basic.pm,v 1.34 2005/03/30 20:00:51 jettero Exp $
+# $Id: Basic.pm,v 1.35 2005/04/02 17:26:17 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::Generator::Basic;
@@ -120,8 +120,6 @@ sub drop_rooms {
     my $map    = shift;
     my $groups = shift;
 
-    my %opp = ( n=>"s", s=>"n", e=>"w", w=>"e" );
-
     $opts->{y_size} = $#$map;
     $opts->{x_size} = $#{ $map->[0] };
 
@@ -198,6 +196,8 @@ sub drop_rooms {
         if( my $loc = &choice( @possible_locs ) ) {
             my @corridors = ();
 
+            pop @$loc; # ditch the score.
+
             my $group = &_group;
                $group->{name}     = "Room #$rn";
                $group->{loc_size} = "$size[0]x$size[1] ($loc->[0], $loc->[1])";
@@ -229,7 +229,7 @@ sub drop_rooms {
                     $tile->{od}{$dir} = 1; # open every direction... close edges below
 
                     if( my $n = $tile->{nb}{$dir} ) {
-                        $n->{od}{$opp{$dir}} = 1;
+                        $n->{od}{$Games::RolePlay::MapGen::opp{$dir}} = 1;
                     }
                 }
                 # $tile->{DEBUG_green_mark} = 1;
@@ -266,7 +266,7 @@ sub drop_rooms {
                 my $t = $a->[1];
                 my $n = $t->{nb}{$a->[0]};
 
-                $t->{od}{$a->[0]} = $n->{od}{$opp{$a->[0]}} = 1;
+                $t->{od}{$a->[0]} = $n->{od}{$Games::RolePlay::MapGen::opp{$a->[0]}} = 1;
             }
 
             push @$groups, $group;

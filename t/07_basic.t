@@ -1,4 +1,4 @@
-# $Id: 07_basic.t,v 1.4 2005/03/31 11:52:37 jettero Exp $
+# $Id: 07_basic.t,v 1.5 2005/04/02 17:26:17 jettero Exp $
 
 use strict;
 use Test;
@@ -11,13 +11,14 @@ use Games::RolePlay::MapGen;
 
 my $map = new Games::RolePlay::MapGen({bounding_box => join("x", $x, $y) });
 
-$map->set_generator("Games::RolePlay::MapGen::Generator::Basic");
+$map->set_generator("Basic");
+$map->add_generator_plugin("BasicDoors");
 
 generate $map;
 # save_map $map("$$.map");         # these are for when the tests fail and you don't know why ...
 # print STDERR " saved $$.map\n";  # but we don't normally need them.
 
-set_visualization $map("Games::RolePlay::MapGen::Visualization::BasicImage");
+set_visualization $map("BasicImage");
 visualize $map("map.png");
 
 CHECK_OPEN_DIRECTIONS_FOR_SANITY: { # they should really be the same from each direction ... or there's a problem.

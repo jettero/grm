@@ -1,4 +1,4 @@
-# $Id: Tools.pm,v 1.15 2005/03/30 16:56:04 jettero Exp $
+# $Id: Tools.pm,v 1.16 2005/04/02 17:26:17 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 # package ::_interconnected_map {{{
@@ -107,7 +107,7 @@ sub new {
     $this->{locked}   = 0 unless $this->{locked};
     $this->{stuck}    = 0 unless $this->{stuck};
     $this->{secret}   = 0 unless $this->{secret};
-    $this->{open_dir} = { major=>$this->{open_dir}{major}, minor=>$this->{open_dir}{minor} } unless ref($this->{open_dir});
+    $this->{open_dir} = { major=>undef, minor=>undef } unless ref($this->{open_dir});
 
     return $this;
 }

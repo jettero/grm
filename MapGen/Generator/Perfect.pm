@@ -1,4 +1,4 @@
-# $Id: Perfect.pm,v 1.8 2005/03/30 16:56:04 jettero Exp $
+# $Id: Perfect.pm,v 1.9 2005/04/02 17:26:17 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::Generator::Perfect;
@@ -37,7 +37,6 @@ sub generate_perfect_maze {
     # This object interconnects the map; but, also ensures that the self-refs are broken when it goes out of scope!
 
     my @dirs    = (qw(n s e w));
-    my %opp     = ( n=>"s", s=>"n", e=>"w", w=>"e" );
     my $cur     = &choice(map(@$_, @$map));      
     my @togo    = @dirs;
     my $dir     = &choice(@togo);
@@ -63,7 +62,7 @@ sub generate_perfect_maze {
             $cur->{visited} = 1;
             push @visited, $cur;
 
-            $cur->{od}{$opp{$dir}} = 1;
+            $cur->{od}{$Games::RolePlay::MapGen::opp{$dir}} = 1;
             $cur->{type} = 'corridor';
 
             @togo = grep { !$cur->{od}{$_} and !$cur->{_pud}{$_} } @dirs;

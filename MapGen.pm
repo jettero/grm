@@ -1,4 +1,4 @@
-# $Id: MapGen.pm,v 1.46 2005/04/02 15:43:36 jettero Exp $
+# $Id: MapGen.pm,v 1.47 2005/04/02 17:26:17 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen;
@@ -10,6 +10,8 @@ use Data::Dumper; $Data::Dumper::Indent = 1; $Data::Dumper::SortKeys = 1;
 
 our $VERSION = "0.19";
 our $AUTOLOAD;
+
+our %opp = (n=>"s", e=>"w", s=>"n", w=>"e");
 
 # known_opts {{{
 our %known_opts = (
@@ -58,6 +60,31 @@ sub _check_mod_path  {
     return $mod;
 }
 # }}}
+# _check_opts {{{
+sub _check_opts {
+    my $this = shift;
+    my @e    = ();
+
+    # warn "checking known_opts";
+    no strict 'refs';
+    for my $k (keys %known_opts) {
+        "set_$k"->($this, $known_opts{$k} ) unless defined $this->{$k};
+    }
+
+    for my $k ( keys %$this ) {
+        unless( exists $known_opts{$k} ) {
+            next if $k eq "objs";
+            next if $k eq "_the_map";
+            next if $k eq "_the_groups";
+
+            push @e, "unrecognized option: '$k'";
+        }
+    }
+
+    return "ERROR:\n\t" . join("\n\t", @e) . "\n" if @e;
+    return;
+}
+# }}}
 
 # AUTOLOAD {{{
 sub AUTOLOAD {
@@ -88,38 +115,24 @@ sub AUTOLOAD {
         return;
 
     } elsif( $sub =~ m/MapGen\:\:set_([\w\d\_]+)$/ ) {
-        $this->{$1} = shift;
+        my $n = $1;
 
-        croak "ERROR: set_$1() doesn't let you unset a setting.  Value undefined..." unless defined $this->{$1};
+        croak "ERROR: set_$n() unknown setting" unless exists $known_opts{$n};
 
-        if( my $e = $this->check_opts ) { croak $e }
+        $this->{$n} = shift;
+
+        for my $o (qw(generator visualization)) {
+            if( my $oo = $this->{objs}{$o} ) {
+                $oo->{o}{$n} = $this->{$n};
+            }
+        }
 
         return;
-
     }
 
     croak "ERROR: function $sub() not found";
 }
 sub DESTROY {}
-# }}}
-# check_opts {{{
-sub check_opts {
-    my $this = shift;
-    my @e    = ();
-
-    for my $k ( keys %$this ) {
-        unless( exists $known_opts{$k} ) {
-            next if $k eq "objs";
-            next if $k eq "_the_map";
-            next if $k eq "_the_groups";
-
-            push @e, "unrecognized option: '$k'";
-        }
-    }
-
-    return "ERROR:\n\t" . join("\n\t", @e) . "\n" if @e;
-    return;
-}
 # }}}
 # new {{{
 sub new {
@@ -128,12 +141,7 @@ sub new {
     my $opts  = ( (@opts == 1 and ref($opts[0]) eq "HASH") ? $opts[0] : {@opts} );
     my $this  = bless $opts, $class;
 
-    if( my $e = $this->check_opts ) { croak $e }
-
-    no strict 'refs';
-    for my $k (keys %known_opts) {
-        "set_$k"->($this, $known_opts{$k} ) unless defined $this->{$k};
-    }
+    if( my $e = $this->_check_opts ) { croak $e }
 
     return $this;
 }
@@ -191,7 +199,7 @@ sub generate {
     croak "ERROR locating generator module:\n\t$@\n " if $@;
 
     my $obj;
-    my @opts = map(($_=>$this->{$_}), grep {defined $this->{$_}} keys %$this);
+    my @opts = map(($_=>$this->{$_}), grep {defined $this->{$_} and $_ ne "objs"  and $_ ne "plugins" } keys %$this);
 
     eval qq( \$obj = new $this->{generator} (\@opts); );
     if( $@ ) {
@@ -203,6 +211,9 @@ sub generate {
 
     $this->{objs}{generator} = $obj;
     $err = 1;
+
+    $this->_check_opts; # plugins, generators and visualizations can add default options
+
     goto __MADE_GEN_OBJ;
 }
 # }}}
@@ -226,7 +237,7 @@ sub visualize {
     croak "ERROR locating visualization module:\n\t$@\n " if $@;
 
     my $obj;
-    my @opts = map(($_=>$this->{$_}), grep {defined $this->{$_}} keys %$this);
+    my @opts = map(($_=>$this->{$_}), grep {defined $this->{$_} and $_ ne "objs"  and $_ ne "plugins" } keys %$this);
 
     eval qq( \$obj = new $this->{visualization} (\@opts); );
     if( $@ ) {
@@ -236,6 +247,9 @@ sub visualize {
 
     $this->{objs}{visualization} = $obj;
     $err = 1;
+
+    $this->_check_opts; # plugins, generators and visualizations can add default options
+
     goto __MADE_VIS_OBJ;
 }
 # }}}

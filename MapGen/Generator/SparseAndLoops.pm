@@ -1,4 +1,4 @@
-# $Id: SparseAndLoops.pm,v 1.1 2005/03/25 21:19:45 jettero Exp $
+# $Id: SparseAndLoops.pm,v 1.2 2005/04/02 17:26:17 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::Generator::SparseAndLoops;
@@ -20,7 +20,6 @@ sub remove_deadends {
     my $map  = shift;
 
     my @dirs = (qw(n s e w));
-    my %opp  = ( n=>"s", s=>"n", e=>"w", w=>"e" );
 
     for my $tile ( &_endian_tiles( $map ) ) {
         if( &roll(1, 100) <= $opts->{remove_deadend_percent} ) {
@@ -32,7 +31,7 @@ sub remove_deadends {
             TRY_THIS_DIR_INSTEAD: 
             if( my $nex = $tile->{nb}{$dir} ) {
 
-                $tile->{od}{$dir} = $nex->{od}{$opp{$dir}} = 1;
+                $tile->{od}{$dir} = $nex->{od}{$Games::RolePlay::MapGen::opp{$dir}} = 1;
 
                 if( $nex->{type} ) {
                     # Excellent, we're done with this tile.
@@ -69,14 +68,12 @@ sub sparsify {
     my $this = shift;
     my $opts = shift;
     my $map  = shift;
-    my %opp  = ( n=>"s", s=>"n", e=>"w", w=>"e" );
 
     my $sparseness = $opts->{sparseness};
 
     SPARSIFY: 
     for my $tile ( &_endian_tiles( $map ) ) {
         my($dir)= grep { $tile->{od}{$_} } (qw(n s e w)); # grep returns the resulting list size unless you evaluate in list context
-        my $opp = $opp{$dir};
         my $nex = ($tile->{od}{n} ? $map->[$tile->{y}-1][$tile->{x}] :
                    $tile->{od}{s} ? $map->[$tile->{y}+1][$tile->{x}] :
                    $tile->{od}{e} ? $map->[$tile->{y}][$tile->{x}+1] :
@@ -87,7 +84,7 @@ sub sparsify {
 
         die "incomplete open direction found during sparseness calculation" unless defined $nex;
 
-        $nex->{od}{$opp}  = 0;
+        $nex->{od}{$Games::RolePlay::MapGen::opp{$dir}} = 0;
     }
 
     goto SPARSIFY if --$sparseness > 0;
