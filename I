@@ -9,7 +9,7 @@ cat $pack | perl -ne 's/(VERSION[^0-9]+)([0-9.]+)([^0-9]*)/$1.($2+0.01).$3/e; pr
 
 mv fil $pack
 
-v=`perl -MMapGen -e 'print $Games::RolePlay::MapGen::VERSION'`
+v=`perl -MMapGen -e 'printf "\%0.2f" $Games::RolePlay::MapGen::VERSION'`
 
 if [ -f $p ]; then
     mv $p $p.bak
@@ -20,7 +20,7 @@ if [ -f $p ]; then
     cat $p.bak           >> $p
     rm $p.bak
     mkfifo format.scr
-    echo :set tw=60^M100000gqjZZ > format.scr &
+    echo :set tw=60100000gqjZZ > format.scr &
     vi $p -c "set tw=800" -s format.scr
     fuser -k format.scr
     rm format.scr

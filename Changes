@@ -1,3 +1,7 @@
+0.2:  Sat Apr  2 12:26:32 EST 2005
+   - jettero redid the options passing in various
+     complicated ways
+
 0.19:  Wed Mar 30 11:56:07 EST 2005
    - jettero added save_load and appropriate tests
 
