@@ -1,4 +1,4 @@
-# $Id: MapGen.pm,v 1.12 2005/03/21 18:21:33 jettero Exp $
+# $Id: MapGen.pm,v 1.13 2005/03/23 17:46:35 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::_group;
@@ -124,7 +124,7 @@ sub visualize {
     __MADE_VIS_OBJ:
     if( my $vis = $this->{objs}{visualization} ) {
 
-        $vis->go( _the_map => $this->{_the_map}, (@_==1 ? (fname=>$_[0]) : @_) );
+        $vis->go( _the_map => $this->{_the_map}, _the_groups => $this->{_the_groups}, (@_==1 ? (fname=>$_[0]) : @_) );
 
         return;
 

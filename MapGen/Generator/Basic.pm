@@ -1,4 +1,4 @@
-# $Id: Basic.pm,v 1.10 2005/03/23 12:21:20 jettero Exp $
+# $Id: Basic.pm,v 1.11 2005/03/23 17:46:35 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::Generator::Basic;
@@ -75,6 +75,7 @@ sub _genmap {
 
     my $unvisited = 0;
 
+    # create tiles {{{
     for my $y (1 .. $opts->{y_size}) {
         my $a = [];
 
@@ -85,7 +86,8 @@ sub _genmap {
 
         push @map, $a;
     }
-
+    # }}}
+    # drop rooms {{{
     for my $rn (1 .. &str_eval($opts->{num_rooms})) {
         my @size = $this->_gen_room_size( $opts );
 
@@ -118,11 +120,18 @@ sub _genmap {
                     for my $x ($spot[0]..($size[0]-1)+$spot[0]) {
                         $map[$y][$x]->{group}   = $group;
                         $map[$y][$x]->{visited} = 1;
+                        $map[$y][$x]->{od} = {n=>1, s=>1, e=>1, w=>1}; # open every direction... close edges below
                     }
                 }
 
                 for my $y ($spot[1]..($size[1]-1)+$spot[1]) {
-                    $map[$y][0]->{od} = 1;
+                    $map[$y][ $spot[0]                ]->{od}{w} = 0;
+                    $map[$y][ ($size[0]-1) + $spot[0] ]->{od}{e} = 0;
+                }
+
+                for my $x ($spot[0]..($size[0]-1)+$spot[0]) {
+                    $map[ $spot[1]                ][$x]->{od}{n} = 0;
+                    $map[ ($size[1]-1) + $spot[1] ][$x]->{od}{s} = 0;
                 }
 
                 push @groups, $group;
@@ -132,6 +141,7 @@ sub _genmap {
             }
         }
     }
+    # }}}
 
     return (\@map, \@groups);
 }
