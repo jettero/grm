@@ -1,11 +1,11 @@
-# $Id: Basic.pm,v 1.14 2005/03/24 01:17:02 jettero Exp $
+# $Id: Basic.pm,v 1.15 2005/03/24 12:30:29 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::Generator::Basic;
 
 use strict;
 use Carp;
-use Games::RolePlay::MapGen::Tools qw( _group _tile str_eval irange );
+use Games::RolePlay::MapGen::Tools qw( _group _tile filter str_eval irange choice roll );
 
 1;
 
@@ -73,77 +73,92 @@ sub _genmap {
     my @map    = ();
     my @groups = ();
 
-    my $unvisited = 0;
-
     # create tiles {{{
     for (1 .. $opts->{y_size}) {
         my $a = [];
 
         for (1 .. $opts->{x_size}) {
             push @$a, &_tile;
-            $unvisited ++;
         }
 
         push @map, $a;
     }
     # }}}
-    # drop rooms {{{
-    for my $rn (1 .. &str_eval($opts->{num_rooms})) {
-        my @size = $this->_gen_room_size( $opts );
+    # fully interconnect tiles (to ease perfect maze generation) {{{
+    # This is sloppy and wasteful, but it sure makes the maze alg easier to do.
+    for my $i (0 .. $#map) {
+        my $jend = $#{ $map[$i] };
 
-        $size[0] = $opts->{x_size} if $size[0] > $opts->{x_size};
-        $size[1] = $opts->{y_size} if $size[1] > $opts->{y_size};
+        for my $j (0 .. $jend) {
+            $map[$i][$j]->{nb}{s} = $map[$i+1][$j] unless $i == $#map;
+            $map[$i][$j]->{nb}{n} = $map[$i-1][$j] unless $i == 0;
+            $map[$i][$j]->{nb}{e} = $map[$i][$j+1] unless $j == $jend;
+            $map[$i][$j]->{nb}{w} = $map[$i][$j-1] unless $j == 0;
+        }
+    }
+    # }}}
+    # generate a perfect maze {{{
+    my $tiles   = $opts->{y_size} * $opts->{x_size};
+    my @dirs    = (qw(n s e w));
+    my %opp     = ( n=>"s", s=>"n", e=>"w", w=>"e" );
+    my $isnt    = sub { $_[0] ne $_[1] };
+    my $dir     = &choice(@dirs);
+    my @togo    = &filter(\@dirs, $isnt, $dir);
+    my $cur     = &choice(map(@$_, @map));      
+    my @visited = ( $cur );
 
-        my @min_pos = (0, 0);
-        my @max_pos = ( $opts->{x_size} - $size[0], $opts->{y_size} - $size[1] );
+    $cur->{type} = "corridor";
 
-        my $redos = $opts->{room_fit_redos} || 100;
-        FIND_A_SPOT_FOR_IT: {
-            my @spot = map( irange($min_pos[$_], $max_pos[$_]), 0..1 );
+    open LOG, ">maze.log" or die $!;
+    print LOG "$$ $0 starting maze.log\n";
 
-            my $no_collision = 1;
-            for my $y ($spot[1]..($size[1]-1)+$spot[1]) {
-                for my $x ($spot[0]..($size[0]-1)+$spot[0]) {
-                    if( $map[$y][$x]{type} ) {
-                        $no_collision = 0;
-                        last;
-                    }
-                }
-            }
+    my $DEBUG_looping = 1000000;
+    while( @visited < $tiles ) {
+        my $nex = $cur->{nb}{$dir};
 
-            if( $no_collision ) {
-                my $group = &_group;
-                   $group->{name}     = "Room #$rn";
-                   $group->{loc_size} = "$size[0]x$size[1] ($spot[0], $spot[1])";
-                   $group->{type}     = "room";
-                   $group->{size}     = [@size];
-                   $group->{loc}      = [@spot];
+        print LOG "int(\@visited) = ", sprintf('%3d', int(@visited)), "\n";
 
-                for my $y ($spot[1]..($size[1]-1)+$spot[1]) {
-                    for my $x ($spot[0]..($size[0]-1)+$spot[0]) {
-                        my $tile = $map[$y][$x];
-                        $tile->{group}   = $group;
-                        $tile->{type}    = "room";
-                        $tile->{visited} = 1;
-                        $tile->{od}      = {n=>1, s=>1, e=>1, w=>1}; # open every direction... close edges below
-                    }
-                }
+        if( $nex and not $nex->{visited} ) {
+            $cur->{od}{$dir} = 1;
 
-                for my $y ($spot[1]..($size[1]-1)+$spot[1]) {
-                    $map[$y][ $spot[0]                ]->{od}{w} = 0;
-                    $map[$y][ ($size[0]-1) + $spot[0] ]->{od}{e} = 0;
-                }
+            $cur = $nex;
+            $cur->{visited} = 1;
+            push @visited, $cur;
 
-                for my $x ($spot[0]..($size[0]-1)+$spot[0]) {
-                    $map[ $spot[1]                ][$x]->{od}{n} = 0;
-                    $map[ ($size[1]-1) + $spot[1] ][$x]->{od}{s} = 0;
-                }
+            $cur->{od}{$opp{$dir}} = 1;
+            $cur->{type} = 'corridor';
 
-                push @groups, $group;
+            $dir  = &choice(@dirs) if &roll(2, 6) == 11; # we usually go the same way, unless we get a craps...
+            @togo = &filter(\@dirs, $isnt, $dir);        # whatever, redo the @todo (ignoring the obvious way-we-came)
+
+        } else {
+            if( @togo ) {
+                $dir  = &choice(@togo);
+                @togo = &filter(\@togo, $isnt, $dir);
 
             } else {
-                redo unless --$redos < 1;
+                $cur = &choice(@visited);
             }
+        }
+
+        last if --$DEBUG_looping < 1;
+    }
+
+    close LOG;
+    warn "DEBUG: looping floored!!" if $DEBUG_looping < 1;
+
+    # }}}
+    # clean-up interconnections {{{
+    for my $i (0 .. $#map) {
+        my $jend = $#{ $map[$i] };
+
+        for my $j (0 .. $jend) {
+            # Destroying the map won't destroy the tiles if they're self
+            # referencing like this.  That's not a problem because of the
+            # global destructor, *whew*; except that each new map generated,
+            # until perl exits, would eat up more memory.  
+
+            delete $map[$i][$j]->{n}; # So we have to break the self-refs here.
         }
     }
     # }}}

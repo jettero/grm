@@ -1,4 +1,4 @@
-# $Id: Text.pm,v 1.11 2005/03/24 01:17:02 jettero Exp $
+# $Id: Text.pm,v 1.12 2005/03/24 12:30:29 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::Visualization::Text;
@@ -49,7 +49,7 @@ sub _genmap {
     my @above    = ();
     my $map      = "";
     my $rooms    = "";
-       $rooms   .= "$_->{name} $_->{loc_size}\n" for (&filter( @$g, sub {$_[0]->{type} eq "room"} ));
+       $rooms   .= "$_->{name} $_->{loc_size}\n" for (&filter($g, sub {$_[0]->{type} eq "room"} ));
 
     for my $i (0 .. $#$m) {
         my $p     = $1 if $i =~ m/(\d)$/;

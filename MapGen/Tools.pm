@@ -1,4 +1,4 @@
-# $Id: Tools.pm,v 1.7 2005/03/23 23:35:24 jettero Exp $
+# $Id: Tools.pm,v 1.8 2005/03/24 12:30:29 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::_group;
@@ -17,6 +17,8 @@ use strict;
 
 sub new { bless { v=>0, od=>{n=>0, s=>0, e=>0, w=>0} }, shift }
 
+# sub DESTROY { warn "global destruction detector here; if we forgot to clean up, this would say..." }
+
 package Games::RolePlay::MapGen::Tools;
 
 use strict;
@@ -30,11 +32,12 @@ our @EXPORT_OK = qw(filter choice roll random irange range str_eval _group _tile
 # helper functions
 # filter {{{
 sub filter {
-    my @a = ();
-    my $function = pop;
+    my $input_ar = shift;
+    my $function = shift;
+    my @a        = ();
 
-    for my $e (@_) {
-        push @a, $e if $function->($e);
+    for my $element (@$input_ar) {
+        push @a, $element if $function->($element, @_);
     }
 
     return @a;
@@ -139,8 +142,10 @@ Games::RolePlay::MapGen::Tools - Some support tools and objects for the mapgen s
     my $e  = choice(qw(test this please));  # picks one of test, this, and please at random
     my $v  = str_eval("1d8");               # returns int(roll(1,8)) -- returns undef on parse error
 
-    # filters any elements that don't evaluate to true out of the array. (eg, @a = ("test", "this"))
-    my @a  = filter(qw(test this please), sub { ($_[0] =~ m/^t/ }) 
+    # filters any elements that don't evaluate to true out of the array. 
+    # any additional arguments would be passed into the filter function...
+    my @a = filter([qw(test this please)], sub { ($_[0] =~ m/^t/ }); # (eg, @a = ("test", "this"))
+    my @a = filter([qw(test this please)], sub { ($_[0] ne $_[1] }, "this"); # (eg, @a = ("test", "please"))
 
     # In case you were curious, choice and filter are actually from LPC (and probably pike).
 
