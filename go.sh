@@ -1,13 +1,14 @@
 #!/bin/bash
-# $Id: go.sh,v 1.11 2005/03/25 18:23:01 jettero Exp $
+# $Id: go.sh,v 1.12 2005/03/25 19:41:33 jettero Exp $
 # vi:tw=0:
 
 make || exit 1
 
 perl -d:DProf -Iblib/lib -MGames::RolePlay::MapGen -e \
 'my $map = new Games::RolePlay::MapGen({cell_size=>"20x20", num_rooms=>"3d8", bounding_box => 
-    "3x3"
+    # "3x3"
     # "63x22"
+    "20x20"
 }); 
 
 # set_generator $map("Games::RolePlay::MapGen::Generator::Perfect");

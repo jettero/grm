@@ -19,7 +19,11 @@ if [ -f $p ]; then
     echo                 >> $p
     cat $p.bak           >> $p
     rm $p.bak
+    mkfifo format.scr
+    echo :set tw=60100000gqjZZ > format.scr &
     vi $p -c "set tw=800" -s format.scr
+    fuser -k format.scr
+    rm format.scr
     clear
     head -n 20 $p
 fi

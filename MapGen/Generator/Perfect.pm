@@ -1,4 +1,4 @@
-# $Id: Perfect.pm,v 1.5 2005/03/25 18:24:10 jettero Exp $
+# $Id: Perfect.pm,v 1.6 2005/03/25 19:41:33 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::Generator::Perfect;
@@ -6,7 +6,7 @@ package Games::RolePlay::MapGen::Generator::Perfect;
 use strict;
 use Carp;
 use base qw(Games::RolePlay::MapGen::Generator);
-use Games::RolePlay::MapGen::Tools qw( _group _tile str_eval irange choice roll );
+use Games::RolePlay::MapGen::Tools qw( _group _tile choice roll );
 
 1;
 
@@ -36,7 +36,6 @@ sub _generate_perfect_maze {
     my $map  = new Games::RolePlay::MapGen::_interconnected_map(shift);
     # This object interconnects the map; but, also ensures that the self-refs are broken when it goes out of scope!
 
-    my $tiles   = $opts->{y_size} * $opts->{x_size};
     my @dirs    = (qw(n s e w));
     my %opp     = ( n=>"s", s=>"n", e=>"w", w=>"e" );
     my $cur     = &choice(map(@$_, @$map));      
@@ -142,11 +141,9 @@ Games::RolePlay::MapGen::Generator::Perfect - The perfect maze generator
 
 =head1 DESCRIPTION
 
-This generator creates a specified number of rooms inside a
-bounding box and then adds the specified number of hallways
--- trying to get at least one per room.
+This is the Perfect Maze portion of Jamis Buck's Dungeon Generator.
 
-Here is the URL to the steps listed below: http://www.aarg.net/~minam/dungeon_design.html
+http://www.aarg.net/~minam/dungeon_design.html
 
 =head2 Jamis Buck's Dungeon Generator Algorithm
 
