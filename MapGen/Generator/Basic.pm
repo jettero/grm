@@ -1,4 +1,4 @@
-# $Id: Basic.pm,v 1.30 2005/03/27 02:04:14 jettero Exp $
+# $Id: Basic.pm,v 1.31 2005/03/27 02:34:52 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::Generator::Basic;
@@ -292,7 +292,7 @@ sub cleanup_pseudo_rooms {
         for my $y ( $ymin .. $ymax ) {
             my $tile = $map->[$y][$x];
 
-            $tile->{DEBUG_red_mark} = 1;
+            # $tile->{DEBUG_red_mark} = 1;
 
             if( $tile->{type} eq "pseudo" ) {
                 $tile->{type} = "corridor";
@@ -315,6 +315,13 @@ sub cleanup_pseudo_rooms {
 }
 # }}}
 
+sub doorgen {
+    my $this   = shift;
+    my $opts   = shift;
+    my $map    = shift;
+    my $groups = shift;
+}
+
 # genmap {{{
 sub genmap {
     my $this = shift;
@@ -327,6 +334,7 @@ sub genmap {
     $this->mark_things_as_pseudo_rooms( $map, $groups );
     $this->drop_rooms( $opts, $map, $groups );
     $this->cleanup_pseudo_rooms( $map, $groups );
+    $this->doorgen( $opts, $map, $groups );
 
     return ($map, $groups);
 }
