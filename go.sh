@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Id: go.sh,v 1.16 2005/03/27 02:34:52 jettero Exp $
+# $Id: go.sh,v 1.17 2005/03/27 12:53:27 jettero Exp $
 # vi:tw=0:
 
 make || exit 1
@@ -8,7 +8,8 @@ make || exit 1
 perl $dprof -Iblib/lib -MGames::RolePlay::MapGen -e \
 'my $map = new Games::RolePlay::MapGen({cell_size=>"20x20", num_rooms=>"3d8", bounding_box => 
     # "3x3"
-    "20x20"
+    # "20x20"
+    "30x30"
     # "63x22"
     # "50x37"
 }); 
