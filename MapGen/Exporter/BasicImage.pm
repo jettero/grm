@@ -1,4 +1,4 @@
-# $Id: BasicImage.pm,v 1.15 2005/04/02 23:47:06 jettero Exp $
+# $Id: BasicImage.pm,v 1.16 2005/04/03 15:33:19 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::Visualization::BasicImage;
@@ -78,11 +78,14 @@ sub genmap {
     my $L     = 1; # the length of the cell ticks in open borders
        $L++;       # $L is one less than it seems...
 
-    my ($dm, $dM) = (2, 4); # akin to L, but for doors (door minor horrizontal, door minor vertical and door major)
+    my ($dm, $dM) = (1, 4); # akin to L, but for doors (door minor horrizontal, door minor vertical and door major)
     my ($wx, $wy) = ( $opts->{x_size}*2-$dM*4, $opts->{y_size}*2-$dM*4 ); # the width and height of the door-arcs (cell size)
 
     my $oa = 45;  # show doors open by this amount
-    my $or = deg2rad( $oa );
+    my $do = $oa; # show doors the same amount? or a little bit different?
+       $do -= 10; # this looks kinda neat.
+
+    my $or = deg2rad( $do );
     my $sr = sin( $or ); # we'll be using this, kthx...
 
     $gd->interlaced('true');
@@ -149,42 +152,81 @@ sub genmap {
                         # Here, we draw the diagonal line and arc indicating how the door opens.
                         my $oi = "$dir$door->{open_dir}{major}$door->{open_dir}{minor}";
 
+                        # draw the door line/arcs ... sadly, this is a 16 part if-else block {{{
                         if( $oi eq "sne" ) {
-                          # $gd->arc(  $Xp-$dM, $Yp, $wx, $wy, 180, 180+$oa,       $grey );
-                          # $gd->line( $Xp-$dM, $Yp => ($Xp-$dM)-$ns_b, $Yp-$ns_h, $grey );
+                            $gd->arc(  $Xp-$dM, $Yp, $wx, $wy, 180, 180+$oa,       $grey );
+                            $gd->line( $Xp-$dM, $Yp => ($Xp-$dM)-$ns_b, $Yp-$ns_h, $grey );
 
                         } elsif( $oi eq "nne" ) {  # same as above, but $Yp changes to $yp
-                          # $gd->arc(  $Xp-$dM, $yp, $wx, $wy, 180, 180+$oa,       $grey );
-                          # $gd->line( $Xp-$dM, $yp => ($Xp-$dM)-$ns_b, $yp-$ns_h, $grey );
+                            $gd->arc(  $Xp-$dM, $yp, $wx, $wy, 180, 180+$oa,       $grey );
+                            $gd->line( $Xp-$dM, $yp => ($Xp-$dM)-$ns_b, $yp-$ns_h, $grey );
+
 
                         } elsif( $oi eq "sse" ) {  # same as two above, but 180-$oa and +$ns_h
-                          # $gd->arc(  $Xp-$dM, $Yp, $wx, $wy, 180-$oa, 180,       $grey );
-                          # $gd->line( $Xp-$dM, $Yp => ($Xp-$dM)-$ns_b, $Yp+$ns_h, $grey );
+                            $gd->arc(  $Xp-$dM, $Yp, $wx, $wy, 180-$oa, 180,       $grey );
+                            $gd->line( $Xp-$dM, $Yp => ($Xp-$dM)-$ns_b, $Yp+$ns_h, $grey );
 
                         } elsif( $oi eq "nse" ) {  # same as above, but $Yp to $yp
-                          # $gd->arc(  $Xp-$dM, $yp, $wx, $wy, 180-$oa, 180,       $grey );
-                          # $gd->line( $Xp-$dM, $yp => ($Xp-$dM)-$ns_b, $yp+$ns_h, $grey );
+                            $gd->arc(  $Xp-$dM, $yp, $wx, $wy, 180-$oa, 180,       $grey );
+                            $gd->line( $Xp-$dM, $yp => ($Xp-$dM)-$ns_b, $yp+$ns_h, $grey );
+
+
+                        } elsif( $oi eq "snw" ) { # same as sne, but 360-$oa, $xp, and +$ns_b
+                            $gd->arc(  $xp+$dM, $Yp, $wx, $wy, 360-$oa, 360,       $grey );
+                            $gd->line( $xp+$dM, $Yp => ($xp+$dM)+$ns_b, $Yp-$ns_h, $grey );
+
+                        } elsif( $oi eq "nnw" ) { # same as above, but $yp
+                            $gd->arc(  $xp+$dM, $yp, $wx, $wy, 360-$oa, 360,       $grey );
+                            $gd->line( $xp+$dM, $yp => ($xp+$dM)+$ns_b, $yp-$ns_h, $grey );
+
+
+                        } elsif( $oi eq "ssw" ) { # same as sse, but $xp, +$ns_b, and 360+$oa
+                            $gd->arc(  $xp+$dM, $Yp, $wx, $wy, 360, 360+$oa,       $grey );
+                            $gd->line( $xp+$dM, $Yp => ($xp+$dM)+$ns_b, $Yp+$ns_h, $grey );
+
+                        } elsif( $oi eq "nsw" ) { # same as above, but $yp
+                            $gd->arc(  $xp+$dM, $yp, $wx, $wy, 360, 360+$oa,       $grey );
+                            $gd->line( $xp+$dM, $yp => ($xp+$dM)+$ns_b, $yp+$ns_h, $grey );
 
 
                         } elsif( $oi eq "een" ) {
-                          # $gd->arc(  $Xp, $yp+$dM, $wx, $wy, 90-$oa, 90,         $grey );
-                          # $gd->line( $Xp, $yp+$dM => $Xp+$ew_h, ($yp+$dM)+$ew_b, $grey );
+                            $gd->arc(  $Xp, $yp+$dM, $wx, $wy, 90-$oa, 90,         $grey );
+                            $gd->line( $Xp, $yp+$dM => $Xp+$ew_h, ($yp+$dM)+$ew_b, $grey );
 
                         } elsif( $oi eq "wen" ) { # same as above but $Xp to $xp
-                          # $gd->arc(  $xp, $yp+$dM, $wx, $wy, 90-$oa, 90,         $grey );
-                          # $gd->line( $xp, $yp+$dM => $xp+$ew_h, ($yp+$dM)+$ew_b, $grey );
+                            $gd->arc(  $xp, $yp+$dM, $wx, $wy, 90-$oa, 90,         $grey );
+                            $gd->line( $xp, $yp+$dM => $xp+$ew_h, ($yp+$dM)+$ew_b, $grey );
+
 
                         } elsif( $oi eq "ewn" ) { # same as two above, but 90+$oa and -$ew_h
-                          # $gd->arc(  $Xp, $yp+$dM, $wx, $wy, 90, 90+$oa,         $grey );
-                          # $gd->line( $Xp, $yp+$dM => $Xp-$ew_h, ($yp+$dM)+$ew_b, $grey );
+                            $gd->arc(  $Xp, $yp+$dM, $wx, $wy, 90, 90+$oa,         $grey );
+                            $gd->line( $Xp, $yp+$dM => $Xp-$ew_h, ($yp+$dM)+$ew_b, $grey );
 
                         } elsif( $oi eq "wwn" ) { # same as above but $Xp to $xp
-                          # $gd->arc(  $xp, $yp+$dM, $wx, $wy, 90, 90+$oa,         $grey );
-                          # $gd->line( $xp, $yp+$dM => $xp-$ew_h, ($yp+$dM)+$ew_b, $grey );
-                        }
+                            $gd->arc(  $xp, $yp+$dM, $wx, $wy, 90, 90+$oa,         $grey );
+                            $gd->line( $xp, $yp+$dM => $xp-$ew_h, ($yp+$dM)+$ew_b, $grey );
 
-                        # Use this when everything is all debugged...
-                        # $door->{_drawn}{$dir} = 1;
+
+                        } elsif( $oi eq "ees" ) { # same as een, but $Yp, -$ew_b and 270+$oa
+                            $gd->arc(  $Xp, $Yp-$dM, $wx, $wy, 270, 270+$oa,       $grey );
+                            $gd->line( $Xp, $Yp-$dM => $Xp+$ew_h, ($Yp-$dM)-$ew_b, $grey );
+
+                        } elsif( $oi eq "wes" ) { # same as above, but $xp
+                            $gd->arc(  $xp, $Yp-$dM, $wx, $wy, 270, 270+$oa,       $grey );
+                            $gd->line( $xp, $Yp-$dM => $xp+$ew_h, ($Yp-$dM)-$ew_b, $grey );
+
+                        } elsif( $oi eq "ews" ) { # same as ewn above, but 
+                            $gd->arc(  $Xp, $Yp-$dM, $wx, $wy, 270-$oa, 270,       $grey );
+                            $gd->line( $Xp, $Yp-$dM => $Xp-$ew_h, ($Yp-$dM)-$ew_b, $grey );
+
+                        } elsif( $oi eq "wws" ) { # same as above, but $xp
+                            $gd->arc(  $xp, $Yp-$dM, $wx, $wy, 270-$oa, 270,       $grey );
+                            $gd->line( $xp, $Yp-$dM => $xp-$ew_h, ($Yp-$dM)-$ew_b, $grey );
+
+                        }
+                        # }}}
+
+                        $door->{_drawn}{$dir} = 1;
                     }
                 }
             }
