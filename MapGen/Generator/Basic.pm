@@ -1,4 +1,4 @@
-# $Id: Basic.pm,v 1.21 2005/03/24 21:29:45 jettero Exp $
+# $Id: Basic.pm,v 1.22 2005/03/25 13:34:31 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::Generator::Basic;
@@ -28,10 +28,37 @@ sub _genmap {
     my ($map, $groups) = $this->SUPER::_genmap(@_);
 
     my $sum = sub { my $c = 0; for (qw(n s e w)) { $c ++ if $_[0]->{od}{$_} } $c };
+    my %opp = ( n=>"s", s=>"n", e=>"w", w=>"e" );
 
     my @end_tiles = grep { $sum->($_) == 1 } map(@$_, @$map);
 
-    die int @end_tiles;
+    push @end_tiles, "marker";
+
+    my $sparseness = 1;
+    while( my $tile = shift @end_tiles ) {
+        if( $tile eq "marker" ) {
+            last if -- $sparseness < 1;
+
+            push @end_tiles, "marker";
+            redo;
+        }
+
+        my $dir = grep { $tile->{od}{$_} } (qw(n s e w));
+        my $opp = $opp{$dir};
+        my $nex = ($tile->{od}{n} ? $map->[$tile->{y}-1][$tile->{x}] :
+                   $tile->{od}{s} ? $map->[$tile->{y}+1][$tile->{x}] :
+                   $tile->{od}{e} ? $map->[$tile->{y}][$tile->{x}+1] :
+                                    $map->[$tile->{y}][$tile->{x}-1] );
+
+        $tile->{od} = {n=>0, s=>0, e=>0, w=>0};
+        delete $tile->{type};
+
+        die "incomplete open direction found during sparseness calculation" unless defined $nex;
+
+        $nex->{DEBUG_nex} = 1;
+        $nex->{od}{$opp}  = 0;
+        push @end_tiles, $nex if $sum->($nex) == 1;
+    }
 
     return ($map, $groups);
 }

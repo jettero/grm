@@ -1,4 +1,4 @@
-# $Id: BasicImage.pm,v 1.4 2005/03/24 21:29:45 jettero Exp $
+# $Id: BasicImage.pm,v 1.5 2005/03/25 13:34:31 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::Visualization::BasicImage;
@@ -64,6 +64,9 @@ sub _genmap {
     my $white = $gd->colorAllocate(255, 255, 255);
     my $black = $gd->colorAllocate(  0,   0,   0);
     my $grey  = $gd->colorAllocate(240, 240, 240);
+    my $dgrey = $gd->colorAllocate(150, 150, 150);
+    my $blue  = $gd->colorAllocate(  0,   0, 190);
+    my $B     = 3; # the border around the filled rectangles for empty tiles
 
     $gd->interlaced('true');
 
@@ -72,13 +75,23 @@ sub _genmap {
 
         for my $j (0..$jend) {
             my $t = $m->[$i][$j];
-            my $I = $i+1;
-            my $J = $j+1;
+            my $xp =  $j    * $opts->{x_size};
+            my $yp =  $i    * $opts->{y_size};
+            my $Xp = ($j+1) * $opts->{x_size};
+            my $Yp = ($i+1) * $opts->{y_size};
 
-            $gd->line( $j*$opts->{x_size}, $i*$opts->{y_size} => $J*$opts->{x_size}, $i*$opts->{y_size}, ($t->{od}{n} ? $grey : $black) );
-            $gd->line( $j*$opts->{x_size}, $I*$opts->{y_size} => $J*$opts->{x_size}, $I*$opts->{y_size}, ($t->{od}{s} ? $grey : $black) );
-            $gd->line( $J*$opts->{x_size}, $i*$opts->{y_size} => $J*$opts->{x_size}, $I*$opts->{y_size}, ($t->{od}{e} ? $grey : $black) );
-            $gd->line( $j*$opts->{x_size}, $i*$opts->{y_size} => $j*$opts->{x_size}, $I*$opts->{y_size}, ($t->{od}{w} ? $grey : $black) );
+            $gd->line( $xp, $yp => $Xp, $yp, ($t->{od}{n} ? $grey : $black) );
+            $gd->line( $xp, $Yp => $Xp, $Yp, ($t->{od}{s} ? $grey : $black) );
+            $gd->line( $Xp, $yp => $Xp, $Yp, ($t->{od}{e} ? $grey : $black) );
+            $gd->line( $xp, $yp => $xp, $Yp, ($t->{od}{w} ? $grey : $black) );
+
+            if( not $t->{type} ) {
+                $gd->filledRectangle( $xp+$B, $yp+$B => $Xp-$B, $Yp-$B, $dgrey );
+            }
+
+            if( $t->{DEBUG_nex} ) {
+                $gd->filledRectangle( $xp+$B, $yp+$B => $Xp-$B, $Yp-$B, $blue );
+            }
         }
     }
 
