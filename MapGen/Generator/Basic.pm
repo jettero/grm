@@ -1,19 +1,31 @@
-# $Id: Basic.pm,v 1.19 2005/03/24 18:43:13 jettero Exp $
+# $Id: Basic.pm,v 1.20 2005/03/24 18:55:10 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::Generator::Basic;
 
 use strict;
 use Carp;
-use base 'Games::RolePlay::MapGen::Generator::Perfect';
-# use Games::RolePlay::MapGen::Tools qw( _group _tile str_eval irange choice roll );
+use base qw(Games::RolePlay::MapGen::Generator::Perfect);
 
 1;
 
-sub go {
+sub _gen_room_size {
     my $this = shift;
-    my ($map, $groups) = $this->SUPER::go(@_);
+    my $opts = shift;
+
+    my ($xm, $ym) = split /x/, $opts->{min_size};
+    my ($xM, $yM) = split /x/, $opts->{max_size};
+
+    return (
+        irange($xm, $xM),
+        irange($ym, $yM),
+    );
+}
+
+sub _genmap {
+    my $this = shift;
     my $opts = $this->_gen_opts;
+    my ($map, $groups) = $this->SUPER::_genmap(@_);
 
     return ($map, $groups);
 }
