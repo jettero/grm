@@ -1,8 +1,8 @@
 #!/usr/bin/perl -Iblib/lib
-# $Id: go.pl,v 1.8 2005/04/03 17:30:12 jettero Exp $
+# $Id: go.pl,v 1.9 2005/04/04 11:05:52 jettero Exp $
 # vi:tw=0:
 
-BEGIN { system("make") == 0 or die }
+BEGIN { system("make || (perl Makefile.PL && make)") == 0 or die }
 
 use strict;
 use Games::RolePlay::MapGen;
@@ -23,7 +23,7 @@ use Games::RolePlay::MapGen;
           "30x30"
           # "63x22"
           # "50x37"
-          # "100x100"
+          # "200x200"
   }); 
 
   add_generator_plugin $map "BasicDoors";
@@ -32,8 +32,11 @@ use Games::RolePlay::MapGen;
   generate  $map; 
   visualize $map "map.png";
 
-system("xv -geometry +0+0 map.png &");
-# system("scp map.png voltar.org:tmp/") == 0 or die
+system("pngcrush map.png o.png && mv o.png map.png") == 0 or die;
+system("chmod 0644 map.png") == 0 or die;
+
+system("xv -geometry +0+0 map.png &") == 0 or die;
+# system("scp -Cp map.png voltar.org:tmp/") == 0 or die;
 
 
 __END__
