@@ -1,10 +1,11 @@
-# $Id: Basic.pm,v 1.3 2005/03/19 12:16:29 jettero Exp $
+# $Id: Basic.pm,v 1.4 2005/03/20 13:18:00 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::Generator::Basic;
 
 use strict;
 use Carp;
+use Games::RolePlay::MapGen::Tools qw(_group _tile roll);
 
 1;
 
@@ -26,6 +27,7 @@ sub go {
     }
 
     croak "ERROR: x_size and y_size are required options for " . ref($this) . "::go()" unless $opts->{x_size} and $opts->{y_size};
+    croak "ERROR: x_size and y_size are required options for " . ref($this) . "::go()" unless $opts->{x_size} and $opts->{y_size};
 
     return $this->_genmap( $opts );
 }
@@ -35,17 +37,18 @@ sub _genmap {
     my $this = shift;
     my $opts = shift;
     my @map  = ();
-    my @map = ();
 
     for my $i (1 .. $opts->{x_size}) {
         my $a = [];
 
         for my $j (1 .. $opts->{y_size}) {
-            push @$a, (rand 1 < 0.5 ? ' ' : '.');
+            push @$a, new Games::RolePlay::MapGen::Misc::Tile;
         }
 
         push @map, $a;
     }
+
+    # add two rooms
 
     return \@map;
 }

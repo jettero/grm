@@ -1,5 +1,17 @@
-# $Id: MapGen.pm,v 1.7 2005/03/19 12:05:41 jettero Exp $
+# $Id: MapGen.pm,v 1.8 2005/03/20 13:18:00 jettero Exp $
 # vi:tw=0 syntax=perl:
+
+package Games::RolePlay::MapGen::_group;
+
+use strict;
+
+1;
+
+package Games::RolePlay::MapGen::_tile;
+
+use strict;
+
+1;
 
 package Games::RolePlay::MapGen;
 
