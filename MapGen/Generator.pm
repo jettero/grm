@@ -1,4 +1,4 @@
-# $Id: Generator.pm,v 1.4 2005/04/02 13:13:06 jettero Exp $
+# $Id: Generator.pm,v 1.5 2005/04/02 15:43:36 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::Generator;
@@ -6,12 +6,21 @@ package Games::RolePlay::MapGen::Generator;
 use strict;
 use Carp;
 
+our @ISA;
+
 1;
 
 # new {{{
 sub new {
     my $class = shift;
     my $this  = bless {o => {@_}}, $class;
+
+    $this->{plugins} = {
+        trap => [ ],
+        door => [ ],
+        encr => [ ],
+        tres => [ ],
+    };
 
     return $this;
 }
@@ -75,17 +84,33 @@ sub post_genmap  {
 # }}}
 
 # Meant to be overloaded elsewhere:
-sub trapgen      {}
-sub doorgen      {}
-sub encountergen {}
-sub treasuregen  {}
+sub trapgen      { my $this = shift; $_->trapgen(@_)      for @{ $this->{plugins}{trap} } }
+sub doorgen      { my $this = shift; $_->doorgen(@_)      for @{ $this->{plugins}{door} } }
+sub encountergen { my $this = shift; $_->encountergen(@_) for @{ $this->{plugins}{encr} } }
+sub treasuregen  { my $this = shift; $_->treasuregen(@_)  for @{ $this->{plugins}{tres} } }
 
 sub add_plugin {
     my $this   = shift;
     my $plugin = shift;
 
-    eval "use base q($plugin)";
+    ## This is a nice idea, but it actually sux0rs ... toast
+    ## # Check to see if it works
+    ## push @ISA, $plugin;
+    ## $Games::RolePlay::MapGen::Generator::doorgen = 
+
+    eval "use $plugin";
     croak $@ if $@;
+
+    my $obj; 
+    eval "\$obj = new $plugin";
+    croak $@ if $@;
+
+    croak "uesless plugin" unless int(@$obj) > 0;
+    for my $e (@$obj) {
+        my $pt = $this->{plugins}{$e};
+        croak "plugin hooks unknown event" unless ref($pt) eq "ARRAY";
+        push @$pt, $obj;
+    }
 }
 
 __END__

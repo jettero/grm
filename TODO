@@ -4,12 +4,12 @@
   + considers open corridor/corridor boundaries (slso)
   + considers closed corridor/corridor bondaries (slso)
 
-- make the povray plugin
+- consider a povray plugin
   + this will be the funnest part of all
 
 - split out the generic visualization stuff into a Visualization.pm
-  + this'll prolly take care of itself during the povray plugin
 
-- GL plugin?  Oh, yes, I think so.
-  + this will be the funnest part of all
+- xml dumps?
+- asn.1 dumps?  (why?)
 
+- Move more of the %known_opts to their own objects

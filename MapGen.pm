@@ -1,4 +1,4 @@
-# $Id: MapGen.pm,v 1.45 2005/04/02 13:06:35 jettero Exp $
+# $Id: MapGen.pm,v 1.46 2005/04/02 15:43:36 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen;
@@ -27,11 +27,6 @@ our %known_opts = (
           same_way_percent => 90,
          same_node_percent => 30,
     remove_deadend_percent => 60,
-
-      open_room_corridor_door_percent     => { door => 95, secret =>  2, stuck => 25, locked => 50 },
-    closed_room_corridor_door_percent     => { door =>  5, secret => 95, stuck => 10, locked => 30 },
-      open_corridor_corridor_door_percent => { door =>  1, secret => 10, stuck => 25, locked => 50 },
-    closed_corridor_corridor_door_percent => { door =>  1, secret => 95, stuck => 10, locked => 30 },
 );
 # }}}
 

@@ -1,5 +1,5 @@
 #!/usr/bin/perl -Iblib/lib
-# $Id: go.pl,v 1.1 2005/04/02 13:13:49 jettero Exp $
+# $Id: go.pl,v 1.2 2005/04/02 15:43:36 jettero Exp $
 # vi:tw=0:
 
 BEGIN { system("make") == 0 or die }
@@ -28,7 +28,7 @@ set_visualization    $map "BasicImage";
 generate  $map; 
 visualize $map "map.png";
 
-system("xv map.png &");
+# system("xv map.png &");
 # system("scp map.png voltar.org:tmp/") == 0 or die
 
 
