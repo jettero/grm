@@ -1,13 +1,40 @@
-# $Id: MapGen.pm,v 1.1 2005/03/16 15:45:48 jettero Exp $
-# vi:tw=75:
+# $Id: MapGen.pm,v 1.3 2005/03/17 12:16:47 jettero Exp $
+# vi:tw=0:
 
 package Games::RolePlay::MapGen;
 
 use strict;
+use AutoLoader;
+use Carp;
 
 our $VERSION = "0.01";
+our $AUTOLOAD;
 
 1;
+
+# AUTOLOAD {{{
+sub AUTOLOAD {
+    my $this = shift;
+    my $sub  = $AUTOLOAD;
+
+    if( $sub =~ m/MapGen\:\:set_([\w\d\_]+)$/ ) {
+        $this->{$1} = shift;
+        return;
+    }
+
+    croak "ERROR: function $sub() not found";
+}
+sub DESTROY {}
+# }}}
+
+sub new {
+    my $class = shift;
+    my @opts  = @_;
+    my $opts  = ( (@opts == 1 and ref($opts[0]) eq "HASH") ? $opts[0] : {@opts} );
+    my $this  = bless $opts, $class;
+
+    return $this;
+}
 
 __END__
 # Below is stub documentation for your module. You better edit it!
