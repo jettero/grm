@@ -1,7 +1,7 @@
-# $Id: BasicDoorsAndTraps.pm,v 1.2 2005/03/29 14:46:33 jettero Exp $
+# $Id: BasicDoors.pm,v 1.1 2005/03/29 14:47:29 jettero Exp $
 # vi:tw=0 syntax=perl:
 
-package Games::RolePlay::MapGen::Generator::BasicDoorsAndTraps;
+package Games::RolePlay::MapGen::Generator::BasicDoors;
 
 use strict;
 use Carp;

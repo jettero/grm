@@ -1,4 +1,4 @@
-# $Id: MapGen.pm,v 1.34 2005/03/28 13:58:10 jettero Exp $
+# $Id: MapGen.pm,v 1.35 2005/03/29 14:46:33 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::_group;
@@ -23,7 +23,7 @@ our $VERSION = "0.17";
 our $AUTOLOAD;
 
 our %known_opts = (
-    generator              => "Games::RolePlay::MapGen::Generator::Basic",
+    generator              => "Games::RolePlay::MapGen::Generator::BasicDoorsAndTraps",
     visualization          => "Games::RolePlay::MapGen::Visualization::Text",
     bounding_box           => "50x50",
     tile_size              => "3 ft",
