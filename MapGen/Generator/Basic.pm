@@ -1,4 +1,4 @@
-# $Id: Basic.pm,v 1.13 2005/03/23 23:37:17 jettero Exp $
+# $Id: Basic.pm,v 1.14 2005/03/24 01:17:02 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::Generator::Basic;
@@ -90,6 +90,9 @@ sub _genmap {
     # drop rooms {{{
     for my $rn (1 .. &str_eval($opts->{num_rooms})) {
         my @size = $this->_gen_room_size( $opts );
+
+        $size[0] = $opts->{x_size} if $size[0] > $opts->{x_size};
+        $size[1] = $opts->{y_size} if $size[1] > $opts->{y_size};
 
         my @min_pos = (0, 0);
         my @max_pos = ( $opts->{x_size} - $size[0], $opts->{y_size} - $size[1] );
