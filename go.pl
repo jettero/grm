@@ -1,5 +1,5 @@
 #!/usr/bin/perl -Iblib/lib
-# $Id: go.pl,v 1.3 2005/04/02 17:26:17 jettero Exp $
+# $Id: go.pl,v 1.4 2005/04/02 23:47:06 jettero Exp $
 # vi:tw=0:
 
 BEGIN { system("make") == 0 or die }
@@ -8,15 +8,16 @@ use strict;
 use Games::RolePlay::MapGen;
 
   my $map = new Games::RolePlay::MapGen({
-      cell_size=>"20x20", 
+      cell_size=>"75x75", 
       num_rooms=>
           # "70d4", 
-          "3d8", 
+          # "3d8", 
+          "2d4", 
 
       bounding_box => 
           # "3x3"
-          # "20x20"
-          "30x30"
+          "12x12"
+          # "30x30"
           # "63x22"
           # "50x37"
           # "100x100"

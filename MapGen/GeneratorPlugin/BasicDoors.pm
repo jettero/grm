@@ -1,4 +1,4 @@
-# $Id: BasicDoors.pm,v 1.4 2005/04/02 17:40:53 jettero Exp $
+# $Id: BasicDoors.pm,v 1.5 2005/04/02 23:47:06 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::GeneratorPlugin::BasicDoors;
@@ -71,7 +71,8 @@ sub doorgen {
                             my $d1 = sprintf("%40s: (%5d, %5d)", $tkey, $r, $c);
                             my $d2 = sprintf("(%2d, %2d, $dir)", $j, $i);
 
-                            print STDERR "$d1 dooring $d2\n";
+                            # print STDERR "$d1 dooring $d2\n";
+
                             my $opp = $Games::RolePlay::MapGen::opp{$dir};
 
                             $t->{od}{$dir} = $n->{od}{$opp} = &_door(
@@ -80,7 +81,7 @@ sub doorgen {
 
                                 open_dir => {
                                     major => &choice( $dir, $opp ),
-                                    minor => &choice( $dir, $minor_dirs->{$dir} ),
+                                    minor => &choice( @{$minor_dirs->{$dir}} ),
                                 },
 
                             );

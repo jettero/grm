@@ -1,4 +1,4 @@
-# $Id: BasicImage.pm,v 1.14 2005/04/02 17:40:53 jettero Exp $
+# $Id: BasicImage.pm,v 1.15 2005/04/02 23:47:06 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::Visualization::BasicImage;
@@ -6,6 +6,7 @@ package Games::RolePlay::MapGen::Visualization::BasicImage;
 use strict;
 use Carp;
 use GD;
+use Math::Trig qw(deg2rad);
 
 1;
 
@@ -64,8 +65,9 @@ sub genmap {
 
     my $white  = $gd->colorAllocate(0xff, 0xff, 0xff);
     my $black  = $gd->colorAllocate(0x00, 0x00, 0x00);
-    my $grey   = $gd->colorAllocate(0xee, 0xee, 0xee);
-    my $dgrey  = $gd->colorAllocate(0x50, 0x50, 0x50);
+    my $lgrey  = $gd->colorAllocate(0xcc, 0xcc, 0xcc);
+    my $dgrey  = $gd->colorAllocate(0x60, 0x60, 0x60);
+    my $grey   = $gd->colorAllocate(0x90, 0x90, 0x90);
     my $blue   = $gd->colorAllocate(0x00, 0x00, 0xbb);
     my $red    = $gd->colorAllocate(0xbb, 0x00, 0x00);
     my $green  = $gd->colorAllocate(0x00, 0xbb, 0x00);
@@ -75,6 +77,13 @@ sub genmap {
     my $B     = 1; # the border around the filled rectangles for empty tiles
     my $L     = 1; # the length of the cell ticks in open borders
        $L++;       # $L is one less than it seems...
+
+    my ($dm, $dM) = (2, 4); # akin to L, but for doors (door minor horrizontal, door minor vertical and door major)
+    my ($wx, $wy) = ( $opts->{x_size}*2-$dM*4, $opts->{y_size}*2-$dM*4 ); # the width and height of the door-arcs (cell size)
+
+    my $oa = 45;  # show doors open by this amount
+    my $or = deg2rad( $oa );
+    my $sr = sin( $or ); # we'll be using this, kthx...
 
     $gd->interlaced('true');
 
@@ -88,6 +97,13 @@ sub genmap {
             my $Xp = ($j+1) * $opts->{x_size};
             my $Yp = ($i+1) * $opts->{y_size};
 
+            my $ns_l = (($Xp-$dM) - ($xp+$dM));  # for the doors...
+            my $ew_l = (($Yp-$dM) - ($yp+$dM));
+            my $ns_h = $ns_l * $sr;
+            my $ew_h = $ew_l * $sr;
+            my $ns_b = sqrt( $ns_l ** 2 - $ns_h ** 2 );
+            my $ew_b = sqrt( $ew_l ** 2 - $ew_h ** 2 );
+
             $gd->line( $xp, $yp => $Xp, $yp, $black );
             $gd->line( $xp, $Yp => $Xp, $Yp, $black );
             $gd->line( $Xp, $yp => $Xp, $Yp, $black );
@@ -100,8 +116,8 @@ sub genmap {
 
             if( $t->{od}{n} and $t->{od}{w} ) {
                 if( $t->{nb}{n}{od}{w} and $t->{nb}{w}{od}{n} ) {
-                    $gd->line( $xp-$L, $yp    => $xp+$L, $yp,    $white ); # $grey );
-                    $gd->line( $xp,    $yp-$L => $xp,    $yp+$L, $white ); # $grey );
+                    $gd->line( $xp-$L, $yp    => $xp+$L, $yp,    $white );
+                    $gd->line( $xp,    $yp-$L => $xp,    $yp+$L, $white );
                 }
             }
 
@@ -109,16 +125,66 @@ sub genmap {
                 if( ref(my $door = $t->{od}{$dir}) ) {
                     unless( $door->{_drawn}{$dir} ) {
 
-                        use Data::Dumper;
-                        die Dumper( $door );  # these doors are all set to be drawn in their various different ways
+                        # use Data::Dumper;
+                        # die Dumper( $door );  # these doors are all set to be drawn in their various different ways
 
-                        # regular old unlocked, open, unstock, unhid doors
-                        $gd->rectangle( $xp+ 3, $yp+ 2 => $Xp- 3, $yp- 2, $black ) if $dir eq "n";
-                        $gd->rectangle( $Xp+ 2, $yp+ 3 => $Xp- 2, $Yp- 3, $black ) if $dir eq "e";
-                        $gd->rectangle( $xp+ 3, $Yp+ 2 => $Xp- 3, $Yp- 2, $black ) if $dir eq "s";
-                        $gd->rectangle( $xp+ 2, $yp+ 3 => $xp- 2, $Yp- 3, $black ) if $dir eq "w";
+                        if( $door->{secret} ) {
+                            # This is a secret door, so it should look like a wall.
+                            # Yes, you're reading it right... we're RE-drawing an erased line.
 
-                        $door->{_drawn}{$dir} = 1;
+                            $gd->line( $xp, $yp => $Xp, $yp, $black ) if $dir eq "n";
+                            $gd->line( $xp, $Yp => $Xp, $Yp, $black ) if $dir eq "s";
+                            $gd->line( $Xp, $yp => $Xp, $Yp, $black ) if $dir eq "e";
+                            $gd->line( $xp, $yp => $xp, $Yp, $black ) if $dir eq "w";
+
+                        } else {
+                            # Regular old unlocked, open, unstock, unhidden doors are these cute little rectangles.
+
+                            $gd->filledRectangle( $xp+$dM, $yp-$dm => $Xp-$dM, $yp+$dm, $lgrey ) if $dir eq "n";
+                            $gd->filledRectangle( $Xp-$dm, $yp+$dM => $Xp+$dm, $Yp-$dM, $lgrey ) if $dir eq "e";
+                            $gd->filledRectangle( $xp+$dM, $Yp-$dm => $Xp-$dM, $Yp+$dm, $lgrey ) if $dir eq "s";
+                            $gd->filledRectangle( $xp-$dm, $yp+$dM => $xp+$dm, $Yp-$dM, $lgrey ) if $dir eq "w";
+                        }
+
+                        # Here, we draw the diagonal line and arc indicating how the door opens.
+                        my $oi = "$dir$door->{open_dir}{major}$door->{open_dir}{minor}";
+
+                        if( $oi eq "sne" ) {
+                          # $gd->arc(  $Xp-$dM, $Yp, $wx, $wy, 180, 180+$oa,       $grey );
+                          # $gd->line( $Xp-$dM, $Yp => ($Xp-$dM)-$ns_b, $Yp-$ns_h, $grey );
+
+                        } elsif( $oi eq "nne" ) {  # same as above, but $Yp changes to $yp
+                          # $gd->arc(  $Xp-$dM, $yp, $wx, $wy, 180, 180+$oa,       $grey );
+                          # $gd->line( $Xp-$dM, $yp => ($Xp-$dM)-$ns_b, $yp-$ns_h, $grey );
+
+                        } elsif( $oi eq "sse" ) {  # same as two above, but 180-$oa and +$ns_h
+                          # $gd->arc(  $Xp-$dM, $Yp, $wx, $wy, 180-$oa, 180,       $grey );
+                          # $gd->line( $Xp-$dM, $Yp => ($Xp-$dM)-$ns_b, $Yp+$ns_h, $grey );
+
+                        } elsif( $oi eq "nse" ) {  # same as above, but $Yp to $yp
+                          # $gd->arc(  $Xp-$dM, $yp, $wx, $wy, 180-$oa, 180,       $grey );
+                          # $gd->line( $Xp-$dM, $yp => ($Xp-$dM)-$ns_b, $yp+$ns_h, $grey );
+
+
+                        } elsif( $oi eq "een" ) {
+                          # $gd->arc(  $Xp, $yp+$dM, $wx, $wy, 90-$oa, 90,         $grey );
+                          # $gd->line( $Xp, $yp+$dM => $Xp+$ew_h, ($yp+$dM)+$ew_b, $grey );
+
+                        } elsif( $oi eq "wen" ) { # same as above but $Xp to $xp
+                          # $gd->arc(  $xp, $yp+$dM, $wx, $wy, 90-$oa, 90,         $grey );
+                          # $gd->line( $xp, $yp+$dM => $xp+$ew_h, ($yp+$dM)+$ew_b, $grey );
+
+                        } elsif( $oi eq "ewn" ) { # same as two above, but 90+$oa and -$ew_h
+                          # $gd->arc(  $Xp, $yp+$dM, $wx, $wy, 90, 90+$oa,         $grey );
+                          # $gd->line( $Xp, $yp+$dM => $Xp-$ew_h, ($yp+$dM)+$ew_b, $grey );
+
+                        } elsif( $oi eq "wwn" ) { # same as above but $Xp to $xp
+                          # $gd->arc(  $xp, $yp+$dM, $wx, $wy, 90, 90+$oa,         $grey );
+                          # $gd->line( $xp, $yp+$dM => $xp-$ew_h, ($yp+$dM)+$ew_b, $grey );
+                        }
+
+                        # Use this when everything is all debugged...
+                        # $door->{_drawn}{$dir} = 1;
                     }
                 }
             }
