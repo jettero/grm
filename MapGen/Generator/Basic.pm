@@ -1,4 +1,4 @@
-# $Id: Basic.pm,v 1.8 2005/03/21 12:09:33 jettero Exp $
+# $Id: Basic.pm,v 1.9 2005/03/21 18:21:33 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::Generator::Basic;
@@ -68,9 +68,10 @@ sub _gen_bounding_size {
 
 # _genmap {{{
 sub _genmap {
-    my $this = shift;
-    my $opts = shift;
-    my @map  = ();
+    my $this   = shift;
+    my $opts   = shift;
+    my @map    = ();
+    my @groups = ();
 
     for my $y (1 .. $opts->{y_size}) {
         my $a = [];
@@ -107,6 +108,8 @@ sub _genmap {
                    $group->{name}     = "Room #$rn";
                    $group->{loc_size} = "$size[0]x$size[1] ($spot[0], $spot[1])";
                    $group->{type}     = "room";
+                   $group->{size}     = [@size];
+                   $group->{loc}      = [@spot];
 
                 for my $y ($spot[1]..($size[1]-1)+$spot[1]) {
                     for my $x ($spot[0]..($size[0]-1)+$spot[0]) {
@@ -114,13 +117,15 @@ sub _genmap {
                     }
                 }
 
+                push @groups, $group;
+
             } else {
                 redo unless --$redos < 1;
             }
         }
     }
 
-    return \@map;
+    return (\@map, \@groups);
 }
 # }}}
 

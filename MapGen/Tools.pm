@@ -1,4 +1,4 @@
-# $Id: Tools.pm,v 1.3 2005/03/20 16:42:49 jettero Exp $
+# $Id: Tools.pm,v 1.4 2005/03/21 18:21:33 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::_group;
@@ -16,6 +16,7 @@ use strict;
 1;
 
 sub new { bless {}, shift }
+sub in_group { my $this = shift; $this->{group} = shift; $this->{group}->add( $this ) };
 
 package Games::RolePlay::MapGen::Tools;
 
