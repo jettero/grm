@@ -1,4 +1,4 @@
-# $Id: BasicImage.pm,v 1.19 2005/04/03 17:27:11 jettero Exp $
+# $Id: BasicImage.pm,v 1.20 2005/04/03 17:30:12 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::Visualization::BasicImage;
@@ -122,13 +122,13 @@ sub genmap {
             $gd->line( $Xp, $yp => $Xp, $Yp, $wall_color );
             $gd->line( $xp, $yp => $xp, $Yp, $wall_color );
 
-            $gd->line( $xp+$L, $yp     => $Xp-$L, $yp,    $open_color ) if $t->{od}{n} == 1;
+            $gd->line( $xp+$L, $yp     => $Xp-$L, $yp,    $open_color ) if $t->{od}{n} == 1; # == 1 doesn't match doors...
             $gd->line( $xp+$L, $Yp     => $Xp-$L, $Yp,    $open_color ) if $t->{od}{s} == 1;
             $gd->line( $Xp,    $yp+$L, => $Xp,    $Yp-$L, $open_color ) if $t->{od}{e} == 1;
             $gd->line( $xp,    $yp+$L, => $xp,    $Yp-$L, $open_color ) if $t->{od}{w} == 1;
 
-            if( $t->{od}{n} and $t->{od}{w} ) {
-                if( $t->{nb}{n}{od}{w} and $t->{nb}{w}{od}{n} ) {
+            if( $t->{od}{n} == 1 and $t->{od}{w} == 1 ) { # == 1 doesn't match doors
+                if( $t->{nb}{n}{od}{w} == 1 and $t->{nb}{w}{od}{n} == 1 ) {
                     $gd->line( $xp-$L, $yp    => $xp+$L, $yp,    $open_color );
                     $gd->line( $xp,    $yp-$L => $xp,    $yp+$L, $open_color );
                 }
@@ -141,16 +141,7 @@ sub genmap {
                         # use Data::Dumper;
                         # die Dumper( $door );  # these doors are all set to be drawn in their various different ways
 
-                        if( $door->{secret} ) {
-                            # This is a secret door, so it should look like a wall.
-                            # Yes, you're reading it right... we're RE-drawing an erased line.
-
-                            $gd->line( $xp, $yp => $Xp, $yp, $wall_color ) if $dir eq "n";
-                            $gd->line( $xp, $Yp => $Xp, $Yp, $wall_color ) if $dir eq "s";
-                            $gd->line( $Xp, $yp => $Xp, $Yp, $wall_color ) if $dir eq "e";
-                            $gd->line( $xp, $yp => $xp, $Yp, $wall_color ) if $dir eq "w";
-
-                        } else {
+                        if( not $door->{secret} ) {
                             # Regular old unlocked, open, unstock, unhidden doors are these cute little rectangles.
 
                             $gd->filledRectangle( $xp+$dM, $yp-$dm => $Xp-$dM, $yp+$dm, $door_color ) if $dir eq "n";
