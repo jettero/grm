@@ -1,4 +1,4 @@
-# $Id: Basic.pm,v 1.2 2005/03/18 18:01:29 jettero Exp $
+# $Id: Basic.pm,v 1.3 2005/03/19 12:16:29 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::Generator::Basic;
@@ -8,25 +8,40 @@ use Carp;
 
 1;
 
+# new {{{
 sub new {
     my $class = shift;
     my $this  = bless {o => {@_}}, $class;
 
-    croak "ERROR: x_size and y_size are required arguments for $class" unless $this->{o}{x_size} and $this->{o}{y_size};
-
     return $this;
 }
-
+# }}}
+# go {{{
 sub go {
     my $this = shift;
+    my $opts = {@_};
 
+    for my $k (keys %{ $this->{o} }) {
+        $opts->{$k} = $this->{o}{$k} if not exists $opts->{$k};
+    }
+
+    croak "ERROR: x_size and y_size are required options for " . ref($this) . "::go()" unless $opts->{x_size} and $opts->{y_size};
+
+    return $this->_genmap( $opts );
+}
+# }}}
+
+sub _genmap {
+    my $this = shift;
+    my $opts = shift;
+    my @map  = ();
     my @map = ();
 
-    for my $i (1 .. $this->{o}{x_size}) {
+    for my $i (1 .. $opts->{x_size}) {
         my $a = [];
 
-        for my $j (1 .. $this->{o}{y_size}) {
-            push @$a, ' ';
+        for my $j (1 .. $opts->{y_size}) {
+            push @$a, (rand 1 < 0.5 ? ' ' : '.');
         }
 
         push @map, $a;
