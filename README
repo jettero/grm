@@ -1,0 +1,14 @@
+vi:tw=75:
+
+AUTHOR'S NOTE 
+
+I was particularly thrilled with Jamis Buck's Dungeon Generator
+(http://www.aarg.net/~minam/dungeon.cgi), but I wanted to design something
+a little more flexible that also allowed a little more flexibility --
+particularly, new visualization and generation plugins.
+
+SYNOPSIS
+
+    use Games::RolePlay::MapGen;
+
+    my $default_random_map = new Games::RolePlay::MapGen;

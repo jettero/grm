@@ -1,0 +1,28 @@
+#!/bin/sh
+
+p=Changes
+pack=MapGen.pm
+
+cat $pack | perl -ne 's/(VERSION[^0-9]+)([0-9.]+)([^0-9]*)/$1.($2+0.01).$3/e; print "$_";' > fil
+
+#cat fil | grep VER; rm fil ; exit
+
+mv fil $pack
+
+v=`perl -MCormen -e 'print $Games::RolePlay::MapGen::VERSION'`
+
+if [ -f $p ]; then
+    mv $p $p.bak
+    echo -n $v:'  '       > $p
+    date                 >> $p
+    echo "   - $USER $*" >> $p
+    echo                 >> $p
+    cat $p.bak           >> $p
+    rm $p.bak
+    vi $p -c "set tw=800" -s format.scr
+    clear
+    head -n 20 $p
+fi
+
+
+cvs ci -m ok
