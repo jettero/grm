@@ -1,4 +1,4 @@
-# $Id: MapGen.pm,v 1.43 2005/04/01 16:59:42 jettero Exp $
+# $Id: MapGen.pm,v 1.44 2005/04/02 12:44:54 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen;
@@ -203,6 +203,8 @@ sub generate {
         die   "ERROR generating generator:\n\t$@\n " if $@ =~ m/ERROR/;
         croak "ERROR generating generator:\n\t$@\n " if $@;
     }
+
+    $obj->add_plugin( $_ ) for @{ $this->{plugins}{generator} };
 
     $this->{objs}{generator} = $obj;
     $err = 1;
