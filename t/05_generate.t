@@ -1,6 +1,4 @@
-# $Id: 05_generate.t,v 1.3 2005/03/20 13:18:00 jettero Exp $
-
-exit 0;
+# $Id: 05_generate.t,v 1.4 2005/03/20 13:26:10 jettero Exp $
 
 use strict;
 use Test;

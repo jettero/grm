@@ -1,4 +1,4 @@
-# $Id: Tools.pm,v 1.1 2005/03/20 13:18:00 jettero Exp $
+# $Id: Tools.pm,v 1.2 2005/03/20 13:26:10 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::_group;
@@ -23,7 +23,7 @@ use strict;
 use Carp;
 use base q(Exporter);
 
-our @EXPORT_OK = qw(filter choice roll random range _group _tile);
+our @EXPORT_OK = qw(filter choice roll random range str_eval _group _tile);
 
 1;
 
@@ -97,6 +97,16 @@ sub range {
     return $lhs + $rand;
 }
 # }}}
+# str_eval {{{
+sub str_eval {
+    my $str = shift;
+
+    $str =~ s/^\s*(\d+)d(\d+)\s*$/&roll($1, $2)/eg;
+
+    return undef if $str =~ m/\D/;
+    return int $str;
+}
+# }}}
 
 sub _group { return new Games::RolePlay::MapGen::_group(@_) }
 sub _tile  { return new Games::RolePlay::MapGen::_tile(@_) }
@@ -110,7 +120,7 @@ Games::RolePlay::MapGen::Tools - Some support tools and objects for the mapgen s
 
 =head1 SYNOPSIS
 
-    use Games::RolePlay::MapGen::Tools qw( filter choice roll random range );
+    use Games::RolePlay::MapGen::Tools qw( filter choice roll random range str_eval );
 
     my $r1 = roll(1, 20);                   # 1d20
     my $r2 = random(20);                    # 0-20
@@ -118,6 +128,7 @@ Games::RolePlay::MapGen::Tools - Some support tools and objects for the mapgen s
     my $r4 = range(9000, 10000, 1);         # 100% positively correlated with the last range (ie, not random at all)
     my $r5 = range(7, 12, -1);              # 100% negatively correlated with the last range (ie, not random at all)
     my $e  = choice(qw(test this please));  # picks one of test, this, and please at random
+    my $v  = str_eval("1d8");               # returns int(roll(1,8)) -- returns undef on parse error
 
     # filters any elements that don't evaluate to true out of the array. (eg, @a = ("test", "this"))
     my @a  = filter(qw(test this please), sub { ($_[0] =~ m/^t/ }) 

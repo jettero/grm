@@ -1,4 +1,4 @@
-# $Id: Basic.pm,v 1.4 2005/03/20 13:18:00 jettero Exp $
+# $Id: Basic.pm,v 1.5 2005/03/20 13:26:10 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::Generator::Basic;
@@ -42,13 +42,11 @@ sub _genmap {
         my $a = [];
 
         for my $j (1 .. $opts->{y_size}) {
-            push @$a, new Games::RolePlay::MapGen::Misc::Tile;
+            push @$a, &_tile;
         }
 
         push @map, $a;
     }
-
-    # add two rooms
 
     return \@map;
 }

@@ -1,12 +1,12 @@
 
-# $Id: 03_tools.t,v 1.1 2005/03/20 13:18:00 jettero Exp $
+# $Id: 03_tools.t,v 1.2 2005/03/20 13:26:10 jettero Exp $
 
 use strict;
 use Test;
 
-plan tests => 1 + 4 + 8 + 8 + 3000;
+plan tests => 1 + 4 + 8 + 8 + (1) + 8 + 3000 + 2;
 
-use Games::RolePlay::MapGen::Tools qw(filter choice roll random range _group _tile);
+use Games::RolePlay::MapGen::Tools qw(filter choice roll random range str_eval _group _tile);
 
 # filter 1 {{{
 my @a = filter(qw(test this please), sub { $_[0] =~ m/^t/ }); 
@@ -36,6 +36,21 @@ while( not( $h{1} and $h{2} and $h{3} and $h{4} and $h{5} and $h{6} and $h{7} an
     ok(1);
 }
 # }}}
+# str_eval 8 + (1) {{{
+%h = ();
+alarm 3; # in case it loops, which it shouldn't
+while( not( $h{1} and $h{2} and $h{3} and $h{4} and $h{5} and $h{6} and $h{7} and $h{8} ) ) {
+    my $roll = &str_eval("1d8");
+
+    die "holy crap that's not defined!!" unless defined $roll;
+
+    redo if $h{$roll};
+
+    $h{$roll} = 1;
+    ok(1);
+}
+ok( &str_eval("test failed"), undef );
+# }}}
 # random 8 {{{
 %h = ();
 alarm 3; # in case it loops, which it shouldn't
@@ -48,7 +63,7 @@ while( not( $h{0} and $h{1} and $h{2} and $h{3} and $h{4} and $h{5} and $h{6} an
     ok(1);
 }
 # }}}
-# range 3000 {{.{
+# range 3000 {{{
 for(1..1000) {
     my $num = range(37, 99);
     my $cor = range(370, 990, 1);
@@ -60,5 +75,5 @@ for(1..1000) {
 }
 # }}}
 
-# _group
-# _tile
+ok( ref(&_group) =~ m/::_group$/ );
+ok( ref(&_tile)  =~ m/::_tile$/  );
