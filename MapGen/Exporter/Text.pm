@@ -1,10 +1,11 @@
-# $Id: Text.pm,v 1.5 2005/03/20 16:42:49 jettero Exp $
+# $Id: Text.pm,v 1.6 2005/03/23 12:21:20 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::Visualization::Text;
 
 use strict;
 use Carp;
+use Games::RolePlay::MapGen::Tools qw( &filter );
 
 1;
 
@@ -43,33 +44,29 @@ sub _genmap {
     my $this = shift;
     my $opts = shift;
     my $m    = $opts->{_the_map};
+    my $g    = $opts->{_the_groups};
+
+    my @rooms = &filter( @$g, sub { $_[0]->{type} eq "room" } );
+
+    for my $room (@rooms) {
+        for my $i ($room->{..$#$m) {
+            for my $j (0..$#{ $m->[$i] }) {
+            }
+        }
+    }
+
     my $map  = "";
-
-    my $debug = "";
-    my %debug = ();
-
     for my $i (0..$#$m) {
         for my $j (0..$#{ $m->[$i] }) {
-            my $group = $m->[$i][$j]{group};
+            my $tile  = $m->[$i][$j];
 
-            if( $group ) {
-                $map .= substr($group->{type}, 0, 1);
-
-                unless( $debug{$group->{name}} ) {
-                    $debug .= "$group->{name}";
-                    $debug .= " -- $group->{loc_size}\n";
-                    $debug{$group->{name}} = 1;
-                }
-
-            } else {
-                $map .= " ";
-            }
+            $map .= $tile->{_sym} || " ";
         }
 
         $map .= "\n";
     }
 
-    return $map . "\n$debug";
+    return $map;
 }
 
 __END__

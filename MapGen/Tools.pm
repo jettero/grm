@@ -1,4 +1,4 @@
-# $Id: Tools.pm,v 1.4 2005/03/21 18:21:33 jettero Exp $
+# $Id: Tools.pm,v 1.5 2005/03/23 12:21:20 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::_group;
@@ -15,8 +15,7 @@ use strict;
 
 1;
 
-sub new { bless {}, shift }
-sub in_group { my $this = shift; $this->{group} = shift; $this->{group}->add( $this ) };
+sub new { bless { visited=>0, od=>[0,0,0,0] }, shift }
 
 package Games::RolePlay::MapGen::Tools;
 
@@ -142,6 +141,28 @@ Games::RolePlay::MapGen::Tools - Some support tools and objects for the mapgen s
 
     # This package also exports _group and _tile, which are shortcut functions for new
     # Games::RolePlay::MapGen::_tile and ::_group objects.
+
+=head1 Games::RolePlay::MapGen::_group
+
+At this time, the ::_group object is just a blessed hash that contains some
+variables that need to be set by the ::Generator objects.
+
+    $group->{name}     = "Room #$rn";
+    $group->{loc_size} = "$size[0]x$size[1] ($spot[0], $spot[1])";
+    $group->{type}     = "room";
+    $group->{size}     = [@size];
+    $group->{loc}      = [@spot];
+
+=head1 Games::RolePlay::MapGen::_tile
+
+At this time, the ::_tile object is just a blessed hash that the
+::Generators instantiate at every map location.  There are no required
+variables at this time.
+
+    { visited=>0, od=>[0,0,0,0] }
+
+By default, for convenience, visited is set to 0 and "open directions" is
+set to all zeros.
 
 =head1 AUTHOR
 

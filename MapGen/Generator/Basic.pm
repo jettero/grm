@@ -1,4 +1,4 @@
-# $Id: Basic.pm,v 1.9 2005/03/21 18:21:33 jettero Exp $
+# $Id: Basic.pm,v 1.10 2005/03/23 12:21:20 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::Generator::Basic;
@@ -73,11 +73,14 @@ sub _genmap {
     my @map    = ();
     my @groups = ();
 
+    my $unvisited = 0;
+
     for my $y (1 .. $opts->{y_size}) {
         my $a = [];
 
         for my $x (1 .. $opts->{x_size}) {
             push @$a, &_tile;
+            $unvisited ++;
         }
 
         push @map, $a;
@@ -113,8 +116,13 @@ sub _genmap {
 
                 for my $y ($spot[1]..($size[1]-1)+$spot[1]) {
                     for my $x ($spot[0]..($size[0]-1)+$spot[0]) {
-                        $map[$y][$x]->{group} = $group;
+                        $map[$y][$x]->{group}   = $group;
+                        $map[$y][$x]->{visited} = 1;
                     }
+                }
+
+                for my $y ($spot[1]..($size[1]-1)+$spot[1]) {
+                    $map[$y][0]->{od} = 1;
                 }
 
                 push @groups, $group;
@@ -148,9 +156,35 @@ Games::RolePlay::MapGen::Generator::Basic - The basic random bounded dungeon gen
 
 =head1 DESCRIPTION
 
-    This generator creates a specified number of rooms inside a
-    bounding box and then adds the specified number of hallways
-    -- trying to get at least one per room.
+This generator creates a specified number of rooms inside a
+bounding box and then adds the specified number of hallways
+-- trying to get at least one per room.
+
+Here is the URL to the steps listed below: http://www.aarg.net/~minam/dungeon_design.html
+
+=head2 Jamis Buck's Dungeon Generator Algorithm
+
+1. Start with a rectangular grid, x units wide and y units tall. Mark each cell in the grid
+unvisited.
+
+2. Pick a random cell in the grid and mark it visited. This is the current cell.
+
+3. From the current cell, pick a random direction (north, south, east, or west). If (1) there is no
+cell adjacent to the current cell in that direction, or (2) if the adjacent cell in that direction
+has been visited, then that direction is invalid, and you must pick a different random direction. If
+all directions are invalid, pick a different random visited cell in the grid and start this step
+over again.
+
+4. Let's call the cell in the chosen direction C. Create a corridor between the current cell and C,
+and then make C the current cell. Mark C visited.
+
+5. Repeat steps 3 and 4 until all cells in the grid have been visited.
+
+6. Look at every cell in the maze grid. If the given cell contains a corridor that exits the cell in
+only one direction (in otherwords, if the cell is the end of a dead-end hallway), "erase" that cell
+by removing the corridor.
+
+7. Repeat step #6 sparseness times (ie, if sparseness is five, repeat step #6 five times).
 
 =head1 SEE ALSO
 
