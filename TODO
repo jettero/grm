@@ -1,7 +1,4 @@
 
-- finish the room dropper
-  + marks pseudo-rooms with a negative corridor count
-
 - add a door dropper...
   + considers the room/corridor boundaries (secret, locked, stuck, openable)
   + considers open corridor/corridor boundaries (slso)

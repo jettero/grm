@@ -1,4 +1,4 @@
-# $Id: Basic.pm,v 1.29 2005/03/26 20:51:30 jettero Exp $
+# $Id: Basic.pm,v 1.30 2005/03/27 02:04:14 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::Generator::Basic;
@@ -54,7 +54,7 @@ sub mark_things_as_pseudo_rooms {
                        $group->{loc}  = [$ul->{x}, $ul->{y}];
 
                     for( $ul, $ur, $ll, $lr) {
-                        $_->{DEBUG_red_mark} = 1;
+                        # $_->{DEBUG_red_mark} = 1;
                         $_->{group} = $group;
                         $_->{type}  = $group->{type};
                     }
@@ -75,7 +75,7 @@ sub mark_things_as_pseudo_rooms {
                         for( $ul, $um, $ur,
                              $ll, $lm, $lr ) {
 
-                            $_->{DEBUG_blue_mark} = 1;
+                            # $_->{DEBUG_blue_mark} = 1;
                             $_->{group} = $group;
                             $_->{type}  = $group->{type};
                         }
@@ -99,7 +99,7 @@ sub mark_things_as_pseudo_rooms {
                              $ml, $mr,
                              $ll, $lr ) {
 
-                            $_->{DEBUG_blue_mark} = 1;
+                            # $_->{DEBUG_blue_mark} = 1;
                             $_->{group} = $group;
                             $_->{type}  = $group->{type};
                         }
@@ -144,15 +144,17 @@ sub drop_rooms {
                    for my $y (0 .. $size[1]-1) {
                        my $tile = $map->[$i+$y][$j+$x];
 
-                       goto LONGJUMP_PAST_SCORING if $tile->{type} eq "room";
+                       if( exists $tile->{type} ) {
+                           goto LONGJUMP_PAST_SCORING if $tile->{type} eq "room";
 
-                       if( $tile->{type} eq "corridor" ) {
-                           $score += 1.07;
+                           if( $tile->{type} eq "corridor" ) {
+                               $score += 1.07;
 
-                       } elsif( $tile->{type} eq "pseudo" ) {
-                           $tile->{group}{_rd_all} ++;
+                           } elsif( $tile->{type} eq "pseudo" ) {
+                               $tile->{group}{_rd_all} ++;
 
-                           $pseudo = 1;
+                               $pseudo = 1;
+                           }
                        }
                    }
                }
@@ -212,17 +214,19 @@ sub drop_rooms {
             for my $y ( $ymin .. $ymax ) {
                 my $tile = $map->[$y][$x];
 
-                if( $tile->{type} eq "corridor" or $tile->{type} eq "pseudo" ) {
-                    push @corridors, [ w => $tile ] if $x == $xmin and $tile->{od}{w};
-                    push @corridors, [ n => $tile ] if $y == $ymin and $tile->{od}{n};
-                    push @corridors, [ e => $tile ] if $x == $xmax and $tile->{od}{e};
-                    push @corridors, [ s => $tile ] if $y == $ymax and $tile->{od}{s};
+                if( exists $tile->{type} ) {
+                    if( $tile->{type} eq "corridor" or $tile->{type} eq "pseudo" ) {
+                        push @corridors, [ w => $tile ] if $x == $xmin and $tile->{od}{w};
+                        push @corridors, [ n => $tile ] if $y == $ymin and $tile->{od}{n};
+                        push @corridors, [ e => $tile ] if $x == $xmax and $tile->{od}{e};
+                        push @corridors, [ s => $tile ] if $y == $ymax and $tile->{od}{s};
+                    }
                 }
 
                 $tile->{type}  = "room";
                 $tile->{group} = $group;
                 $tile->{od}    = {n=>1, s=>1, e=>1, w=>1}; # open every direction... close edges below
-                $tile->{DEBUG_green_mark} = 1;
+                # $tile->{DEBUG_green_mark} = 1;
             }}
 
             for my $y ($ymin .. $ymax) {
@@ -265,6 +269,51 @@ sub drop_rooms {
     }
 }
 # }}}
+# cleanup_pseudo_rooms {{{
+sub cleanup_pseudo_rooms {
+    my $this   = shift;
+    my $map    = shift;
+    my $groups = shift;
+    my @pseudo = ();
+
+    @$groups = grep { my $r = 1; if( $_->{type} eq "pseudo" ) { push @pseudo, $_; $r = 0 } $r } @$groups;
+
+    for my $group (@pseudo) {
+        my ($xmin, $ymin) = @{ $group->{loc}   };
+        my ($xmax, $ymax) = @{ $group->{asize} };
+
+        $xmax += $xmin -1;
+        $ymax += $ymin -1;
+
+        my $intact = 1;
+        my @tofix  = ();
+
+        for my $x ( $xmin .. $xmax ) {
+        for my $y ( $ymin .. $ymax ) {
+            my $tile = $map->[$y][$x];
+
+            $tile->{DEBUG_red_mark} = 1;
+
+            if( $tile->{type} eq "pseudo" ) {
+                $tile->{type} = "corridor";
+                push @tofix, $tile;
+
+            } else {
+                $intact = 0;
+            }
+        }}
+
+        if( $intact ) {
+            for my $tile (@tofix) {
+                $tile->{od}{n} = 1 if $tile->{y} > $ymin;
+                $tile->{od}{e} = 1 if $tile->{x} < $xmax;
+                $tile->{od}{s} = 1 if $tile->{y} > $ymax;
+                $tile->{od}{w} = 1 if $tile->{x} > $xmin;
+            }
+        }
+    }
+}
+# }}}
 
 # genmap {{{
 sub genmap {
@@ -277,6 +326,7 @@ sub genmap {
     # In fact, we'd really rather cover them up if possible.
     $this->mark_things_as_pseudo_rooms( $map, $groups );
     $this->drop_rooms( $opts, $map, $groups );
+    $this->cleanup_pseudo_rooms( $map, $groups );
 
     return ($map, $groups);
 }
