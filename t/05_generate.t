@@ -1,9 +1,9 @@
-# $Id: 05_generate.t,v 1.6 2005/03/23 18:47:33 jettero Exp $
+# $Id: 05_generate.t,v 1.7 2005/03/23 23:35:24 jettero Exp $
 
 use strict;
 use Test;
 
-my ($x, $y) = (30, 30);
+my ($x, $y) = (20, 15);
 
 plan tests => 1 + (4 * $x * $y);
 
@@ -18,10 +18,10 @@ CHECK_OPEN_DIRECTIONS_FOR_SANITY: { # they should really be the same from each d
     for my $i (0..$y-1) {
         for my $j (0..$x-1) {
             my $here  = $m->[$i][$j]{tile}{od};
-            my $above = ($i==0  ? undef : $m->[$i-1][$j]{tile}{od});
-            my $below = ($i==$y ? undef : $m->[$i+1][$j]{tile}{od});
-            my $left  = ($j==0  ? undef : $m->[$i][$j-1]{tile}{od});
-            my $right = ($j==$x ? undef : $m->[$i][$j+1]{tile}{od});
+            my $above = ( $i ==    0 ? undef : $m->[$i-1][$j]{tile}{od});
+            my $below = ( $i == $y-1 ? undef : $m->[$i+1][$j]{tile}{od});
+            my $left  = ( $j ==    0 ? undef : $m->[$i][$j-1]{tile}{od});
+            my $right = ( $j == $x-1 ? undef : $m->[$i][$j+1]{tile}{od});
 
             if( $above ) { ok( $above->{s}, $here->{n} ) } else { ok(1) }
             if( $below ) { ok( $below->{n}, $here->{s} ) } else { ok(1) }

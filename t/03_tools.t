@@ -1,12 +1,12 @@
 
-# $Id: 03_tools.t,v 1.3 2005/03/20 16:42:49 jettero Exp $
+# $Id: 03_tools.t,v 1.4 2005/03/23 23:35:24 jettero Exp $
 
 use strict;
 use Test;
 
-plan tests => 1 + 4 + 8 + 8 + 4 + 4 + (2) + 8 + 600 + 2;
+plan tests => 1 + 4 + 8 + 8 + 4 + 4 + (2) + 8 + 604 + 2;
 
-use Games::RolePlay::MapGen::Tools qw(filter choice roll random range str_eval _group _tile);
+use Games::RolePlay::MapGen::Tools qw(filter choice roll random irange range str_eval _group _tile);
 
 # filter 1 {{{
 my @a = filter(qw(test this please), sub { $_[0] =~ m/^t/ }); 
@@ -88,7 +88,14 @@ while( not( $h{0} and $h{1} and $h{2} and $h{3} and $h{4} and $h{5} and $h{6} an
     ok(1);
 }
 # }}}
-# range 600 {{{
+# range 604 {{{
+
+alarm 30; # this is far more than should be needed.
+1 while sprintf('%0.4f', range(0, 7)) != "0.0"; ok( 1 );
+1 while sprintf('%0.4f', range(0, 7)) != "7.0"; ok( 1 );
+1 while irange(0, 7) != 0; ok(1);
+1 while irange(0, 7) != 7; ok(1);
+
 for(1..200) {
     my $num = range(37, 99);
     my $cor = range(370, 990, 1);

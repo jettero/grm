@@ -1,4 +1,4 @@
-# $Id: Basic.pm,v 1.12 2005/03/23 23:35:24 jettero Exp $
+# $Id: Basic.pm,v 1.13 2005/03/23 23:37:17 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::Generator::Basic;
@@ -48,8 +48,8 @@ sub _gen_room_size {
     my ($xM, $yM) = split /x/, $opts->{max_size};
 
     return (
-        range($xm, $xM),
-        range($ym, $yM),
+        irange($xm, $xM),
+        irange($ym, $yM),
     );
 }
 # }}}
@@ -96,7 +96,7 @@ sub _genmap {
 
         my $redos = $opts->{room_fit_redos} || 100;
         FIND_A_SPOT_FOR_IT: {
-            my @spot = map( range($min_pos[$_], $max_pos[$_]), 0..1 );
+            my @spot = map( irange($min_pos[$_], $max_pos[$_]), 0..1 );
 
             my $no_collision = 1;
             for my $y ($spot[1]..($size[1]-1)+$spot[1]) {

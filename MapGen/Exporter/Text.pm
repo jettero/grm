@@ -1,4 +1,4 @@
-# $Id: Text.pm,v 1.9 2005/03/23 23:35:24 jettero Exp $
+# $Id: Text.pm,v 1.10 2005/03/23 23:37:17 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::Visualization::Text;
@@ -104,21 +104,21 @@ sub _genmap {
         $map .= "\n";
 
         if( $i == $#$m ) {
-            $map .= "##";
+            $map .= "  ";
             for my $j (0 .. $jend) {
                 my $tile  = $m->[$i][$j];
 
                 if( my $type = $tile->{type} ) {
-                    $map .= ($tile->{od}{s} ? "ab" : "c-");
-                    $map .= "d" if $j == $jend;
+                    $map .= ($tile->{od}{s} ? "  " : " -");
+                    $map .= " " if $j == $jend;
 
                 } elsif( $above[$j-1] ) {
-                    $map .= ($above[$j-1]->{od}{e} ? "ef" : "|g");
-                    $map .= "h" if $j == $jend;
+                    $map .= ($above[$j-1]->{od}{e} ? "  " : "| ");
+                    $map .= " " if $j == $jend;
                     $above[$j] = undef;
 
                 } else {
-                    $map .= ($j == $jend ? "ijk" : "lm");
+                    $map .= ($j == $jend ? "   " : "  ");
                 }
             }
             $map .= "\n";

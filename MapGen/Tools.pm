@@ -1,4 +1,4 @@
-# $Id: Tools.pm,v 1.6 2005/03/23 15:31:55 jettero Exp $
+# $Id: Tools.pm,v 1.7 2005/03/23 23:35:24 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::_group;
@@ -23,7 +23,7 @@ use strict;
 use Carp;
 use base q(Exporter);
 
-our @EXPORT_OK = qw(filter choice roll random range str_eval _group _tile);
+our @EXPORT_OK = qw(filter choice roll random irange range str_eval _group _tile);
 
 1;
 
@@ -97,6 +97,11 @@ sub range {
     return $lhs + $rand;
 }
 # }}}
+# irange {{{
+sub irange {
+    return sprintf('%0.0f', range(@_));
+}
+# }}}
 # str_eval {{{
 sub str_eval {
     my $str = shift;
@@ -127,9 +132,10 @@ Games::RolePlay::MapGen::Tools - Some support tools and objects for the mapgen s
 
     my $r1 = roll(1, 20);                   # 1d20
     my $r2 = random(20);                    # 0-20
-    my $r3 = range(50, 100);                # some number between 50 and 100
+    my $r3 = range(50, 100);                # some number between 50 and 100 (not an integer!)
     my $r4 = range(9000, 10000, 1);         # 100% positively correlated with the last range (ie, not random at all)
     my $r5 = range(7, 12, -1);              # 100% negatively correlated with the last range (ie, not random at all)
+    my $ri = irange(0, 7);                  # An integer between 0 and 7
     my $e  = choice(qw(test this please));  # picks one of test, this, and please at random
     my $v  = str_eval("1d8");               # returns int(roll(1,8)) -- returns undef on parse error
 
