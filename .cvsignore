@@ -6,3 +6,4 @@ Makefile
 maze.log
 tmon.out
 map.png
+debug.log

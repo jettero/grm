@@ -1,5 +1,61 @@
-# $Id: Tools.pm,v 1.10 2005/03/24 16:06:55 jettero Exp $
+# $Id: Tools.pm,v 1.11 2005/03/25 18:23:01 jettero Exp $
 # vi:tw=0 syntax=perl:
+
+package Games::RolePlay::MapGen::_interconnected_map;
+
+use strict;
+use Carp;
+
+1;
+
+# new {{{
+sub new {
+    my $class = shift;
+    my $map   = shift;
+
+    # This interconnected array stuff is _REALLY_ handy, but it needs to be cleaned up, so it gets it's own class
+
+    for my $i (0 .. $#$map) {
+        my $jend = $#{ $map->[$i] };
+
+        for my $j (0 .. $jend) {
+            $map->[$i][$j]->{nb}{s} = $map->[$i+1][$j] unless $i == $#$map;
+            $map->[$i][$j]->{nb}{n} = $map->[$i-1][$j] unless $i == 0;
+            $map->[$i][$j]->{nb}{e} = $map->[$i][$j+1] unless $j == $jend;
+            $map->[$i][$j]->{nb}{w} = $map->[$i][$j-1] unless $j == 0;
+        }
+    }
+
+    return bless $map, $class;
+}
+# }}}
+# DESTROY {{{
+sub DESTROY {
+    my $map = shift;
+
+    for my $i (0 .. $#$map) {
+        my $jend = $#{ $map->[$i] };
+
+        for my $j (0 .. $jend) {
+            # Destroying the map wouldn't destroy the tiles if they're self
+            # referencing like this.  That's not a problem because of the
+            # global destructor, *whew*; except that each new map generated,
+            # until perl exits, would eat up more memory.  
+
+            delete $map->[$i][$j]{nb}; # So we have to break the self-refs here.
+        }
+    }
+
+    # You can test to make sure the tiles are dying when a map goes out of
+    # scope by setting the VERBOSE_TILE_DEATH environment variable to a true
+    # value.  If they fail to die when they go out of scope, it would say so on
+    # the warning line.  If you'd really really like to see that, change the
+    # {nb} above to {nb_borked} and you'll see what I mean.
+
+    # Lastly, if you'd like to read a lengthy dissertation on this subject,
+    # search for "Two-Phased" in the perlobj man page.
+}
+# }}}
 
 package Games::RolePlay::MapGen::_group;
 
@@ -16,8 +72,7 @@ use strict;
 1;
 
 sub new { my $class = shift; bless { @_, v=>0, od=>{n=>0, s=>0, e=>0, w=>0} }, $class }
-
-# sub DESTROY { warn "global destruction detector here; if we forgot to clean up, this would say..." }
+sub DESTROY { warn "tile verbosely dying" if $ENV{VERBOSE_TILE_DEATH} }  # search for VERBOSE above...
 
 package Games::RolePlay::MapGen::Tools;
 

@@ -1,4 +1,4 @@
-# $Id: Perfect.pm,v 1.3 2005/03/25 17:01:33 jettero Exp $
+# $Id: Perfect.pm,v 1.4 2005/03/25 18:23:01 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::Generator::Perfect;
@@ -32,23 +32,9 @@ sub _create_tiles {
 # _generate_perfect_maze {{{
 sub _generate_perfect_maze {
     my $this = shift;
-    my $opts = shift;
-    my $map  = shift;
+    my $opts = shift; # This is really just a hack to make sure the interconnections get un-self-ref'd when they go out of scope
+    my $map  = new Games::RolePlay::MapGen::Generator::Perfect::_interconnected_map(shift);
 
-    # fully interconnect tiles (to ease perfect maze generation) {{{
-    # This may be sloppy and wasteful, but it sure makes the maze alg easier to do.
-    for my $i (0 .. $#$map) {
-        my $jend = $#{ $map->[$i] };
-
-        for my $j (0 .. $jend) {
-            $map->[$i][$j]->{nb}{s} = $map->[$i+1][$j] unless $i == $#$map;
-            $map->[$i][$j]->{nb}{n} = $map->[$i-1][$j] unless $i == 0;
-            $map->[$i][$j]->{nb}{e} = $map->[$i][$j+1] unless $j == $jend;
-            $map->[$i][$j]->{nb}{w} = $map->[$i][$j-1] unless $j == 0;
-        }
-    }
-    # }}}
-    # generate a perfect maze {{{
     my $tiles   = $opts->{y_size} * $opts->{x_size};
     my @dirs    = (qw(n s e w));
     my %opp     = ( n=>"s", s=>"n", e=>"w", w=>"e" );
@@ -119,22 +105,6 @@ sub _generate_perfect_maze {
 
         # print DEBUG "\n";
     }
-
-    # }}}
-    # clean-up interconnections {{{
-    for my $i (0 .. $#$map) {
-        my $jend = $#{ $map->[$i] };
-
-        for my $j (0 .. $jend) {
-            # Destroying the map won't destroy the tiles if they're self
-            # referencing like this.  That's not a problem because of the
-            # global destructor, *whew*; except that each new map generated,
-            # until perl exits, would eat up more memory.  
-
-            delete $map->[$i][$j]->{n}; # So we have to break the self-refs here.
-        }
-    }
-    # }}}
 
 }
 # }}}

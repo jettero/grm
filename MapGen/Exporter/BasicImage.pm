@@ -1,4 +1,4 @@
-# $Id: BasicImage.pm,v 1.6 2005/03/25 17:01:33 jettero Exp $
+# $Id: BasicImage.pm,v 1.7 2005/03/25 18:23:01 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::Visualization::BasicImage;
@@ -67,6 +67,8 @@ sub _genmap {
     my $dgrey = $gd->colorAllocate( 80,  80,  80);
     my $blue  = $gd->colorAllocate(  0,   0, 190);
     my $B     = 1; # the border around the filled rectangles for empty tiles
+    my $L     = 1; # the length of the cell ticks in open borders
+       $L++;       # $L is one less than it seems...
 
     $gd->interlaced('true');
 
@@ -80,10 +82,15 @@ sub _genmap {
             my $Xp = ($j+1) * $opts->{x_size};
             my $Yp = ($i+1) * $opts->{y_size};
 
-            $gd->line( $xp, $yp => $Xp, $yp, ($t->{od}{n} ? $grey : $black) );
-            $gd->line( $xp, $Yp => $Xp, $Yp, ($t->{od}{s} ? $grey : $black) );
-            $gd->line( $Xp, $yp => $Xp, $Yp, ($t->{od}{e} ? $grey : $black) );
-            $gd->line( $xp, $yp => $xp, $Yp, ($t->{od}{w} ? $grey : $black) );
+            $gd->line( $xp, $yp => $Xp, $yp, $black );
+            $gd->line( $xp, $Yp => $Xp, $Yp, $black );
+            $gd->line( $Xp, $yp => $Xp, $Yp, $black );
+            $gd->line( $xp, $yp => $xp, $Yp, $black );
+
+            $gd->line( $xp+$L, $yp    => $Xp-$L, $yp,    $white ) if $t->{od}{n};
+            $gd->line( $xp+$L, $Yp    => $Xp-$L, $Yp,    $white ) if $t->{od}{s};
+            $gd->line( $Xp,    $yp+$L => $Xp,    $Yp-$L, $white ) if $t->{od}{e};
+            $gd->line( $xp,    $yp+$L => $xp,    $Yp-$L, $white ) if $t->{od}{w};
 
             if( not $t->{type} ) {
                 $gd->filledRectangle( $xp+$B, $yp+$B => $Xp-$B, $Yp-$B, $dgrey );
