@@ -1,4 +1,4 @@
-# $Id: BasicImage.pm,v 1.11 2005/03/28 21:30:34 jettero Exp $
+# $Id: BasicImage.pm,v 1.12 2005/03/30 20:00:51 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::Visualization::BasicImage;
@@ -62,13 +62,14 @@ sub genmap {
 
     my $gd    = new GD::Image(1+($opts->{x_size} * @{$m->[0]}), 1+($opts->{y_size} * @$m));
 
-    my $white = $gd->colorAllocate(0xff, 0xff, 0xff);
-    my $black = $gd->colorAllocate(0x00, 0x00, 0x00);
-    my $grey  = $gd->colorAllocate(0xee, 0xee, 0xee);
-    my $dgrey = $gd->colorAllocate(0x50, 0x50, 0x50);
-    my $blue  = $gd->colorAllocate(0x00, 0x00, 0xbb);
-    my $red   = $gd->colorAllocate(0xbb, 0x00, 0x00);
-    my $green = $gd->colorAllocate(0x00, 0xbb, 0x00);
+    my $white  = $gd->colorAllocate(0xff, 0xff, 0xff);
+    my $black  = $gd->colorAllocate(0x00, 0x00, 0x00);
+    my $grey   = $gd->colorAllocate(0xee, 0xee, 0xee);
+    my $dgrey  = $gd->colorAllocate(0x50, 0x50, 0x50);
+    my $blue   = $gd->colorAllocate(0x00, 0x00, 0xbb);
+    my $red    = $gd->colorAllocate(0xbb, 0x00, 0x00);
+    my $green  = $gd->colorAllocate(0x00, 0xbb, 0x00);
+    my $purple = $gd->colorAllocate(0xff, 0x00, 0xff);
 
     my $D     = 5; # the border around debugging marks
     my $B     = 1; # the border around the filled rectangles for empty tiles
@@ -118,6 +119,10 @@ sub genmap {
 
             if( $t->{DEBUG_green_mark} ) {
                 $gd->filledRectangle( $xp+$D, $yp+$D => $Xp-$D, $Yp-$D, $green );
+            }
+
+            if( $t->{DEBUG_purple_mark} ) {
+                $gd->filledRectangle( $xp+$D, $yp+$D => $Xp-$D, $Yp-$D, $purple );
             }
         }
     }

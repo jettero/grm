@@ -1,4 +1,4 @@
-# $Id: Basic.pm,v 1.33 2005/03/29 16:22:08 jettero Exp $
+# $Id: Basic.pm,v 1.34 2005/03/30 20:00:51 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::Generator::Basic;
@@ -225,7 +225,13 @@ sub drop_rooms {
 
                 $tile->{type}  = "room";
                 $tile->{group} = $group;
-                $tile->{od}    = {n=>1, s=>1, e=>1, w=>1}; # open every direction... close edges below
+                for my $dir (qw(n e s w)) {
+                    $tile->{od}{$dir} = 1; # open every direction... close edges below
+
+                    if( my $n = $tile->{nb}{$dir} ) {
+                        $n->{od}{$opp{$dir}} = 1;
+                    }
+                }
                 # $tile->{DEBUG_green_mark} = 1;
             }}
 
@@ -306,8 +312,8 @@ sub cleanup_pseudo_rooms {
         if( $intact ) {
             for my $tile (@tofix) {
                 $tile->{od}{n} = 1 if $tile->{y} > $ymin;
+                $tile->{od}{s} = 1 if $tile->{y} < $ymax;
                 $tile->{od}{e} = 1 if $tile->{x} < $xmax;
-                $tile->{od}{s} = 1 if $tile->{y} > $ymax;
                 $tile->{od}{w} = 1 if $tile->{x} > $xmin;
             }
         }

@@ -1,4 +1,4 @@
-# $Id: MapGen.pm,v 1.40 2005/03/30 16:56:11 jettero Exp $
+# $Id: MapGen.pm,v 1.41 2005/03/30 20:00:51 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen;
@@ -100,8 +100,10 @@ sub save_map {
 
     $this->{_the_map}->disconnect_map;
 
+    my @keys = keys %$this;
+
     open _SAVE, ">$filename" or die "couldn't open $filename for write: $!";
-    print _SAVE Data::Dumper->Dump([$this->{_the_map}, $this->{_the_groups}], [qw($this->{_the_map} $this->{_the_groups})]);
+    print _SAVE Data::Dumper->Dump([map($this->{$_}, @keys)], [map("\$this\-\>{$_}", @keys)]);
     close _SAVE;
 
     $this->{_the_map}->interconnect_map;
@@ -118,6 +120,9 @@ sub load_map {
 
     eval $entire_file;
     die "ERROR while evaluating saved map: $@" if $@;
+
+    require Games::RolePlay::MapGen::Tools; # This would already be loaded if we were the blessed ref that did the saving
+    $this->{_the_map}->interconnect_map;    # bit it wouldn't be loaded otherwise!
 }
 # }}}
 # generate {{{

@@ -1,4 +1,4 @@
-# $Id: 07_basic.t,v 1.2 2005/03/30 15:39:24 jettero Exp $
+# $Id: 07_basic.t,v 1.3 2005/03/30 20:00:51 jettero Exp $
 
 use strict;
 use Test;
@@ -14,6 +14,8 @@ my $map = new Games::RolePlay::MapGen({bounding_box => join("x", $x, $y) });
 $map->set_generator("Games::RolePlay::MapGen::Generator::Basic");
 
 generate $map;
+save_map $map("$$.map");
+print STDERR " saved $$.map\n";
 
 set_visualization $map("Games::RolePlay::MapGen::Visualization::BasicImage");
 visualize $map("map.png");
