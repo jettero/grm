@@ -1,4 +1,4 @@
-# $Id: BasicImage.pm,v 1.18 2005/04/03 16:18:19 jettero Exp $
+# $Id: BasicImage.pm,v 1.19 2005/04/03 17:27:11 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::Visualization::BasicImage;
@@ -122,10 +122,10 @@ sub genmap {
             $gd->line( $Xp, $yp => $Xp, $Yp, $wall_color );
             $gd->line( $xp, $yp => $xp, $Yp, $wall_color );
 
-            $gd->line( $xp+$L, $yp     => $Xp-$L, $yp,    $open_color ) if $t->{od}{n};
-            $gd->line( $xp+$L, $Yp     => $Xp-$L, $Yp,    $open_color ) if $t->{od}{s};
-            $gd->line( $Xp,    $yp+$L, => $Xp,    $Yp-$L, $open_color ) if $t->{od}{e};
-            $gd->line( $xp,    $yp+$L, => $xp,    $Yp-$L, $open_color ) if $t->{od}{w};
+            $gd->line( $xp+$L, $yp     => $Xp-$L, $yp,    $open_color ) if $t->{od}{n} == 1;
+            $gd->line( $xp+$L, $Yp     => $Xp-$L, $Yp,    $open_color ) if $t->{od}{s} == 1;
+            $gd->line( $Xp,    $yp+$L, => $Xp,    $Yp-$L, $open_color ) if $t->{od}{e} == 1;
+            $gd->line( $xp,    $yp+$L, => $xp,    $Yp-$L, $open_color ) if $t->{od}{w} == 1;
 
             if( $t->{od}{n} and $t->{od}{w} ) {
                 if( $t->{nb}{n}{od}{w} and $t->{nb}{w}{od}{n} ) {
