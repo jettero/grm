@@ -1,5 +1,5 @@
 #!/usr/bin/perl -Iblib/lib
-# $Id: go.pl,v 1.11 2005/04/04 15:50:01 jettero Exp $
+# $Id: go.pl,v 1.12 2005/04/04 17:23:59 jettero Exp $
 # vi:tw=0:
 
 BEGIN { system("make || (perl Makefile.PL && make)") == 0 or die }
@@ -10,16 +10,18 @@ use Games::RolePlay::MapGen;
   my $map = new Games::RolePlay::MapGen({
       cell_size=>
           # "20x20", 
-          "30x30", 
+          # "30x30", 
+          "24x32", 
           # "80x80", 
+
       num_rooms=>
           # "70d4", 
-          "3d8", 
-          # "2d4", 
+          # "3d8", 
+          "2d4", 
 
       bounding_box => 
           # "3x3"
-          "12x12"
+          "15x15"
           # "30x30"
           # "63x22"
           # "50x37"
@@ -27,17 +29,18 @@ use Games::RolePlay::MapGen;
   }); 
 
   add_generator_plugin $map "BasicDoors";
-  # set_exporter $map "BasicImage";
 
   generate $map; 
-  # export   $map "map.png";
   export   $map "map.txt";
   save_map $map "map.map";
 
+  set_exporter $map "BasicImage";
+  export       $map "map.png";
+
+system("xv -geometry +0+0 map.png &") == 0 or die;
+
 # system("pngcrush map.png o.png && mv o.png map.png") == 0 or die;
 # system("chmod 0644 map.png") == 0 or die;
-
-# system("xv -geometry +0+0 map.png &") == 0 or die;
 # system("scp -Cp map.png voltar.org:tmp/") == 0 or die;
 
 system("cat map.txt") == 0 or die;

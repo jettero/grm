@@ -1,4 +1,4 @@
-# $Id: Text.pm,v 1.16 2005/04/04 15:47:46 jettero Exp $
+# $Id: Text.pm,v 1.17 2005/04/04 17:23:59 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::Exporter::Text;
@@ -38,6 +38,7 @@ sub go {
     return $map;
 }
 # }}}
+# _show_by_od {{{
 sub _show_by_od {
     my $this = shift;
     my $tile = shift;
@@ -49,8 +50,8 @@ sub _show_by_od {
 
     } elsif( $od ) {
         # A door!
-        my $color = ( ($od->{locked} and $od->{stuck}) ? "[35m" : $od->{locked} ? "[31m" : $od->{stuck} ? "[m" : "" );
-        my $reset = ($color ? "[m" : "");
+        my $color = ( ($od->{locked} and $od->{stuck}) ? "[35m" : $od->{locked} ? "[31m" : $od->{stuck} ? "[m" : "[33m" );
+        my $reset = "[m";
 
         if( $od->{secret} ) {
             my $wall = {n=>"-", s=>"-", e=>"|", w=>"|"}->{$dir};
@@ -67,6 +68,7 @@ sub _show_by_od {
 
     return "?"; # this should be visually borked looking.
 }
+# }}}
 # genmap {{{
 sub genmap {
     my $this = shift;
@@ -98,11 +100,11 @@ sub genmap {
             my $tile = $m->[$i][$j];
 
             if( my $type = $tile->{type} ) {
-                $map .= ($tile->{od}{n} ? "  " : " -");
+                $map .= " " . $this->_show_by_od($tile, "n");
                 $map .= " " if $j == $jend;
 
             } elsif( $above[$j] ) {
-                $map .= ($above[$j]->{od}{s} ? "  " : " -");
+                $map .= " " . $this->_show_by_od($above[$j], "s");
                 $map .= " " if $j == $jend;
 
             } else {
@@ -115,12 +117,12 @@ sub genmap {
             my $tile  = $m->[$i][$j];
 
             if( my $type = $tile->{type} ) {
-                $map .= ($tile->{od}{w} ? " ." : "|.");
-                $map .= ($tile->{od}{e} ? " "  : "|" ) if $j == $jend;
+                $map .= $this->_show_by_od($tile, "w") . ".";
+                $map .= $this->_show_by_od($tile, "e") if $j == $jend;
                 $above[$j] = $tile;
 
             } elsif( $j>0 and $above[$j-1] ) {
-                $map .= ($above[$j-1]->{od}{e} ? "  " : "| ");
+                $map .= $this->_show_by_od($above[$j-1], "e") . " ";
                 $map .= " " if $j == $jend;
                 $above[$j] = undef;
 
@@ -137,11 +139,11 @@ sub genmap {
                 my $tile  = $m->[$i][$j];
 
                 if( my $type = $tile->{type} ) {
-                    $map .= ($tile->{od}{s} ? "  " : " -");
+                    $map .= " " . $this->_show_by_od($tile, "s");
                     $map .= " " if $j == $jend;
 
                 } elsif( $above[$j] ) {
-                    $map .= ($above[$j]->{od}{s} ? "  " : " -");
+                    $map .= " " . $this->_show_by_od($above[$j], "s");
                     $map .= " " if $j == $jend;
 
                 } else {

@@ -1,7 +1,7 @@
 
 - door dropper...
-  + add locked/stuck status
-  + finish shifting the doors animations off the doors/walls
+  + add locked/stuck status to the GD exporter
+  + consider a double-door rare-ifier
 
 - bug??!?! Sometimes the crosshair-in-room-remover removes crosshairs from walls... find this
 
