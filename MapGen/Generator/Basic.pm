@@ -1,4 +1,4 @@
-# $Id: Basic.pm,v 1.7 2005/03/21 12:07:56 jettero Exp $
+# $Id: Basic.pm,v 1.8 2005/03/21 12:09:33 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::Generator::Basic;
@@ -46,7 +46,6 @@ sub _gen_room_size {
 
     my ($xm, $ym) = split /x/, $opts->{min_size};
     my ($xM, $yM) = split /x/, $opts->{max_size};
-
 
     return (
         int range($xm, $xM),
