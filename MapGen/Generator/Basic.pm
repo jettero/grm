@@ -1,4 +1,4 @@
-# $Id: Basic.pm,v 1.24 2005/03/25 19:41:33 jettero Exp $
+# $Id: Basic.pm,v 1.25 2005/03/25 19:58:39 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::Generator::Basic;
@@ -29,7 +29,7 @@ sub _remove_deadends {
             my @togo = grep { !$tile->{od}{$_} } @dirs;
             my $dir  = &choice(@togo);
 
-            TRY_THIS_NEX: 
+            TRY_THIS_DIR_INSTEAD: 
             if( my $nex = $tile->{nb}{$dir} ) {
 
                 $tile->{od}{$dir} = $nex->{od}{$opp{$dir}} = 1;
@@ -53,12 +53,12 @@ sub _remove_deadends {
 
             } else {
                 $tile->{_bud}{$dir} = 1;
-                @togo = grep { !$tile->{od}{$_} and !$tile->{_bud}{$dir} } @dirs;
+                @togo = grep { !$tile->{od}{$_} and !$tile->{_bud}{$_} } @dirs;
                 $dir  = &choice(@togo);
 
                 die "FATAL: couldn't figure out how to un-dead this end..." unless $dir;
 
-                goto TRY_THIS_NEX;
+                goto TRY_THIS_DIR_INSTEAD;
             }
         }
     }
