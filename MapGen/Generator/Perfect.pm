@@ -1,4 +1,4 @@
-# $Id: Perfect.pm,v 1.2 2005/03/24 18:55:10 jettero Exp $
+# $Id: Perfect.pm,v 1.3 2005/03/25 17:01:33 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::Generator::Perfect;
@@ -52,20 +52,25 @@ sub _generate_perfect_maze {
     my $tiles   = $opts->{y_size} * $opts->{x_size};
     my @dirs    = (qw(n s e w));
     my %opp     = ( n=>"s", s=>"n", e=>"w", w=>"e" );
-    my $dir     = &choice(@dirs);
-    my @togo    = grep {$_ ne $dir} @dirs;
     my $cur     = &choice(map(@$_, @$map));      
+    my @togo    = @dirs;
+    my $dir     = &choice(@togo);
     my @visited = ( $cur );
 
     $cur->{type} = "corridor";
 
-    while( @visited < $tiles ) {
+    # open DEBUG, ">debug.log" or die $!;
+
+    for(;;) {
         my $nex = $cur->{nb}{$dir};
 
-        # my $show = sub { my $n = shift; if( $n ) { return sprintf('(%2d, %2d)', $n->{x}, $n->{y}) } else { return "undef   " } };
-        # warn "\$cur = " . $show->($cur) . " \$nex = " . $show->($nex);
+        my $show = sub { my $n = shift; sprintf '(%2d, %2d)', $n->{x}, $n->{y} };
+
+        # printf DEBUG '@visited=%3d; $cur=%s; $nex=%s;%s', int @visited, $show->($cur), $show->($nex);
 
         if( $nex and not $nex->{visited} ) {
+            # print DEBUG " NEXT";
+
             $cur->{od}{$dir} = 1;
 
             $cur = $nex;
@@ -75,24 +80,44 @@ sub _generate_perfect_maze {
             $cur->{od}{$opp{$dir}} = 1;
             $cur->{type} = 'corridor';
 
-            $dir  = &choice(@dirs) if &roll(2, 6) == 11; # we usually go the same way, unless we get a craps...
-            @togo = grep {$_ ne $dir} @dirs;             # whatever, redo the @todo (ignoring the obvious way-we-came)
+            @togo = grep { !$cur->{od}{$_} and !$cur->{_pud}{$_} } @dirs;
+            $dir  = &choice(@togo) if &roll(1, 100) > $opts->{same_way_percent};
+            # $opts->{same_way_percent} of the time, we won't change the direction
 
-        } else {
-            if( @togo ) {
-                $dir  = &choice(@togo);
-                @togo = grep {$_ ne $dir} @togo;
+        } elsif( @togo ) {
+            # print DEBUG " TOGO";
+
+            $cur->{_pud}{$dir} = 1; # perfect's used dir
+
+            # $opts->{same_node_percent} of the time, we try to use the same node
+            if( @visited>1 and (&roll(1, 100) > $opts->{same_node_percent}) ) {
+                # print DEBUG " SAME";
+                # Pick a new node with a random direction that makes sense.
+                $cur  = &choice(@visited);
+                @togo = grep { !$cur->{od}{$_} and !$cur->{_pud}{$_} } @dirs;
+                $dir  = &choice(@togo); # whenever we switch nodes, we pick a random direction though
 
             } else {
-                # This node is so boring, we don't want to accidentally try it again
-                @visited = grep {$_ != $cur} @visited;
-
-                last unless @visited;
-
-                $cur  = &choice(@visited);
-                @togo = @dirs;
+                # print DEBUG " DIFF";
+                # Try a different direction at this same node.
+                @togo = grep { !$cur->{od}{$_} and !$cur->{_pud}{$_} } @dirs;
+                $dir  = &choice(@togo);
             }
+
+        } else {
+            # print DEBUG " DULL";
+            # This node is so boring, we don't want to accidentally try it again
+            @visited = grep {$_ != $cur} @visited;
+
+            last unless @visited;
+
+            # Pick a new node with a random direction that makes sense.
+            $cur  = &choice(@visited);
+            @togo = grep { !$cur->{od}{$_} and !$cur->{_pud}{$_} } @dirs;
+            $dir  = &choice(@togo);
         }
+
+        # print DEBUG "\n";
     }
 
     # }}}

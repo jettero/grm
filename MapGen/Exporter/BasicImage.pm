@@ -1,4 +1,4 @@
-# $Id: BasicImage.pm,v 1.5 2005/03/25 13:34:31 jettero Exp $
+# $Id: BasicImage.pm,v 1.6 2005/03/25 17:01:33 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::Visualization::BasicImage;
@@ -64,9 +64,9 @@ sub _genmap {
     my $white = $gd->colorAllocate(255, 255, 255);
     my $black = $gd->colorAllocate(  0,   0,   0);
     my $grey  = $gd->colorAllocate(240, 240, 240);
-    my $dgrey = $gd->colorAllocate(150, 150, 150);
+    my $dgrey = $gd->colorAllocate( 80,  80,  80);
     my $blue  = $gd->colorAllocate(  0,   0, 190);
-    my $B     = 3; # the border around the filled rectangles for empty tiles
+    my $B     = 1; # the border around the filled rectangles for empty tiles
 
     $gd->interlaced('true');
 
@@ -89,9 +89,9 @@ sub _genmap {
                 $gd->filledRectangle( $xp+$B, $yp+$B => $Xp-$B, $Yp-$B, $dgrey );
             }
 
-            if( $t->{DEBUG_nex} ) {
-                $gd->filledRectangle( $xp+$B, $yp+$B => $Xp-$B, $Yp-$B, $blue );
-            }
+            # if( $t->{DEBUG_nex} ) {
+                # $gd->filledRectangle( $xp+$B, $yp+$B => $Xp-$B, $Yp-$B, $blue );
+            # }
         }
     }
 
