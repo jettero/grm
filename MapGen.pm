@@ -1,4 +1,4 @@
-# $Id: MapGen.pm,v 1.27 2005/03/25 21:19:45 jettero Exp $
+# $Id: MapGen.pm,v 1.29 2005/03/26 20:51:30 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::_group;
@@ -19,7 +19,7 @@ use strict;
 use AutoLoader;
 use Carp;
 
-our $VERSION = "0.13";
+our $VERSION = "0.14";
 our $AUTOLOAD;
 
 our %known_opts = (
@@ -28,7 +28,10 @@ our %known_opts = (
     bounding_box           => "50x50",
     tile_size              => "3 ft",
     cell_size              => "20x20",
+
     num_rooms              => "1d4+1",
+    min_room_size          => "2x2",
+    max_room_size          => "7x7",
 
     sparseness             => 10,
           same_way_percent => 90,
