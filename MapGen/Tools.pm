@@ -1,4 +1,4 @@
-# $Id: Tools.pm,v 1.14 2005/03/30 15:39:24 jettero Exp $
+# $Id: Tools.pm,v 1.15 2005/03/30 16:56:04 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 # package ::_interconnected_map {{{
@@ -9,10 +9,9 @@ use Carp;
 
 1;
 
-# new {{{
-sub new {
-    my $class = shift;
-    my $map   = shift;
+# interconnect_map {{{
+sub interconnect_map {
+    my $map = shift;
 
     # This interconnected array stuff is _REALLY_ handy, but it needs to be cleaned up, so it gets it's own class
 
@@ -26,12 +25,10 @@ sub new {
             $map->[$i][$j]->{nb}{w} = $map->[$i][$j-1] unless $j == 0;
         }
     }
-
-    return bless $map, $class;
 }
 # }}}
-# DESTROY {{{
-sub DESTROY {
+# disconnect_map {{{
+sub disconnect_map {
     my $map = shift;
 
     for my $i (0 .. $#$map) {
@@ -57,6 +54,25 @@ sub DESTROY {
     # search for "Two-Phased" in the perlobj man page.
 }
 # }}}
+# new {{{
+sub new {
+    my $class = shift;
+    my $arg   = shift;
+    my $map   = bless $arg, $class;
+
+    $map->interconnect_map; # also used by save_map()
+
+    return $map;
+}
+# }}}
+# DESTROY {{{
+sub DESTROY {
+    my $map = shift;
+
+    $map->disconnect_map; # also used by save_map()
+}
+# }}}
+
 # }}}
 # package ::_group; {{{
 package Games::RolePlay::MapGen::_group;

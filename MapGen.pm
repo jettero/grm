@@ -1,4 +1,4 @@
-# $Id: MapGen.pm,v 1.39 2005/03/30 16:56:04 jettero Exp $
+# $Id: MapGen.pm,v 1.40 2005/03/30 16:56:11 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen;
@@ -8,7 +8,7 @@ use AutoLoader;
 use Carp;
 use Data::Dumper; $Data::Dumper::Indent = 1; $Data::Dumper::SortKeys = 1;
 
-our $VERSION = "0.18";
+our $VERSION = "0.19";
 our $AUTOLOAD;
 
 # known_opts {{{

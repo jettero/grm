@@ -1,4 +1,4 @@
-# $Id: Perfect.pm,v 1.7 2005/03/25 21:19:12 jettero Exp $
+# $Id: Perfect.pm,v 1.8 2005/03/30 16:56:04 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::Generator::Perfect;
@@ -105,6 +105,8 @@ sub generate_perfect_maze {
 
         # print DEBUG "\n";
     }
+
+    delete $_->{_pud} for (map(@$_, @$map))
 
 }
 # }}}

@@ -1,3 +1,6 @@
+0.19:  Wed Mar 30 11:56:07 EST 2005
+   - jettero added save_load and appropriate tests
+
 0.18:  Wed Mar 30 10:39:38 EST 2005
    - jettero improved the irange tests... it was behaving
      statistically stupidly and the tests missed it
