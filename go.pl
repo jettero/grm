@@ -1,5 +1,5 @@
 #!/usr/bin/perl -Iblib/lib
-# $Id: go.pl,v 1.13 2005/04/05 13:09:11 jettero Exp $
+# $Id: go.pl,v 1.14 2005/04/05 15:05:21 jettero Exp $
 # vi:tw=0:
 
 BEGIN { system("make || (perl Makefile.PL && make)") == 0 or die }
@@ -46,7 +46,7 @@ use Games::RolePlay::MapGen;
 # system("scp -Cp map.png voltar.org:tmp/") == 0 or die;
 
 # system("cat map.txt") == 0 or die;
-system("cat map.xml") == 0 or die;
+system("cat map.xml | less -eS") == 0 or die;
 
 
 __END__

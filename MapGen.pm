@@ -1,4 +1,4 @@
-# $Id: MapGen.pm,v 1.55 2005/04/05 13:09:11 jettero Exp $
+# $Id: MapGen.pm,v 1.56 2005/04/05 15:05:21 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen;
@@ -157,6 +157,7 @@ sub save_map {
     my @keys = keys %$this;
 
     open _SAVE, ">$filename" or die "couldn't open $filename for write: $!";
+    print _SAVE "#!/usr/bin/perl\n\n";
     print _SAVE Data::Dumper->Dump([map($this->{$_}, @keys)], [map("\$this\-\>{$_}", @keys)]);
     close _SAVE;
 
