@@ -1,3 +1,6 @@
+0.07:  Fri Mar 25 14:41:29 EST 2005
+   - jettero split up the generator further and added the sparseness code
+
 0.06:  Thu Mar 24 11:50:57 EST 2005
    - jettero started a GD visualization object
 
