@@ -3,4 +3,3 @@ MapGen.pm
 META.yml
 README
 Makefile.PL
-t/00_load.t

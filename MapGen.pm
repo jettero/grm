@@ -1,5 +1,5 @@
-# $Id: MapGen.pm,v 1.2 2005/03/16 15:46:00 jettero Exp $
-# vi:tw=0:
+# $Id: MapGen.pm,v 1.1 2005/03/16 15:45:48 jettero Exp $
+# vi:tw=75:
 
 package Games::RolePlay::MapGen;
 
