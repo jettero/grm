@@ -1,4 +1,4 @@
-# $Id: BasicImage.pm,v 1.10 2005/03/28 13:57:58 jettero Exp $
+# $Id: BasicImage.pm,v 1.11 2005/03/28 21:30:34 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::Visualization::BasicImage;
@@ -99,8 +99,8 @@ sub genmap {
 
             if( $t->{od}{n} and $t->{od}{w} ) {
                 if( $t->{nb}{n}{od}{w} and $t->{nb}{w}{od}{n} ) {
-                    $gd->line( $xp-$L, $yp    => $xp+$L, $yp,    $grey );
-                    $gd->line( $xp,    $yp-$L => $xp,    $yp+$L, $grey );
+                    $gd->line( $xp-$L, $yp    => $xp+$L, $yp,    $white ); # $grey );
+                    $gd->line( $xp,    $yp-$L => $xp,    $yp+$L, $white ); # $grey );
                 }
             }
 
