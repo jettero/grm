@@ -1,4 +1,4 @@
-# $Id: BasicImage.pm,v 1.2 2005/03/24 18:35:48 jettero Exp $
+# $Id: BasicImage.pm,v 1.3 2005/03/24 20:50:08 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::Visualization::BasicImage;
@@ -60,7 +60,7 @@ sub _genmap {
 
     $this->_gen_cell_size($opts);
 
-    my $gd    = new GD::Image(1+($opts->{x_size} * $#{$m->[0]}), 1+($opts->{y_size} * $#$m));
+    my $gd    = new GD::Image(1+($opts->{x_size} * @{$m->[0]}), 1+($opts->{y_size} * @$m));
     my $white = $gd->colorAllocate(255, 255, 255);
     my $black = $gd->colorAllocate(  0,   0,   0);
     my $grey  = $gd->colorAllocate(220, 220, 220);
@@ -75,12 +75,10 @@ sub _genmap {
             my $I = $i+1;
             my $J = $j+1;
 
-            $gd->rectangle( $j*$opts->{x_size}, $i*$opts->{y_size} => $J*$opts->{x_size}, $I*$opts->{y_size}, $grey);
-
-            $gd->line( $j*$opts->{x_size}, $i*$opts->{y_size} => $J*$opts->{x_size}, $i*$opts->{y_size}, $black) unless $t->{od}{n};
-            $gd->line( $j*$opts->{x_size}, $I*$opts->{y_size} => $J*$opts->{x_size}, $I*$opts->{y_size}, $black) unless $t->{od}{s};
-            $gd->line( $J*$opts->{x_size}, $i*$opts->{y_size} => $J*$opts->{x_size}, $I*$opts->{y_size}, $black) unless $t->{od}{e};
-            $gd->line( $j*$opts->{x_size}, $i*$opts->{y_size} => $j*$opts->{x_size}, $I*$opts->{y_size}, $black) unless $t->{od}{w};
+            $gd->line( $j*$opts->{x_size}, $i*$opts->{y_size} => $J*$opts->{x_size}, $i*$opts->{y_size}, ($t->{od}{n} ? $grey : $black) );
+            $gd->line( $j*$opts->{x_size}, $I*$opts->{y_size} => $J*$opts->{x_size}, $I*$opts->{y_size}, ($t->{od}{s} ? $grey : $black) );
+            $gd->line( $J*$opts->{x_size}, $i*$opts->{y_size} => $J*$opts->{x_size}, $I*$opts->{y_size}, ($t->{od}{e} ? $grey : $black) );
+            $gd->line( $j*$opts->{x_size}, $i*$opts->{y_size} => $j*$opts->{x_size}, $I*$opts->{y_size}, ($t->{od}{w} ? $grey : $black) );
         }
     }
 

@@ -1,4 +1,4 @@
-# $Id: MapGen.pm,v 1.17 2005/03/24 18:35:48 jettero Exp $
+# $Id: MapGen.pm,v 1.18 2005/03/24 20:50:08 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::_group;
@@ -61,6 +61,8 @@ sub check_opts {
     for my $k ( keys %$this ) {
         unless( exists $known_opts{$k} ) {
             next if $k eq "objs";
+            next if $k eq "_the_map";
+            next if $k eq "_the_groups";
 
             push @e, "unrecognized option: '$k'";
         }
