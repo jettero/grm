@@ -1,5 +1,5 @@
 #!/usr/bin/perl -Iblib/lib
-# $Id: go.pl,v 1.9 2005/04/04 11:05:52 jettero Exp $
+# $Id: go.pl,v 1.10 2005/04/04 15:17:19 jettero Exp $
 # vi:tw=0:
 
 BEGIN { system("make || (perl Makefile.PL && make)") == 0 or die }
@@ -27,10 +27,11 @@ use Games::RolePlay::MapGen;
   }); 
 
   add_generator_plugin $map "BasicDoors";
-  set_visualization    $map "BasicImage";
+  set_exporter $map "BasicImage";
 
-  generate  $map; 
-  visualize $map "map.png";
+  generate $map; 
+  export   $map "map.png";
+  save_map $map "map.map";
 
 system("pngcrush map.png o.png && mv o.png map.png") == 0 or die;
 system("chmod 0644 map.png") == 0 or die;
@@ -54,7 +55,7 @@ make || exit 1
 
 # perl -d:DProf -Iblib/lib -MGames::RolePlay::MapGen -e \
 # 'my $map = new Games::RolePlay::MapGen({num_rooms=>"3d8", bounding_box => "63x22"}); 
-# generate $map; visualize $map("map.txt");' || exit 1
+# generate $map; export $map("map.txt");' || exit 1
 # 
 # rm -vf script
 # mkfifo script

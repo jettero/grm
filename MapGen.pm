@@ -1,4 +1,4 @@
-# $Id: MapGen.pm,v 1.53 2005/04/02 23:47:06 jettero Exp $
+# $Id: MapGen.pm,v 1.54 2005/04/04 15:17:19 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen;
@@ -8,7 +8,7 @@ use AutoLoader;
 use Carp;
 use Data::Dumper; $Data::Dumper::Indent = 1; $Data::Dumper::SortKeys = 1;
 
-our $VERSION = "0.25";
+our $VERSION = "0.26";
 our $AUTOLOAD;
 
 our %opp = (n=>"s", e=>"w", s=>"n", w=>"e");
@@ -16,7 +16,7 @@ our %opp = (n=>"s", e=>"w", s=>"n", w=>"e");
 # known_opts {{{
 our %known_opts = (
     generator              => "Basic",
-    visualization          => "Text",
+    exporter               => "Text",
     bounding_box           => "50x50",
     tile_size              => "3 ft",
     cell_size              => "20x20",
@@ -42,7 +42,7 @@ sub _check_mod_path  {
 
     my $found = 0;
     my $mod;
-    for my $toadd ("", "Games/RolePlay/MapGen/Generator/", "Games/RolePlay/MapGen/GeneratorPlugin/", "Games/RolePlay/MapGen/Visualization/", "Games/RolePlay/MapGen/VisualizationPlugin/") {
+    for my $toadd ("", "Games/RolePlay/MapGen/Generator/", "Games/RolePlay/MapGen/GeneratorPlugin/", "Games/RolePlay/MapGen/Exporter/", "Games/RolePlay/MapGen/ExporterPlugin/") {
         $mod = "$toadd$omod";
         for my $dir (@INC) {
             # warn "trying $dir/$mod.pm" if $dir =~ m/blib/ and $mod =~ m/Text/;
@@ -91,7 +91,7 @@ sub AUTOLOAD {
     my $this = shift;
     my $sub  = $AUTOLOAD;
 
-    if( $sub =~ m/MapGen\:\:set_(generator|visualization)$/ ) {
+    if( $sub =~ m/MapGen\:\:set_(generator|exporter)$/ ) {
         my $type = $1;
         my $modu = shift;
 
@@ -101,7 +101,7 @@ sub AUTOLOAD {
 
         return;
 
-    } elsif( $sub =~ m/MapGen\:\:add_(generator|visualization)_plugin$/ ) {
+    } elsif( $sub =~ m/MapGen\:\:add_(generator|exporter)_plugin$/ ) {
         my $type = $1;
         my $plug = shift;
         my $newn;
@@ -121,7 +121,7 @@ sub AUTOLOAD {
 
         $this->{$n} = shift;
 
-        for my $o (qw(generator visualization)) {
+        for my $o (qw(generator exporter)) {
             if( my $oo = $this->{objs}{$o} ) {
                 $oo->{o}{$n} = $this->{$n};
             }
@@ -212,43 +212,43 @@ sub generate {
     $this->{objs}{generator} = $obj;
     $err = 1;
 
-    $this->_check_opts; # plugins, generators and visualizations can add default options
+    $this->_check_opts; # plugins, generators and exporters can add default options
 
     goto __MADE_GEN_OBJ;
 }
 # }}}
-# visualize {{{
-sub visualize {
+# export {{{
+sub export {
     my $this = shift;
     my $err;
 
     __MADE_VIS_OBJ:
-    if( my $vis = $this->{objs}{visualization} ) {
+    if( my $vis = $this->{objs}{exporter} ) {
 
         $vis->go( _the_map => $this->{_the_map}, _the_groups => $this->{_the_groups}, (@_==1 ? (fname=>$_[0]) : @_) );
 
         return;
 
     } else {
-        die "problem creating new visualization object" if $err;
+        die "problem creating new exporter object" if $err;
     }
 
-    eval qq( require $this->{visualization} );
-    croak "ERROR locating visualization module:\n\t$@\n " if $@;
+    eval qq( require $this->{exporter} );
+    croak "ERROR locating exporter module:\n\t$@\n " if $@;
 
     my $obj;
     my @opts = map(($_=>$this->{$_}), grep {defined $this->{$_} and $_ ne "objs"  and $_ ne "plugins" } keys %$this);
 
-    eval qq( \$obj = new $this->{visualization} (\@opts); );
+    eval qq( \$obj = new $this->{exporter} (\@opts); );
     if( $@ ) {
-        die   "ERROR generating visualization:\n\t$@\n " if $@ =~ m/ERROR/;
-        croak "ERROR generating visualization:\n\t$@\n " if $@;
+        die   "ERROR generating exporter:\n\t$@\n " if $@ =~ m/ERROR/;
+        croak "ERROR generating exporter:\n\t$@\n " if $@;
     }
 
-    $this->{objs}{visualization} = $obj;
+    $this->{objs}{exporter} = $obj;
     $err = 1;
 
-    $this->_check_opts; # plugins, generators and visualizations can add default options
+    $this->_check_opts; # plugins, generators and exporters can add default options
 
     goto __MADE_VIS_OBJ;
 }
@@ -269,8 +269,8 @@ Games::RolePlay::MapGen - The base object for generating dungeons and maps
     $map->add_generator_plugin("BasicDoors"); # however, you must add the doors.
     generate $map("map.txt");                 # It'll generate a text map by default.
 
-    $map->set_visualization( "BasicImage" );  # But a graphical map is probably more useful.
-    generate $map("map.png");
+    $map->set_exporter( "BasicImage" );       # But a graphical map is probably more useful.
+    export $map("map.png");
 
 =head1 AUTHOR
 

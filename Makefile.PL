@@ -11,5 +11,5 @@ WriteMakefile(
         # 'Math::Algebra::Symbols' => 0,
     # },
 
-    clean => { FILES => "*.txt *.png *.log *.map" },
+    clean => { FILES => "*.txt *.png *.log *.map *.xml" },
 );

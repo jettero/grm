@@ -5,7 +5,7 @@
 
 - bug??!?! Sometimes the crosshair-in-room-remover removes crosshairs from walls... find this
 
-- xml dumps?
+- xml dumps -- and test.
 - asn.1 dumps?  (why?)
 
 - Move more of the %known_opts to their own objects

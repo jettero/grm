@@ -1,11 +1,11 @@
-# $Id: 05_perfect.t,v 1.4 2005/04/02 17:26:17 jettero Exp $
+# $Id: 05_perfect.t,v 1.5 2005/04/04 15:17:20 jettero Exp $
 
 use strict;
 use Test;
 
 my ($x, $y) = (25, 25);
 
-plan tests => 1 + (5 * $x * $y);
+plan tests => (5 * $x * $y);
 
 use Games::RolePlay::MapGen;
 
@@ -35,12 +35,4 @@ CHECK_OPEN_DIRECTIONS_FOR_SANITY: { # they should really be the same from each d
             if( $right ) { ok( $right->{w}, $here->{e} ) } else { ok(1) }
         }
     }
-}
-
-visualize $map ("map.txt");
-if( -f "map.txt" ) {
-    ok( 1 );
-
-} else {
-    ok( 0 );
 }

@@ -1,7 +1,7 @@
-# $Id: BasicImage.pm,v 1.20 2005/04/03 17:30:12 jettero Exp $
+# $Id: BasicImage.pm,v 1.21 2005/04/04 15:17:19 jettero Exp $
 # vi:tw=0 syntax=perl:
 
-package Games::RolePlay::MapGen::Visualization::BasicImage;
+package Games::RolePlay::MapGen::Exporter::BasicImage;
 
 use strict;
 use Carp;
@@ -271,7 +271,7 @@ __END__
 
 =head1 NAME
 
-Games::RolePlay::MapGen::Visualization::BasicImage - A pure text mapgen visualization.
+Games::RolePlay::MapGen::Exporter::BasicImage - A pure text mapgen exporter.
 
 =head1 SYNOPSIS
 

@@ -1,7 +1,7 @@
-# $Id: Text.pm,v 1.14 2005/03/25 21:19:12 jettero Exp $
+# $Id: Text.pm,v 1.15 2005/04/04 15:17:20 jettero Exp $
 # vi:tw=0 syntax=perl:
 
-package Games::RolePlay::MapGen::Visualization::Text;
+package Games::RolePlay::MapGen::Exporter::Text;
 
 use strict;
 use Carp;
@@ -133,7 +133,7 @@ __END__
 
 =head1 NAME
 
-Games::RolePlay::MapGen::Visualization::Text - A pure text mapgen visualization.
+Games::RolePlay::MapGen::Exporter::Text - A pure text mapgen exporter.
 
 =head1 SYNOPSIS
 
@@ -141,10 +141,10 @@ Games::RolePlay::MapGen::Visualization::Text - A pure text mapgen visualization.
 
     my $map = new Games::RolePlay::MapGen;
     
-    $map->set_visual( "Games::RolePlay::MapGen::Visualization::Text" );
+    $map->set_exporter( "Text" );
 
     generate  $map;
-    visualize $map( "filename.txt" );
+    export    $map( "filename.txt" );
 
 =head1 DESCRIPTION
 
