@@ -1,4 +1,4 @@
-# $Id: Tools.pm,v 1.9 2005/03/24 14:02:24 jettero Exp $
+# $Id: Tools.pm,v 1.10 2005/03/24 16:06:55 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::_group;
@@ -25,24 +25,11 @@ use strict;
 use Carp;
 use base q(Exporter);
 
-our @EXPORT_OK = qw(filter choice roll random irange range str_eval _group _tile);
+our @EXPORT_OK = qw(choice roll random irange range str_eval _group _tile);
 
 1;
 
 # helper functions
-# filter {{{
-sub filter {
-    my $input_ar = shift;
-    my $function = shift;
-    my @a        = ();
-
-    for my $element (@$input_ar) {
-        push @a, $element if $function->($element, @_);
-    }
-
-    return @a;
-}
-# }}}
 # choice {{{
 sub choice {
     return $_[&random(int @_)] || "";
@@ -131,7 +118,7 @@ Games::RolePlay::MapGen::Tools - Some support tools and objects for the mapgen s
 
 =head1 SYNOPSIS
 
-    use Games::RolePlay::MapGen::Tools qw( filter choice roll random range str_eval );
+    use Games::RolePlay::MapGen::Tools qw( choice roll random range str_eval );
 
     my $r1 = roll(1, 20);                   # 1d20
     my $r2 = random(20);                    # 0-20
@@ -141,14 +128,6 @@ Games::RolePlay::MapGen::Tools - Some support tools and objects for the mapgen s
     my $ri = irange(0, 7);                  # An integer between 0 and 7
     my $e  = choice(qw(test this please));  # picks one of test, this, and please at random
     my $v  = str_eval("1d8");               # returns int(roll(1,8)) -- returns undef on parse error
-
-    # filters any elements that don't evaluate to true out of the array. 
-    # any additional arguments would be passed into the filter function...
-    my @a = filter([qw(test this please)], sub { ($_[0] =~ m/^t/ }); # (eg, @a = ("test", "this"))
-    my @a = filter([qw(test this please)], sub { ($_[0] ne $_[1] }, "this"); # (eg, @a = ("test", "please"))
-
-    # In case you were curious, choice and filter are actually from LPC (and probably pike).
-
 
     # This package also exports _group and _tile, which are shortcut functions for new
     # Games::RolePlay::MapGen::_tile and ::_group objects.

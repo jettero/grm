@@ -1,19 +1,13 @@
 
-# $Id: 03_tools.t,v 1.5 2005/03/24 12:30:29 jettero Exp $
+# $Id: 03_tools.t,v 1.6 2005/03/24 16:06:55 jettero Exp $
 
 use strict;
 use Test;
 
-plan tests => 2 + 4 + 8 + 8 + 4 + 4 + (2) + 8 + 604 + 2;
+plan tests => 4 + 8 + 8 + 4 + 4 + (2) + 8 + 604 + 2;
 
-use Games::RolePlay::MapGen::Tools qw(filter choice roll random irange range str_eval _group _tile);
+use Games::RolePlay::MapGen::Tools qw(choice roll random irange range str_eval _group _tile);
 
-# filter 2 {{{
-my @a = filter([qw(test this please)], sub { $_[0] =~ m/^t/ }); 
-ok("@a", "test this"); 
-my @b = filter([qw(test this please)], sub { $_[0] ne $_[1] }, "this"); 
-ok("@b", "test please"); 
-# }}}
 # choice 4 {{{
 my %h = ( 1=>1, 2=>2, 3=>3, 4=>4 );
 alarm 3; # in case it loops, which it shouldn't

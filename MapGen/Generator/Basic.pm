@@ -1,11 +1,11 @@
-# $Id: Basic.pm,v 1.17 2005/03/24 14:26:16 jettero Exp $
+# $Id: Basic.pm,v 1.18 2005/03/24 16:06:55 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::Generator::Basic;
 
 use strict;
 use Carp;
-use Games::RolePlay::MapGen::Tools qw( _group _tile filter str_eval irange choice roll );
+use Games::RolePlay::MapGen::Tools qw( _group _tile str_eval irange choice roll );
 
 1;
 
@@ -66,14 +66,12 @@ sub _gen_bounding_size {
 }
 # }}}
 
-# _genmap {{{
-sub _genmap {
-    my $this   = shift;
-    my $opts   = shift;
-    my @map    = ();
-    my @groups = ();
+# _create_tiles {{{
+sub _create_tiles {
+    my $this = shift;
+    my $opts = shift;
+    my @map  = ();
 
-    # create tiles {{{
     for my $i (0 .. $opts->{y_size}-1) {
         my $a = [];
 
@@ -83,17 +81,26 @@ sub _genmap {
 
         push @map, $a;
     }
-    # }}}
+
+    return @map;
+}
+# }}}
+# _generate_perfect_maze {{{
+sub _generate_perfect_maze {
+    my $this = shift;
+    my $opts = shift;
+    my $map  = shift;
+
     # fully interconnect tiles (to ease perfect maze generation) {{{
-    # This is sloppy and wasteful, but it sure makes the maze alg easier to do.
-    for my $i (0 .. $#map) {
-        my $jend = $#{ $map[$i] };
+    # This may be sloppy and wasteful, but it sure makes the maze alg easier to do.
+    for my $i (0 .. $#$map) {
+        my $jend = $#{ $map->[$i] };
 
         for my $j (0 .. $jend) {
-            $map[$i][$j]->{nb}{s} = $map[$i+1][$j] unless $i == $#map;
-            $map[$i][$j]->{nb}{n} = $map[$i-1][$j] unless $i == 0;
-            $map[$i][$j]->{nb}{e} = $map[$i][$j+1] unless $j == $jend;
-            $map[$i][$j]->{nb}{w} = $map[$i][$j-1] unless $j == 0;
+            $map->[$i][$j]->{nb}{s} = $map->[$i+1][$j] unless $i == $#$map;
+            $map->[$i][$j]->{nb}{n} = $map->[$i-1][$j] unless $i == 0;
+            $map->[$i][$j]->{nb}{e} = $map->[$i][$j+1] unless $j == $jend;
+            $map->[$i][$j]->{nb}{w} = $map->[$i][$j-1] unless $j == 0;
         }
     }
     # }}}
@@ -101,17 +108,19 @@ sub _genmap {
     my $tiles   = $opts->{y_size} * $opts->{x_size};
     my @dirs    = (qw(n s e w));
     my %opp     = ( n=>"s", s=>"n", e=>"w", w=>"e" );
-    my $isnt    = sub { $_[0] ne $_[1] };
     my $dir     = &choice(@dirs);
-    my @togo    = &filter(\@dirs, $isnt, $dir);
-    my $cur     = &choice(map(@$_, @map));      
+    my @togo    = grep {$_ ne $dir} @dirs;
+    my $cur     = &choice(map(@$_, @$map));      
     my @visited = ( $cur );
 
     $cur->{type} = "corridor";
 
     while( @visited < $tiles ) {
         my $nex = $cur->{nb}{$dir};
-         
+
+        # my $show = sub { my $n = shift; if( $n ) { return sprintf('(%2d, %2d)', $n->{x}, $n->{y}) } else { return "undef   " } };
+        # warn "\$cur = " . $show->($cur) . " \$nex = " . $show->($nex);
+
         if( $nex and not $nex->{visited} ) {
             $cur->{od}{$dir} = 1;
 
@@ -123,16 +132,16 @@ sub _genmap {
             $cur->{type} = 'corridor';
 
             $dir  = &choice(@dirs) if &roll(2, 6) == 11; # we usually go the same way, unless we get a craps...
-            @togo = &filter(\@dirs, $isnt, $dir);        # whatever, redo the @todo (ignoring the obvious way-we-came)
+            @togo = grep {$_ ne $dir} @dirs;             # whatever, redo the @todo (ignoring the obvious way-we-came)
 
         } else {
             if( @togo ) {
                 $dir  = &choice(@togo);
-                @togo = &filter(\@togo, $isnt, $dir);
+                @togo = grep {$_ ne $dir} @togo;
 
             } else {
                 # This node is so boring, we don't want to accidentally try it again
-                @visited = &filter(\@visited, $isnt, $cur); 
+                @visited = grep {$_ != $cur} @visited;
 
                 last unless @visited;
 
@@ -142,12 +151,10 @@ sub _genmap {
         }
     }
 
-    close LOG;
-
     # }}}
     # clean-up interconnections {{{
-    for my $i (0 .. $#map) {
-        my $jend = $#{ $map[$i] };
+    for my $i (0 .. $#$map) {
+        my $jend = $#{ $map->[$i] };
 
         for my $j (0 .. $jend) {
             # Destroying the map won't destroy the tiles if they're self
@@ -155,10 +162,22 @@ sub _genmap {
             # global destructor, *whew*; except that each new map generated,
             # until perl exits, would eat up more memory.  
 
-            delete $map[$i][$j]->{n}; # So we have to break the self-refs here.
+            delete $map->[$i][$j]->{n}; # So we have to break the self-refs here.
         }
     }
     # }}}
+
+}
+# }}}
+
+# _genmap {{{
+sub _genmap {
+    my $this   = shift;
+    my $opts   = shift;
+    my @map    = $this->_create_tiles( $opts );
+    my @groups = ();
+
+    $this->_generate_perfect_maze($opts, \@map);
 
     return (\@map, \@groups);
 }

@@ -4,3 +4,4 @@ blib
 Makefile
 *.txt
 maze.log
+tmon.out
