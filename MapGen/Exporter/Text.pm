@@ -1,5 +1,5 @@
-# $Id: Text.pm,v 1.1 2005/03/18 12:31:36 jettero Exp $
-# vi:tw=0:
+# $Id: Text.pm,v 1.2 2005/03/18 18:01:29 jettero Exp $
+# vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::Visualization::Text;
 
@@ -10,9 +10,24 @@ use Carp;
 
 sub new {
     my $class = shift;
-    my $this  = bless {}, $class;
+    my $this  = bless {o => {@_}}, $class;
 
     return $this;
+}
+
+sub go {
+    my $this = shift;
+    my $opts = {@_};
+
+    for my $k (keys %{ $this->{o} }) {
+        $opts->{$k} = $this->{o}{$k} if not exists $opts->{$k};
+    }
+
+    croak "ERROR: fname is a required option for " . ref($this) . "::go()" unless $opts->{fname};
+
+    open _MAP_OUT, ">$opts->{fname}" or die "ERROR: couldn't open $opts->{fname} for write: $!";
+    print _MAP_OUT "supz\n";
+    close _MAP_OUT;
 }
 
 __END__

@@ -10,4 +10,7 @@ WriteMakefile(
         # 'Math::Units'            => 0,
         # 'Math::Algebra::Symbols' => 0,
     # },
+
+
+    clean => { FILES => "*.txt" },
 );

@@ -1,5 +1,5 @@
-# $Id: MapGen.pm,v 1.5 2005/03/18 12:31:36 jettero Exp $
-# vi:tw=0:
+# $Id: MapGen.pm,v 1.6 2005/03/18 18:01:29 jettero Exp $
+# vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen;
 
@@ -11,7 +11,10 @@ our $VERSION = "0.01";
 our $AUTOLOAD;
 
 our %known_opts = (
-    generator => "Games::RolePlay::MapGen::Generator::Basic"
+    generator     => "Games::RolePlay::MapGen::Generator::Basic",
+    visualization => "Games::RolePlay::MapGen::Visualization::Text",
+    bounding_box  => "10x10",
+    cell_size     => "3 ft",
 );
 
 1;
@@ -22,7 +25,10 @@ sub AUTOLOAD {
     my $sub  = $AUTOLOAD;
 
     if( $sub =~ m/MapGen\:\:set_([\w\d\_]+)$/ ) {
+        delete $this->{objs}{$1} if $this->{objs}{$1};
         $this->{$1} = shift;
+
+        croak "ERROR: set_$1() doesn't let you unset a setting.  Value undefined..." unless defined $this->{$1};
 
         if( my $e = $this->check_opts ) { croak $e }
 
@@ -33,13 +39,15 @@ sub AUTOLOAD {
 }
 sub DESTROY {}
 # }}}
-
+# check_opts {{{
 sub check_opts {
     my $this = shift;
     my @e    = ();
 
     for my $k ( keys %$this ) {
         unless( exists $known_opts{$k} ) {
+            next if $k eq "objs";
+
             push @e, "unrecognized option: '$k'";
         }
     }
@@ -47,7 +55,8 @@ sub check_opts {
     return "ERROR:\n\t" . join("\n\t", @e) . "\n" if @e;
     return;
 }
-
+# }}}
+# new {{{
 sub new {
     my $class = shift;
     my @opts  = @_;
@@ -56,17 +65,67 @@ sub new {
 
     if( my $e = $this->check_opts ) { croak $e }
 
+    for my $k (keys %known_opts) {
+        $this->{$k} = $known_opts{$k} unless $this->{$k};
+    }
+
     return $this;
 }
+# }}}
 
+# generate {{{
 sub generate {
     my $this = shift;
+    my $err;
 
-    $this->{generator} = $known_opts{generator} if defined $known_opts{generator};
-    croak "generator is a required option for generate()" unless $this->{generator};
+    __MADE_GEN_OBJ:
+    if( my $gen = $this->{objs}{generator} ) {
 
-    require $this->{generator};
+        $this->{m} = $gen->go( @_ );
+
+        return;
+
+    } else {
+        die "ERROR: problem creating new generator object" if $err;
+    }
+
+    my $obj;
+    my @b    = split /\s*x\s*/, $this->{bounding_box};
+    my @opts = ( x_size => $b[0], y_size => $b[1] );
+
+    eval qq( require $this->{generator}; \$obj = new $this->{generator} (\@opts); );
+    croak "ERROR generating generator:\n\t$@" if $@;
+
+    $this->{objs}{generator} = $obj;
+    $err = 1;
+    goto __MADE_GEN_OBJ;
 }
+# }}}
+# visualize {{{
+sub visualize {
+    my $this = shift;
+    my $err;
+
+    __MADE_VIS_OBJ:
+    if( my $vis = $this->{objs}{visualization} ) {
+
+        $vis->go( _the_map => $this->{m}, (@_==1 ? (fname=>$_[0]) : @_) );
+
+        return;
+
+    } else {
+        die "problem creating new visualization object" if $err;
+    }
+
+    my $obj;
+    eval qq( require $this->{visualization}; \$obj = new $this->{visualization}; );
+    croak "ERROR generating visualization:\n\t$@" if $@;
+
+    $this->{objs}{visualization} = $obj;
+    $err = 1;
+    goto __MADE_VIS_OBJ;
+}
+# }}}
 
 __END__
 # Below is stub documentation for your module. You better edit it!
@@ -79,7 +138,10 @@ Games::RolePlay::MapGen - The base object for generating dungeons and maps
 
     use Games::RolePlay::MapGen;
 
-    my $default_map_object = new Games::RolePlay::MapGen;
+    my $map = new Games::RolePlay::MapGen;
+
+    generate  $map;
+    visualize $map ("map.txt");
 
 =head1 AUTHOR
 
