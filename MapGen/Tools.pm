@@ -1,4 +1,4 @@
-# $Id: Tools.pm,v 1.5 2005/03/23 12:21:20 jettero Exp $
+# $Id: Tools.pm,v 1.6 2005/03/23 15:31:55 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::_group;
@@ -15,7 +15,7 @@ use strict;
 
 1;
 
-sub new { bless { visited=>0, od=>[0,0,0,0] }, shift }
+sub new { bless { v=>0, od=>{n=>0, s=>0, e=>0, w=>0} }, shift }
 
 package Games::RolePlay::MapGen::Tools;
 
@@ -159,10 +159,11 @@ At this time, the ::_tile object is just a blessed hash that the
 ::Generators instantiate at every map location.  There are no required
 variables at this time.
 
-    { visited=>0, od=>[0,0,0,0] }
+    v=>0, 
+    od=>{n=>0, s=>0, e=>0, w=>0}
 
-By default, for convenience, visited is set to 0 and "open directions" is
-set to all zeros.
+Though, for convenience, visited is set to 0 and "open directions" is set to
+all zeros.
 
 =head1 AUTHOR
 
