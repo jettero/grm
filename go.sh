@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Id: go.sh,v 1.24 2005/03/31 11:52:37 jettero Exp $
+# $Id: go.sh,v 1.25 2005/04/02 13:06:35 jettero Exp $
 # vi:tw=0:
 
 make || exit 1
@@ -28,8 +28,9 @@ make || exit 1
        
        # set_generator $map("Perfect");
        
-       generate $map; 
        $map->add_generator_plugin("BasicDoors");
+
+       generate $map; 
        
        set_visualization $map("Games::RolePlay::MapGen::Visualization::BasicImage");
        visualize $map("map.png");
@@ -39,7 +40,7 @@ make || exit 1
        
        ' || exit 1
        
-       xv map.png &
+       # xv map.png &
        # scp map.png voltar.org:tmp/
 
 

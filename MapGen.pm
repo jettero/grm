@@ -1,4 +1,4 @@
-# $Id: MapGen.pm,v 1.44 2005/04/02 12:44:54 jettero Exp $
+# $Id: MapGen.pm,v 1.45 2005/04/02 13:06:35 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen;
@@ -45,7 +45,7 @@ sub _check_mod_path  {
 
     my $found = 0;
     my $mod;
-    for my $toadd ("", "Games/RolePlay/MapGen/Generator/", "Games/RolePlay/MapGen/GeneratorPlugin/", "Games/RolePlay/MapGen/Visualization/") {
+    for my $toadd ("", "Games/RolePlay/MapGen/Generator/", "Games/RolePlay/MapGen/GeneratorPlugin/", "Games/RolePlay/MapGen/Visualization/", "Games/RolePlay/MapGen/VisualizationPlugin/") {
         $mod = "$toadd$omod";
         for my $dir (@INC) {
             # warn "trying $dir/$mod.pm" if $dir =~ m/blib/ and $mod =~ m/Text/;
@@ -79,7 +79,7 @@ sub AUTOLOAD {
 
         return;
 
-    } elsif( $sub =~ m/MapGen\:\:add_(\w+)_plugin$/ ) {
+    } elsif( $sub =~ m/MapGen\:\:add_(generator|visualization)_plugin$/ ) {
         my $type = $1;
         my $plug = shift;
         my $newn;
