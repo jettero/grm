@@ -1,4 +1,4 @@
-# $Id: Basic.pm,v 1.27 2005/03/25 21:25:22 jettero Exp $
+# $Id: Basic.pm,v 1.28 2005/03/25 22:35:22 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::Generator::Basic;
@@ -9,6 +9,18 @@ use base qw(Games::RolePlay::MapGen::Generator::SparseAndLoops);
 use Games::RolePlay::MapGen::Tools qw( choice roll );
 
 1;
+
+sub mark_things_as_pseudo_rooms {
+    my $this = shift;
+    my $map  = shift;
+
+    for my $i (0 .. $#$map) {
+        my $jend = $#{ $map->[$i] };
+
+        for my $j(0 .. $jend) {
+        }
+    }
+}
 
 # genmap {{{
 sub genmap {
