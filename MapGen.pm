@@ -1,4 +1,4 @@
-# $Id: MapGen.pm,v 1.6 2005/03/18 18:01:29 jettero Exp $
+# $Id: MapGen.pm,v 1.7 2005/03/19 12:05:41 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen;
@@ -81,7 +81,7 @@ sub generate {
     __MADE_GEN_OBJ:
     if( my $gen = $this->{objs}{generator} ) {
 
-        $this->{m} = $gen->go( @_ );
+        $this->{_the_map} = $gen->go( @_ );
 
         return;
 
@@ -94,7 +94,10 @@ sub generate {
     my @opts = ( x_size => $b[0], y_size => $b[1] );
 
     eval qq( require $this->{generator}; \$obj = new $this->{generator} (\@opts); );
-    croak "ERROR generating generator:\n\t$@" if $@;
+    if( $@ ) {
+        die   "ERROR generating generator:\n\t$@\n " if $@ =~ m/ERROR/;
+        croak "ERROR generating generator:\n\t$@\n " if $@;
+    }
 
     $this->{objs}{generator} = $obj;
     $err = 1;
@@ -109,7 +112,7 @@ sub visualize {
     __MADE_VIS_OBJ:
     if( my $vis = $this->{objs}{visualization} ) {
 
-        $vis->go( _the_map => $this->{m}, (@_==1 ? (fname=>$_[0]) : @_) );
+        $vis->go( _the_map => $this->{_the_map}, (@_==1 ? (fname=>$_[0]) : @_) );
 
         return;
 
@@ -119,7 +122,10 @@ sub visualize {
 
     my $obj;
     eval qq( require $this->{visualization}; \$obj = new $this->{visualization}; );
-    croak "ERROR generating visualization:\n\t$@" if $@;
+    if( $@ ) {
+        die   "ERROR generating visualization:\n\t$@\n " if $@ =~ m/ERROR/;
+        croak "ERROR generating visualization:\n\t$@\n " if $@;
+    }
 
     $this->{objs}{visualization} = $obj;
     $err = 1;

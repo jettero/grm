@@ -1,0 +1,5 @@
+#!/bin/sh
+# $Id: test,v 1.1 2005/03/19 12:05:41 jettero Exp $
+
+./makeitfromscratch
+make test
