@@ -1,4 +1,4 @@
-# $Id: MapGen.pm,v 1.23 2005/03/25 19:44:53 jettero Exp $
+# $Id: MapGen.pm,v 1.26 2005/03/25 21:19:12 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::_group;
@@ -19,7 +19,7 @@ use strict;
 use AutoLoader;
 use Carp;
 
-our $VERSION = "0.1";
+our $VERSION = "0.12";
 our $AUTOLOAD;
 
 our %known_opts = (
@@ -181,6 +181,15 @@ If you find bugs, please please please let him know. :)
 Actually, let him know if you find it handy at all.
 Half the fun of releasing this stuff is knowing 
 that people use it.
+
+=head1 Special Thanks to Jamis Buck
+
+I emailed Jamis and asked for permission to duplicate the text of portions
+of his "Random Dungeon Design: The Secret Workings of Jamis Buck's Dungeon
+Generator" document (http://www.aarg.net/~minam/dungeon_design.html) and he
+was cool with that.
+
+Really, without his work, I never would have written this module!
 
 =head1 COPYRIGHT
 
