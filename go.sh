@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Id: go.sh,v 1.23 2005/03/31 01:19:00 jettero Exp $
+# $Id: go.sh,v 1.24 2005/03/31 11:52:37 jettero Exp $
 # vi:tw=0:
 
 make || exit 1
@@ -14,21 +14,22 @@ make || exit 1
        'my $map = new Games::RolePlay::MapGen({cell_size=>"20x20", 
 
            num_rooms=>
-           "70d4", 
-           # "3d8", 
+           # "70d4", 
+           "3d8", 
 
            bounding_box => 
            # "3x3"
            # "20x20"
-           # "30x30"
+           "30x30"
            # "63x22"
            # "50x37"
-           "100x100"
+           # "100x100"
        }); 
        
        # set_generator $map("Perfect");
        
        generate $map; 
+       $map->add_generator_plugin("BasicDoors");
        
        set_visualization $map("Games::RolePlay::MapGen::Visualization::BasicImage");
        visualize $map("map.png");
@@ -38,8 +39,8 @@ make || exit 1
        
        ' || exit 1
        
-       # xv map.png &
-       scp map.png voltar.org:tmp/
+       xv map.png &
+       # scp map.png voltar.org:tmp/
 
 
 # perl -Iblib/lib -MExtUtils::Command::MM -e 'test_harness(0, "blib/lib", "blib/arch")' t/05*.t || exit 1

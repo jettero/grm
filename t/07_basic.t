@@ -1,4 +1,4 @@
-# $Id: 07_basic.t,v 1.3 2005/03/30 20:00:51 jettero Exp $
+# $Id: 07_basic.t,v 1.4 2005/03/31 11:52:37 jettero Exp $
 
 use strict;
 use Test;
@@ -14,8 +14,8 @@ my $map = new Games::RolePlay::MapGen({bounding_box => join("x", $x, $y) });
 $map->set_generator("Games::RolePlay::MapGen::Generator::Basic");
 
 generate $map;
-save_map $map("$$.map");
-print STDERR " saved $$.map\n";
+# save_map $map("$$.map");         # these are for when the tests fail and you don't know why ...
+# print STDERR " saved $$.map\n";  # but we don't normally need them.
 
 set_visualization $map("Games::RolePlay::MapGen::Visualization::BasicImage");
 visualize $map("map.png");
