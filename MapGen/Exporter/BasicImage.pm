@@ -1,4 +1,4 @@
-# $Id: BasicImage.pm,v 1.13 2005/04/02 17:26:17 jettero Exp $
+# $Id: BasicImage.pm,v 1.14 2005/04/02 17:40:53 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::Visualization::BasicImage;
@@ -108,6 +108,9 @@ sub genmap {
             for my $dir (qw(n e s w)) {
                 if( ref(my $door = $t->{od}{$dir}) ) {
                     unless( $door->{_drawn}{$dir} ) {
+
+                        use Data::Dumper;
+                        die Dumper( $door );  # these doors are all set to be drawn in their various different ways
 
                         # regular old unlocked, open, unstock, unhid doors
                         $gd->rectangle( $xp+ 3, $yp+ 2 => $Xp- 3, $yp- 2, $black ) if $dir eq "n";

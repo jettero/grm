@@ -1,11 +1,11 @@
-# $Id: BasicDoors.pm,v 1.3 2005/04/02 17:26:17 jettero Exp $
+# $Id: BasicDoors.pm,v 1.4 2005/04/02 17:40:53 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::GeneratorPlugin::BasicDoors;
 
 use strict;
 use Carp;
-use Games::RolePlay::MapGen::Tools qw( roll _door );
+use Games::RolePlay::MapGen::Tools qw( roll _door choice );
 
 $Games::RolePlay::MapGen::known_opts{       "open_room_corridor_door_percent" } = { door => 95, secret =>  2, stuck => 25, locked => 50 };
 $Games::RolePlay::MapGen::known_opts{     "closed_room_corridor_door_percent" } = { door =>  5, secret => 95, stuck => 10, locked => 30 };
@@ -28,6 +28,14 @@ sub doorgen {
     my $opts   = shift;
     my $map    = shift;
     my $groups = shift;
+
+    my $minor_dirs = {
+        n => [qw(e w)],
+        s => [qw(e w)],
+
+        e => [qw(n s)],
+        w => [qw(n s)],
+    };
 
     for my $i ( 0 .. $#$map ) {
         my $jend = $#{ $map->[$i] };
@@ -64,16 +72,15 @@ sub doorgen {
                             my $d2 = sprintf("(%2d, %2d, $dir)", $j, $i);
 
                             print STDERR "$d1 dooring $d2\n";
+                            my $opp = $Games::RolePlay::MapGen::opp{$dir};
 
-                            $t->{od}{$dir} = $n->{od}{$Games::RolePlay::MapGen::opp{$dir}} = &_door(
+                            $t->{od}{$dir} = $n->{od}{$opp} = &_door(
 
-                                # these are the exact defaults...
-                                locked   => 0,
-                                stuck    => 0,
-                                secret   => 0,
+                                (map {$_ => ((roll(1, 10000) <= $chances->{$_}*100) ? 1:0) } qw(locked stuck secret)),
+
                                 open_dir => {
-                                    major => undef,
-                                    minor => undef,
+                                    major => &choice( $dir, $opp ),
+                                    minor => &choice( $dir, $minor_dirs->{$dir} ),
                                 },
 
                             );
