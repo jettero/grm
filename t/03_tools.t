@@ -1,10 +1,10 @@
 
-# $Id: 03_tools.t,v 1.2 2005/03/20 13:26:10 jettero Exp $
+# $Id: 03_tools.t,v 1.3 2005/03/20 16:42:49 jettero Exp $
 
 use strict;
 use Test;
 
-plan tests => 1 + 4 + 8 + 8 + (1) + 8 + 3000 + 2;
+plan tests => 1 + 4 + 8 + 8 + 4 + 4 + (2) + 8 + 600 + 2;
 
 use Games::RolePlay::MapGen::Tools qw(filter choice roll random range str_eval _group _tile);
 
@@ -36,7 +36,7 @@ while( not( $h{1} and $h{2} and $h{3} and $h{4} and $h{5} and $h{6} and $h{7} an
     ok(1);
 }
 # }}}
-# str_eval 8 + (1) {{{
+# str_eval 8 + 4 + 4 + (2) {{{
 %h = ();
 alarm 3; # in case it loops, which it shouldn't
 while( not( $h{1} and $h{2} and $h{3} and $h{4} and $h{5} and $h{6} and $h{7} and $h{8} ) ) {
@@ -49,7 +49,32 @@ while( not( $h{1} and $h{2} and $h{3} and $h{4} and $h{5} and $h{6} and $h{7} an
     $h{$roll} = 1;
     ok(1);
 }
+%h = ();
+alarm 3; # in case it loops, which it shouldn't
+while( not( $h{2} and $h{3} and $h{4} and $h{5} ) ) {
+    my $roll = &str_eval("1d4+1");
+
+    die "holy crap that's not defined!!" unless defined $roll;
+
+    redo if $h{$roll};
+
+    $h{$roll} = 1;
+    ok(1);
+}
+%h = ();
+alarm 3; # in case it loops, which it shouldn't
+while( not( $h{0} and $h{1} and $h{2} and $h{3} ) ) {
+    my $roll = &str_eval("1d4-1");
+
+    die "holy crap that's not defined!!" unless defined $roll;
+
+    redo if $h{$roll};
+
+    $h{$roll} = 1;
+    ok(1);
+}
 ok( &str_eval("test failed"), undef );
+ok( &str_eval(1073), 1073 );
 # }}}
 # random 8 {{{
 %h = ();
@@ -63,8 +88,8 @@ while( not( $h{0} and $h{1} and $h{2} and $h{3} and $h{4} and $h{5} and $h{6} an
     ok(1);
 }
 # }}}
-# range 3000 {{{
-for(1..1000) {
+# range 600 {{{
+for(1..200) {
     my $num = range(37, 99);
     my $cor = range(370, 990, 1);
     my $neg = range(37, 99, -1);

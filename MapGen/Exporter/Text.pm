@@ -1,4 +1,4 @@
-# $Id: Text.pm,v 1.4 2005/03/19 12:16:29 jettero Exp $
+# $Id: Text.pm,v 1.5 2005/03/20 16:42:49 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::Visualization::Text;
@@ -42,19 +42,34 @@ sub go {
 sub _genmap {
     my $this = shift;
     my $opts = shift;
-    my $m    = $this->{_the_map};
+    my $m    = $opts->{_the_map};
     my $map  = "";
+
+    my $debug = "";
+    my %debug = ();
 
     for my $i (0..$#$m) {
         for my $j (0..$#{ $m->[$i] }) {
+            my $group = $m->[$i][$j]{group};
 
-            $map .= ($m->[$i][$j] ? "." : " ");
+            if( $group ) {
+                $map .= substr($group->{type}, 0, 1);
+
+                unless( $debug{$group->{name}} ) {
+                    $debug .= "$group->{name}";
+                    $debug .= " -- $group->{loc_size}\n";
+                    $debug{$group->{name}} = 1;
+                }
+
+            } else {
+                $map .= " ";
+            }
         }
 
         $map .= "\n";
     }
 
-    return $map
+    return $map . "\n$debug";
 }
 
 __END__

@@ -1,4 +1,4 @@
-# $Id: Tools.pm,v 1.2 2005/03/20 13:26:10 jettero Exp $
+# $Id: Tools.pm,v 1.3 2005/03/20 16:42:49 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::_group;
@@ -101,7 +101,10 @@ sub range {
 sub str_eval {
     my $str = shift;
 
+    return int $str if $str =~ m/^\d+$/;
+
     $str =~ s/^\s*(\d+)d(\d+)\s*$/&roll($1, $2)/eg;
+    $str =~ s/^\s*(\d+)d(\d+)\s*([\+\-])\s*(\d+)$/&roll($1, $2) + ($3 eq "+" ? $4 : 0-$4)/eg;
 
     return undef if $str =~ m/\D/;
     return int $str;

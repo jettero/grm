@@ -1,4 +1,4 @@
-# $Id: 05_generate.t,v 1.4 2005/03/20 13:26:10 jettero Exp $
+# $Id: 05_generate.t,v 1.5 2005/03/20 16:42:49 jettero Exp $
 
 use strict;
 use Test;
@@ -8,7 +8,7 @@ plan tests => $tests;
 
 use Games::RolePlay::MapGen;
 
-my $map = new Games::RolePlay::MapGen;
+my $map = new Games::RolePlay::MapGen({bounding_box => "90x35"});
 
 generate  $map;
 visualize $map ("map.txt");

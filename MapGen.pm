@@ -1,4 +1,4 @@
-# $Id: MapGen.pm,v 1.10 2005/03/20 13:26:58 jettero Exp $
+# $Id: MapGen.pm,v 1.11 2005/03/20 16:42:49 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::_group;
@@ -25,8 +25,9 @@ our $AUTOLOAD;
 our %known_opts = (
     generator     => "Games::RolePlay::MapGen::Generator::Basic",
     visualization => "Games::RolePlay::MapGen::Visualization::Text",
-    bounding_box  => "10x10",
+    bounding_box  => "100x100",
     cell_size     => "3 ft",
+    num_rooms     => "1d4+1",
 );
 
 1;
@@ -102,8 +103,7 @@ sub generate {
     }
 
     my $obj;
-    my @b    = split /\s*x\s*/, $this->{bounding_box};
-    my @opts = ( x_size => $b[0], y_size => $b[1] );
+    my @opts = ( bounding_box=>$this->{bounding_box}, cell_size=>$this->{cell_size}, num_rooms=>$this->{num_rooms} );
 
     eval qq( require $this->{generator}; \$obj = new $this->{generator} (\@opts); );
     if( $@ ) {
