@@ -1,4 +1,4 @@
-# $Id: MapGen.pm,v 1.16 2005/03/24 16:50:57 jettero Exp $
+# $Id: MapGen.pm,v 1.17 2005/03/24 18:35:48 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::_group;
@@ -25,8 +25,9 @@ our $AUTOLOAD;
 our %known_opts = (
     generator     => "Games::RolePlay::MapGen::Generator::Basic",
     visualization => "Games::RolePlay::MapGen::Visualization::Text",
-    bounding_box  => "100x100",
-    cell_size     => "3 ft",
+    bounding_box  => "50x50",
+    tile_size     => "3 ft",
+    cell_size     => "20x20",
     num_rooms     => "1d4+1",
 );
 

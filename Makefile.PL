@@ -12,5 +12,5 @@ WriteMakefile(
     # },
 
 
-    clean => { FILES => "*.txt" },
+    clean => { FILES => "*.txt *.png" },
 );

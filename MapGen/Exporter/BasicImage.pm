@@ -1,7 +1,7 @@
-# $Id: BasicImage.pm,v 1.1 2005/03/24 16:50:47 jettero Exp $
+# $Id: BasicImage.pm,v 1.2 2005/03/24 18:35:48 jettero Exp $
 # vi:tw=0 syntax=perl:
 
-package Games::RolePlay::MapGen::Visualization::Text;
+package Games::RolePlay::MapGen::Visualization::BasicImage;
 
 use strict;
 use Carp;
@@ -32,7 +32,7 @@ sub go {
     my $map = $this->_genmap($opts);
     unless( $opts->{fname} eq "-retonly" ) {
         open _MAP_OUT, ">$opts->{fname}" or die "ERROR: couldn't open $opts->{fname} for write: $!";
-        print _MAP_OUT $map;
+        print _MAP_OUT $map->png; # the format should really be an option... at some point
         close _MAP_OUT;
     }
 
@@ -40,14 +40,51 @@ sub go {
 }
 # }}}
 
+# _gen_cell_size {{{
+sub _gen_cell_size {
+    my $this = shift;
+    my $opts = shift;
+
+    if( $opts->{cell_size} ) {
+        die "ERROR: illegal cell size '$opts->{cell_size}'" unless $opts->{cell_size} =~ m/^(\d+)x(\d+)/;
+        $opts->{x_size} = $1;
+        $opts->{y_size} = $2;
+    }
+}
+# }}}
+
 sub _genmap {
     my $this = shift;
     my $opts = shift;
     my $m    = $opts->{_the_map};
-    my $cz   = $opts->{cell_size};
-    my $gd   = new GD::Image($cz*$#{ $m->[0]}, $cz*$#$m);
 
-    return $gd->png;
+    $this->_gen_cell_size($opts);
+
+    my $gd    = new GD::Image(1+($opts->{x_size} * $#{$m->[0]}), 1+($opts->{y_size} * $#$m));
+    my $white = $gd->colorAllocate(255, 255, 255);
+    my $black = $gd->colorAllocate(  0,   0,   0);
+    my $grey  = $gd->colorAllocate(220, 220, 220);
+
+    $gd->interlaced('true');
+
+    for my $i (0..$#$m) {
+        my $jend = $#{$m->[$i]};
+
+        for my $j (0..$jend) {
+            my $t = $m->[$i][$j];
+            my $I = $i+1;
+            my $J = $j+1;
+
+            $gd->rectangle( $j*$opts->{x_size}, $i*$opts->{y_size} => $J*$opts->{x_size}, $I*$opts->{y_size}, $grey);
+
+            $gd->line( $j*$opts->{x_size}, $i*$opts->{y_size} => $J*$opts->{x_size}, $i*$opts->{y_size}, $black) unless $t->{od}{n};
+            $gd->line( $j*$opts->{x_size}, $I*$opts->{y_size} => $J*$opts->{x_size}, $I*$opts->{y_size}, $black) unless $t->{od}{s};
+            $gd->line( $J*$opts->{x_size}, $i*$opts->{y_size} => $J*$opts->{x_size}, $I*$opts->{y_size}, $black) unless $t->{od}{e};
+            $gd->line( $j*$opts->{x_size}, $i*$opts->{y_size} => $j*$opts->{x_size}, $I*$opts->{y_size}, $black) unless $t->{od}{w};
+        }
+    }
+
+    return $gd;
 }
 
 __END__
@@ -55,50 +92,13 @@ __END__
 
 =head1 NAME
 
-Games::RolePlay::MapGen::Visualization::Text - A pure text mapgen visualization.
+Games::RolePlay::MapGen::Visualization::BasicImage - A pure text mapgen visualization.
 
 =head1 SYNOPSIS
 
     use Games::RolePlay::MapGen;
 
     my $map = new Games::RolePlay::MapGen;
-    
-    $map->set_visual( "Games::RolePlay::MapGen::Visualization::Text" );
-
-    generate  $map;
-    visualize $map( "filename.txt" );
-
-=head1 DESCRIPTION
-
-    This is how they'd look in a rogue-like... Unfortunately, this design won't
-    work with a cell based map... It'll have to look more like that below.
-
-                 #.#         #.#  
-                 #.#         #.#  
-    ##############+###########+#########
-    ....................................
-    ##############+###########+#########
-               #.....#       #.#
-               #.....#       #.#
-               #.....#       #.#########
-               #######       #..........
-                             ###########
-
-    Sadly, since every cell has up to 4 exits and adjacent cells aren't necessarilly open to eachother, 
-    the text based map has to have a little more space init.
-
-                 |.|             |.| 
-                   
-                 |.|             |.| 
-    - - - - - - - + - - - - - - - + - - - 
-    . . . . . . . . . . . . . . . . . . .
-    - - - - - - - + - - - - - - - + - - - 
-             |. . . . .|         |.|
-
-             |. . . . .|         |.|
-                                    - - -
-             |. . . . .|         |. . . .
-              - - - - -           - - - - 
 
 =head1 SEE ALSO
 

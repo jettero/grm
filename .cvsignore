@@ -5,3 +5,4 @@ Makefile
 *.txt
 maze.log
 tmon.out
+map.png
