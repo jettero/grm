@@ -1,4 +1,4 @@
-# $Id: Text.pm,v 1.8 2005/03/23 18:47:33 jettero Exp $
+# $Id: Text.pm,v 1.9 2005/03/23 23:35:24 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::Visualization::Text;
@@ -46,19 +46,87 @@ sub _genmap {
     my $m    = $opts->{_the_map};
     my $g    = $opts->{_the_groups};
 
-    my $map  = "";
+    my @above    = ();
+    my $map      = "";
+    my $rooms    = "";
+       $rooms   .= "$_->{name} $_->{loc_size}\n" for (&filter( @$g, sub {$_[0]->{type} eq "room"} ));
 
-    for my $i (0..$#$m) {
-        for my $j (0..$#{ $m->[$i] }) {
-            my $tile  = $m->[$i][$j];
+    for my $i (0 .. $#$m) {
+        my $p     = $1 if $i =~ m/(\d)$/;
+        my $jend  = $#{ $m->[$i] };
 
-            $map .= $tile->{_sym} || " ";
+        unless( $i ) {
+            $map .= "  ";
+            for my $j (0 .. $jend) {
+                my $p = $1 if $j =~ m/(\d)$/;
+
+                $map .= " $p";
+            }
+            $map .= " \n";
         }
 
+        $map .= "  ";
+        for my $j (0 .. $jend) {
+            my $tile = $m->[$i][$j];
+
+            if( my $type = $tile->{type} ) {
+                $map .= ($tile->{od}{n} ? "  " : " -");
+                $map .= " " if $j == $jend;
+
+            } elsif( $above[$j] ) {
+                $map .= ($above[$j]->{od}{s} ? "  " : " -");
+                $map .= " " if $j == $jend;
+
+            } else {
+                $map .= ($j == $jend ? "   " : "  ");
+            }
+        }
+        $map .= "\n$p ";
+
+        for my $j (0 .. $jend) {
+            my $tile  = $m->[$i][$j];
+
+            if( my $type = $tile->{type} ) {
+                $map .= ($tile->{od}{w} ? " ." : "|.");
+                $map .= ($tile->{od}{e} ? " "  : "|" ) if $j == $jend;
+                $above[$j] = $tile;
+
+            } elsif( $above[$j-1] ) {
+                $map .= ($above[$j-1]->{od}{e} ? "  " : "| ");
+                $map .= " " if $j == $jend;
+                $above[$j] = undef;
+
+            } else {
+                $above[$j] = undef;
+                $map .= ($j == $jend ? "   " : "  ");
+            }
+        }
         $map .= "\n";
+
+        if( $i == $#$m ) {
+            $map .= "##";
+            for my $j (0 .. $jend) {
+                my $tile  = $m->[$i][$j];
+
+                if( my $type = $tile->{type} ) {
+                    $map .= ($tile->{od}{s} ? "ab" : "c-");
+                    $map .= "d" if $j == $jend;
+
+                } elsif( $above[$j-1] ) {
+                    $map .= ($above[$j-1]->{od}{e} ? "ef" : "|g");
+                    $map .= "h" if $j == $jend;
+                    $above[$j] = undef;
+
+                } else {
+                    $map .= ($j == $jend ? "ijk" : "lm");
+                }
+            }
+            $map .= "\n";
+        }
+
     }
 
-    return $map;
+    return $map . $rooms;
 }
 
 __END__

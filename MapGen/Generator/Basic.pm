@@ -1,11 +1,11 @@
-# $Id: Basic.pm,v 1.11 2005/03/23 17:46:35 jettero Exp $
+# $Id: Basic.pm,v 1.12 2005/03/23 23:35:24 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::Generator::Basic;
 
 use strict;
 use Carp;
-use Games::RolePlay::MapGen::Tools qw( _group _tile str_eval range );
+use Games::RolePlay::MapGen::Tools qw( _group _tile str_eval irange );
 
 1;
 
@@ -48,8 +48,8 @@ sub _gen_room_size {
     my ($xM, $yM) = split /x/, $opts->{max_size};
 
     return (
-        int range($xm, $xM),
-        int range($ym, $yM),
+        range($xm, $xM),
+        range($ym, $yM),
     );
 }
 # }}}
@@ -76,10 +76,10 @@ sub _genmap {
     my $unvisited = 0;
 
     # create tiles {{{
-    for my $y (1 .. $opts->{y_size}) {
+    for (1 .. $opts->{y_size}) {
         my $a = [];
 
-        for my $x (1 .. $opts->{x_size}) {
+        for (1 .. $opts->{x_size}) {
             push @$a, &_tile;
             $unvisited ++;
         }
@@ -91,17 +91,17 @@ sub _genmap {
     for my $rn (1 .. &str_eval($opts->{num_rooms})) {
         my @size = $this->_gen_room_size( $opts );
 
-        my @min_pos = (1, 1);
-        my @max_pos = ( (($opts->{x_size}-1) - $size[0]), (($opts->{y_size}-1) - $size[1]) );
+        my @min_pos = (0, 0);
+        my @max_pos = ( $opts->{x_size} - $size[0], $opts->{y_size} - $size[1] );
 
         my $redos = $opts->{room_fit_redos} || 100;
         FIND_A_SPOT_FOR_IT: {
-            my @spot = map( int range($min_pos[$_], $max_pos[$_]), 0..1 );
+            my @spot = map( range($min_pos[$_], $max_pos[$_]), 0..1 );
 
             my $no_collision = 1;
             for my $y ($spot[1]..($size[1]-1)+$spot[1]) {
                 for my $x ($spot[0]..($size[0]-1)+$spot[0]) {
-                    if( $map[$y][$x]{group} ) {
+                    if( $map[$y][$x]{type} ) {
                         $no_collision = 0;
                         last;
                     }
@@ -118,9 +118,11 @@ sub _genmap {
 
                 for my $y ($spot[1]..($size[1]-1)+$spot[1]) {
                     for my $x ($spot[0]..($size[0]-1)+$spot[0]) {
-                        $map[$y][$x]->{group}   = $group;
-                        $map[$y][$x]->{visited} = 1;
-                        $map[$y][$x]->{od} = {n=>1, s=>1, e=>1, w=>1}; # open every direction... close edges below
+                        my $tile = $map[$y][$x];
+                        $tile->{group}   = $group;
+                        $tile->{type}    = "room";
+                        $tile->{visited} = 1;
+                        $tile->{od}      = {n=>1, s=>1, e=>1, w=>1}; # open every direction... close edges below
                     }
                 }
 
