@@ -1,4 +1,4 @@
-# $Id: Basic.pm,v 1.6 2005/03/20 16:42:49 jettero Exp $
+# $Id: Basic.pm,v 1.7 2005/03/21 12:07:56 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::Generator::Basic;
@@ -94,8 +94,8 @@ sub _genmap {
             my @spot = map( int range($min_pos[$_], $max_pos[$_]), 0..1 );
 
             my $no_collision = 1;
-            for my $y ($spot[1]..$size[1]+$spot[1]) {
-                for my $x ($spot[0]..$size[0]+$spot[0]) {
+            for my $y ($spot[1]..($size[1]-1)+$spot[1]) {
+                for my $x ($spot[0]..($size[0]-1)+$spot[0]) {
                     if( $map[$y][$x]{group} ) {
                         $no_collision = 0;
                         last;
@@ -109,8 +109,8 @@ sub _genmap {
                    $group->{loc_size} = "$size[0]x$size[1] ($spot[0], $spot[1])";
                    $group->{type}     = "room";
 
-                for my $y ($spot[1]..$size[1]+$spot[1]) {
-                    for my $x ($spot[0]..$size[0]+$spot[0]) {
+                for my $y ($spot[1]..($size[1]-1)+$spot[1]) {
+                    for my $x ($spot[0]..($size[0]-1)+$spot[0]) {
                         $map[$y][$x]->{group} = $group;
                     }
                 }
