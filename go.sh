@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Id: go.sh,v 1.22 2005/03/30 20:53:21 jettero Exp $
+# $Id: go.sh,v 1.23 2005/03/31 01:19:00 jettero Exp $
 # vi:tw=0:
 
 make || exit 1
@@ -14,7 +14,7 @@ make || exit 1
        'my $map = new Games::RolePlay::MapGen({cell_size=>"20x20", 
 
            num_rooms=>
-           "10d8", 
+           "70d4", 
            # "3d8", 
 
            bounding_box => 
@@ -38,7 +38,8 @@ make || exit 1
        
        ' || exit 1
        
-       xv map.png &
+       # xv map.png &
+       scp map.png voltar.org:tmp/
 
 
 # perl -Iblib/lib -MExtUtils::Command::MM -e 'test_harness(0, "blib/lib", "blib/arch")' t/05*.t || exit 1
