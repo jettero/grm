@@ -1,5 +1,5 @@
 #!/usr/bin/perl -Iblib/lib
-# $Id: go.pl,v 1.7 2005/04/03 17:27:11 jettero Exp $
+# $Id: go.pl,v 1.8 2005/04/03 17:30:12 jettero Exp $
 # vi:tw=0:
 
 BEGIN { system("make") == 0 or die }
@@ -32,7 +32,7 @@ use Games::RolePlay::MapGen;
   generate  $map; 
   visualize $map "map.png";
 
-system("xv map.png &");
+system("xv -geometry +0+0 map.png &");
 # system("scp map.png voltar.org:tmp/") == 0 or die
 
 
