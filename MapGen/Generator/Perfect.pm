@@ -1,4 +1,4 @@
-# $Id: Perfect.pm,v 1.4 2005/03/25 18:23:01 jettero Exp $
+# $Id: Perfect.pm,v 1.5 2005/03/25 18:24:10 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::Generator::Perfect;
@@ -32,8 +32,9 @@ sub _create_tiles {
 # _generate_perfect_maze {{{
 sub _generate_perfect_maze {
     my $this = shift;
-    my $opts = shift; # This is really just a hack to make sure the interconnections get un-self-ref'd when they go out of scope
-    my $map  = new Games::RolePlay::MapGen::Generator::Perfect::_interconnected_map(shift);
+    my $opts = shift;
+    my $map  = new Games::RolePlay::MapGen::_interconnected_map(shift);
+    # This object interconnects the map; but, also ensures that the self-refs are broken when it goes out of scope!
 
     my $tiles   = $opts->{y_size} * $opts->{x_size};
     my @dirs    = (qw(n s e w));
