@@ -1,4 +1,4 @@
-# $Id: 01_mg_new_auto.t,v 1.2 2005/03/17 12:28:46 jettero Exp $
+# $Id: 01_mg_new_auto.t,v 1.3 2005/03/17 12:29:52 jettero Exp $
 
 use strict;
 use Test;
@@ -7,7 +7,8 @@ plan tests => 4;
 
 use Games::RolePlay::MapGen;
 
-# $Games::RolePlay::MapGen::test_arg = 1;
+$Games::RolePlay::MapGen::known_opts{test_arg}   = undef; # this is a hack to allow the test options for the tests
+$Games::RolePlay::MapGen::known_opts{test_arg_2} = undef;
 
 START_WITH_HREF: {
     my $map = new Games::RolePlay::MapGen({ test_arg => 2 });

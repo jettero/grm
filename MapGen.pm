@@ -1,4 +1,4 @@
-# $Id: MapGen.pm,v 1.3 2005/03/17 12:16:47 jettero Exp $
+# $Id: MapGen.pm,v 1.4 2005/03/17 12:28:46 jettero Exp $
 # vi:tw=0:
 
 package Games::RolePlay::MapGen;
@@ -10,6 +10,10 @@ use Carp;
 our $VERSION = "0.01";
 our $AUTOLOAD;
 
+our %known_opts = (
+    generator => "Games::RolePlay::MapGen::BasicGenerator"
+);
+
 1;
 
 # AUTOLOAD {{{
@@ -19,6 +23,9 @@ sub AUTOLOAD {
 
     if( $sub =~ m/MapGen\:\:set_([\w\d\_]+)$/ ) {
         $this->{$1} = shift;
+
+        if( my $e = $this->check_opts ) { croak $e }
+
         return;
     }
 
@@ -27,13 +34,33 @@ sub AUTOLOAD {
 sub DESTROY {}
 # }}}
 
+sub check_opts {
+    my $this = shift;
+    my @e    = ();
+
+    for my $k ( keys %$this ) {
+        unless( exists $known_opts{$k} ) {
+            push @e, "unrecognized option: '$k'";
+        }
+    }
+
+    return "ERROR:\n\t" . join("\n\t", @e) . "\n" if @e;
+    return;
+}
+
 sub new {
     my $class = shift;
     my @opts  = @_;
     my $opts  = ( (@opts == 1 and ref($opts[0]) eq "HASH") ? $opts[0] : {@opts} );
     my $this  = bless $opts, $class;
 
+    if( my $e = $this->check_opts ) { croak $e }
+
     return $this;
+}
+
+sub generate {
+    my $this = shift;
 }
 
 __END__
