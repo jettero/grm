@@ -1,4 +1,4 @@
-# $Id: Basic.pm,v 1.15 2005/03/24 12:30:29 jettero Exp $
+# $Id: Basic.pm,v 1.16 2005/03/24 14:02:24 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::Generator::Basic;
@@ -74,11 +74,11 @@ sub _genmap {
     my @groups = ();
 
     # create tiles {{{
-    for (1 .. $opts->{y_size}) {
+    for my $i (0 .. $opts->{y_size}-1) {
         my $a = [];
 
-        for (1 .. $opts->{x_size}) {
-            push @$a, &_tile;
+        for my $j (0 .. $opts->{x_size}-1) {
+            push @$a, &_tile(x=>$j, y=>$i);
         }
 
         push @map, $a;
@@ -112,11 +112,15 @@ sub _genmap {
     open LOG, ">maze.log" or die $!;
     print LOG "$$ $0 starting maze.log\n";
 
-    my $DEBUG_looping = 1000000;
+    my $DEBUG_looping = 100000;
     while( @visited < $tiles ) {
         my $nex = $cur->{nb}{$dir};
+         
 
-        print LOG "int(\@visited) = ", sprintf('%3d', int(@visited)), "\n";
+        my $show = sub { my $n = shift; if($n) { return sprintf('(%2d, %2d)', $n->{x}, $n->{y}) } else { return "undef   " } };
+
+        print LOG "int(\@visited) = ", sprintf('%3d', int(@visited)), 
+            " \$dir=$dir; \$cur=", $show->($cur), " \$nex=", $show->($nex), " ";
 
         if( $nex and not $nex->{visited} ) {
             $cur->{od}{$dir} = 1;
@@ -131,12 +135,25 @@ sub _genmap {
             $dir  = &choice(@dirs) if &roll(2, 6) == 11; # we usually go the same way, unless we get a craps...
             @togo = &filter(\@dirs, $isnt, $dir);        # whatever, redo the @todo (ignoring the obvious way-we-came)
 
+            print LOG "\n";
+
         } else {
             if( @togo ) {
                 $dir  = &choice(@togo);
                 @togo = &filter(\@togo, $isnt, $dir);
+                print LOG "\@togo = (@togo)\n";
 
             } else {
+                # This node is so boring, we don't want to accidentally try it again
+                @visited = &filter(\@visited, $isnt, $cur); 
+
+                print LOG "\$cur is boring...\n";
+
+                unless( @visited ) {
+                    warn "ran out of visited nodes for some reason...";
+                    last;
+                }
+
                 $cur = &choice(@visited);
             }
         }

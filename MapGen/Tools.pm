@@ -1,4 +1,4 @@
-# $Id: Tools.pm,v 1.8 2005/03/24 12:30:29 jettero Exp $
+# $Id: Tools.pm,v 1.9 2005/03/24 14:02:24 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::_group;
@@ -7,7 +7,7 @@ use strict;
 
 1;
 
-sub new { bless {}, shift }
+sub new { my $class = shift; bless {@_}, $class }
 
 package Games::RolePlay::MapGen::_tile;
 
@@ -15,7 +15,7 @@ use strict;
 
 1;
 
-sub new { bless { v=>0, od=>{n=>0, s=>0, e=>0, w=>0} }, shift }
+sub new { my $class = shift; bless { @_, v=>0, od=>{n=>0, s=>0, e=>0, w=>0} }, $class }
 
 # sub DESTROY { warn "global destruction detector here; if we forgot to clean up, this would say..." }
 
