@@ -1,4 +1,4 @@
-# $Id: Tools.pm,v 1.11 2005/03/25 18:23:01 jettero Exp $
+# $Id: Tools.pm,v 1.12 2005/03/25 21:19:12 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::_interconnected_map;
@@ -209,6 +209,14 @@ variables at this time.
 
 Though, for convenience, visited is set to 0 and "open directions" is set to
 all zeros.
+
+=head1 Games::RolePlay::MapGen::_interconnected_map
+
+This object interconnects all the tiles in a map array, so 
+$tile = $map->[$y][$x] and $tile->{nb} is an array of neighboring tiles.
+Example: $east_neighbor = $map->[$y][$x]->{nb}{e};
+
+(It also cleans up self-referencing loops at DESTROY time.)
 
 =head1 AUTHOR
 

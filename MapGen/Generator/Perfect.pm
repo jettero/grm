@@ -1,4 +1,4 @@
-# $Id: Perfect.pm,v 1.6 2005/03/25 19:41:33 jettero Exp $
+# $Id: Perfect.pm,v 1.7 2005/03/25 21:19:12 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::Generator::Perfect;
@@ -10,8 +10,8 @@ use Games::RolePlay::MapGen::Tools qw( _group _tile choice roll );
 
 1;
 
-# _create_tiles {{{
-sub _create_tiles {
+# create_tiles {{{
+sub create_tiles {
     my $this = shift;
     my $opts = shift;
     my @map  = ();
@@ -29,8 +29,8 @@ sub _create_tiles {
     return @map;
 }
 # }}}
-# _generate_perfect_maze {{{
-sub _generate_perfect_maze {
+# generate_perfect_maze {{{
+sub generate_perfect_maze {
     my $this = shift;
     my $opts = shift;
     my $map  = new Games::RolePlay::MapGen::_interconnected_map(shift);
@@ -109,14 +109,14 @@ sub _generate_perfect_maze {
 }
 # }}}
 
-# _genmap {{{
-sub _genmap {
+# genmap {{{
+sub genmap {
     my $this   = shift;
     my $opts   = shift;
-    my @map    = $this->_create_tiles( $opts );
+    my @map    = $this->create_tiles( $opts );
     my @groups = ();
 
-    $this->_generate_perfect_maze($opts, \@map);
+    $this->generate_perfect_maze($opts, \@map);
 
     return (\@map, \@groups);
 }

@@ -1,4 +1,4 @@
-# $Id: Generator.pm,v 1.1 2005/03/24 18:55:10 jettero Exp $
+# $Id: Generator.pm,v 1.2 2005/03/25 21:19:12 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::Generator;
@@ -16,8 +16,8 @@ sub new {
     return $this;
 }
 # }}}
-# _gen_opts {{{
-sub _gen_opts {
+# gen_opts {{{
+sub gen_opts {
     my $this = shift;
     my $opts = {@_};
 
@@ -31,9 +31,9 @@ sub _gen_opts {
 # go {{{
 sub go {
     my $this = shift;
-    my $opts = $this->_gen_opts(@_);
+    my $opts = $this->gen_opts(@_);
 
-    $this->_gen_bounding_size( $opts );
+    $this->gen_bounding_size( $opts );
 
     croak "ERROR: bounding_box is a required option for " . ref($this) . "::go()" unless $opts->{x_size} and $opts->{y_size};
     croak "ERROR: num_rooms is a required option for " . ref($this) . "::go()" unless $opts->{num_rooms};
@@ -43,11 +43,11 @@ sub go {
 
     croak "ERROR: room sizes are of the form 9x9, 3x10, 2x2, etc" unless $opts->{min_size} =~ m/^\d+x\d+$/ and $opts->{max_size} =~ m/^\d+x\d+$/;
 
-    return $this->_genmap( $opts );
+    return $this->genmap( $opts );
 }
 # }}}
-# _gen_bounding_size {{{
-sub _gen_bounding_size {
+# gen_bounding_size {{{
+sub gen_bounding_size {
     my $this = shift;
     my $opts = shift;
 

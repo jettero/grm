@@ -1,4 +1,4 @@
-# $Id: Text.pm,v 1.13 2005/03/24 16:06:55 jettero Exp $
+# $Id: Text.pm,v 1.14 2005/03/25 21:19:12 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::Visualization::Text;
@@ -28,7 +28,7 @@ sub go {
     croak "ERROR: fname is a required option for " . ref($this) . "::go()" unless $opts->{fname};
     croak "ERROR: _the_map is a required option for " . ref($this) . "::go()" unless ref($opts->{_the_map});
 
-    my $map = $this->_genmap($opts);
+    my $map = $this->genmap($opts);
     unless( $opts->{fname} eq "-retonly" ) {
         open _MAP_OUT, ">$opts->{fname}" or die "ERROR: couldn't open $opts->{fname} for write: $!";
         print _MAP_OUT $map;
@@ -38,8 +38,8 @@ sub go {
     return $map;
 }
 # }}}
-
-sub _genmap {
+# genmap {{{
+sub genmap {
     my $this = shift;
     my $opts = shift;
     my $m    = $opts->{_the_map};
@@ -126,6 +126,7 @@ sub _genmap {
 
     return $map . $rooms;
 }
+# }}}
 
 __END__
 # Below is stub documentation for your module. You better edit it!
