@@ -1,17 +1,5 @@
-# $Id: MapGen.pm,v 1.38 2005/03/30 16:27:10 jettero Exp $
+# $Id: MapGen.pm,v 1.39 2005/03/30 16:56:04 jettero Exp $
 # vi:tw=0 syntax=perl:
-
-package Games::RolePlay::MapGen::_group;
-
-use strict;
-
-1;
-
-package Games::RolePlay::MapGen::_tile;
-
-use strict;
-
-1;
 
 package Games::RolePlay::MapGen;
 
@@ -23,6 +11,7 @@ use Data::Dumper; $Data::Dumper::Indent = 1; $Data::Dumper::SortKeys = 1;
 our $VERSION = "0.18";
 our $AUTOLOAD;
 
+# known_opts {{{
 our %known_opts = (
     generator              => "Basic",
     visualization          => "Text",
@@ -44,6 +33,7 @@ our %known_opts = (
       open_corridor_corridor_door_percent => { door =>  1, secret => 10, stuck => 25, locked => 50 },
     closed_corridor_corridor_door_percent => { door =>  1, secret => 95, stuck => 10, locked => 30 },
 );
+# }}}
 
 1;
 
@@ -108,9 +98,13 @@ sub save_map {
     my $this     = shift;
     my $filename = shift;
 
+    $this->{_the_map}->disconnect_map;
+
     open _SAVE, ">$filename" or die "couldn't open $filename for write: $!";
     print _SAVE Data::Dumper->Dump([$this->{_the_map}, $this->{_the_groups}], [qw($this->{_the_map} $this->{_the_groups})]);
     close _SAVE;
+
+    $this->{_the_map}->interconnect_map;
 }
 # }}}
 # load_map {{{
@@ -119,7 +113,7 @@ sub load_map {
     my $filename = shift;
 
     open _LOAD, "$filename" or die "couldn't open $filename for read: $!";
-    my $entire_file = <_LOAD>;
+    my $entire_file = join("", <_LOAD>);
     close _LOAD;
 
     eval $entire_file;
