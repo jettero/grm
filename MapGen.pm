@@ -1,4 +1,4 @@
-# $Id: MapGen.pm,v 1.41 2005/03/30 20:00:51 jettero Exp $
+# $Id: MapGen.pm,v 1.42 2005/04/01 14:04:46 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen;
@@ -51,6 +51,9 @@ sub AUTOLOAD {
         if( my $e = $this->check_opts ) { croak $e }
 
         return;
+    } elsif( $sub =~ m/MapGen\:\:add_(\w+)_plugin$/ ) {
+        my $type = $1;
+        my $plug = shift;
     }
 
     croak "ERROR: function $sub() not found";
