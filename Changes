@@ -1,7 +1,10 @@
+0.09:  Fri Mar 25 14:42:56 EST 2005
+   - jettero just got a note from Jamis Buck -- an answer to a question actually. He officially approves of my project. Perhaps it's better to say he doesn't disapprove. Whatever. Thanks Jamis!
+
 0.08:  Fri Mar 25 14:41:46 EST 2005
    - jettero began working on the dead-end remover, but it appears to have some bugs
 
-0.07:  Fri Mar 25 14:41:29 EST 2005
+0.07:  Fri Mar 25 10:30:15 EST 2005
    - jettero split up the generator further and added the sparseness code
 
 0.06:  Thu Mar 24 11:50:57 EST 2005
