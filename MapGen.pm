@@ -1,4 +1,4 @@
-# $Id: MapGen.pm,v 1.14 2005/03/24 16:08:47 jettero Exp $
+# $Id: MapGen.pm,v 1.15 2005/03/24 16:38:11 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::_group;
@@ -19,7 +19,7 @@ use strict;
 use AutoLoader;
 use Carp;
 
-our $VERSION = "0.04";
+our $VERSION = "0.05";
 our $AUTOLOAD;
 
 our %known_opts = (
@@ -103,7 +103,7 @@ sub generate {
     }
 
     my $obj;
-    my @opts = ( bounding_box=>$this->{bounding_box}, cell_size=>$this->{cell_size}, num_rooms=>$this->{num_rooms} );
+    my @opts = map(($_=>$this->{$_}), grep {defined $this->{$_}} keys %$this);
 
     eval qq( require $this->{generator}; \$obj = new $this->{generator} (\@opts); );
     if( $@ ) {
@@ -133,7 +133,9 @@ sub visualize {
     }
 
     my $obj;
-    eval qq( require $this->{visualization}; \$obj = new $this->{visualization}; );
+    my @opts = map(($_=>$this->{$_}), grep {defined $this->{$_}} keys %$this);
+
+    eval qq( require $this->{visualization}; \$obj = new $this->{visualization} (\@opts); );
     if( $@ ) {
         die   "ERROR generating visualization:\n\t$@\n " if $@ =~ m/ERROR/;
         croak "ERROR generating visualization:\n\t$@\n " if $@;
