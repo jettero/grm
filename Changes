@@ -1,7 +1,3 @@
-0.14:  Fri Mar 25 16:20:02 EST 2005
-   - jettero further broke up the generators. Now only my
-     room dropping code will be in Basic.
-
 0.13:  Fri Mar 25 16:19:43 EST 2005
    - jettero drestroyed many nonsensical leading underscores
      on things that shouldn't have ever had them.
