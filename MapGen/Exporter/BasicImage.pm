@@ -1,4 +1,4 @@
-# $Id: BasicImage.pm,v 1.9 2005/03/27 12:53:27 jettero Exp $
+# $Id: BasicImage.pm,v 1.10 2005/03/28 13:57:58 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::Visualization::BasicImage;
@@ -75,16 +75,6 @@ sub genmap {
     my $L     = 1; # the length of the cell ticks in open borders
        $L++;       # $L is one less than it seems...
 
-    my $Lo = sub {
-        my ($major_dir, $minor_dir, $tile) = @_;
-
-        if( my $nex = $tile->{nb}{$major_dir} ) {
-            return 0 if $nex->{od}{$minor_dir};
-        }
-
-        return $L;
-    };
-
     $gd->interlaced('true');
 
     for my $i (0..$#$m) {
@@ -102,10 +92,17 @@ sub genmap {
             $gd->line( $Xp, $yp => $Xp, $Yp, $black );
             $gd->line( $xp, $yp => $xp, $Yp, $black );
 
-            $gd->line( $xp + &$Lo(qw(n w), $t), $yp                     => $Xp - &$Lo(qw(n e), $t), $yp,                     $white ) if $t->{od}{n};
-            $gd->line( $xp + &$Lo(qw(s w), $t), $Yp                     => $Xp - &$Lo(qw(s e), $t), $Yp,                     $white ) if $t->{od}{s};
-            $gd->line( $Xp,                     $yp + &$Lo(qw(e n), $t) => $Xp,                     $Yp - &$Lo(qw(e s), $t), $white ) if $t->{od}{e};
-            $gd->line( $xp,                     $yp + &$Lo(qw(w n), $t) => $xp,                     $Yp - &$Lo(qw(w s), $t), $white ) if $t->{od}{w};
+            $gd->line( $xp+$L, $yp     => $Xp-$L, $yp,    $white ) if $t->{od}{n};
+            $gd->line( $xp+$L, $Yp     => $Xp-$L, $Yp,    $white ) if $t->{od}{s};
+            $gd->line( $Xp,    $yp+$L, => $Xp,    $Yp-$L, $white ) if $t->{od}{e};
+            $gd->line( $xp,    $yp+$L, => $xp,    $Yp-$L, $white ) if $t->{od}{w};
+
+            if( $t->{od}{n} and $t->{od}{w} ) {
+                if( $t->{nb}{n}{od}{w} and $t->{nb}{w}{od}{n} ) {
+                    $gd->line( $xp-$L, $yp    => $xp+$L, $yp,    $grey );
+                    $gd->line( $xp,    $yp-$L => $xp,    $yp+$L, $grey );
+                }
+            }
 
             if( not $t->{type} ) {
                 $gd->filledRectangle( $xp+$B, $yp+$B => $Xp-$B, $Yp-$B, $dgrey );
