@@ -1,5 +1,5 @@
 #!/usr/bin/perl -Iblib/lib
-# $Id: go.pl,v 1.12 2005/04/04 17:23:59 jettero Exp $
+# $Id: go.pl,v 1.13 2005/04/05 13:09:11 jettero Exp $
 # vi:tw=0:
 
 BEGIN { system("make || (perl Makefile.PL && make)") == 0 or die }
@@ -29,7 +29,6 @@ use Games::RolePlay::MapGen;
   }); 
 
   add_generator_plugin $map "BasicDoors";
-
   generate $map; 
   export   $map "map.txt";
   save_map $map "map.map";
@@ -37,13 +36,17 @@ use Games::RolePlay::MapGen;
   set_exporter $map "BasicImage";
   export       $map "map.png";
 
-system("xv -geometry +0+0 map.png &") == 0 or die;
+  set_exporter $map "XML";
+  export       $map "map.xml";
+
+# system("xv -geometry +0+0 map.png &") == 0 or die;
 
 # system("pngcrush map.png o.png && mv o.png map.png") == 0 or die;
 # system("chmod 0644 map.png") == 0 or die;
 # system("scp -Cp map.png voltar.org:tmp/") == 0 or die;
 
-system("cat map.txt") == 0 or die;
+# system("cat map.txt") == 0 or die;
+system("cat map.xml") == 0 or die;
 
 
 __END__

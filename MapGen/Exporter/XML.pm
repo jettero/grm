@@ -1,10 +1,12 @@
-# $Id: XML.pm,v 1.1 2005/04/04 15:23:56 jettero Exp $
+# $Id: XML.pm,v 1.2 2005/04/05 13:09:11 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::Exporter::XML;
 
 use strict;
 use Carp;
+use Tie::IxHash;
+use XML::Simple;
 
 1;
 
@@ -45,7 +47,21 @@ sub genmap {
     my $m    = $opts->{_the_map};
     my $g    = $opts->{_the_groups};
 
-    return "<xml/>";
+    my %main; tie %main, "Tie::IxHash";
+
+    my $options = {}; tie %$options, "Tie::IxHash";
+    my $groups  = []; # tie %groups,  'Tie::IxHash';
+    my $map     = [];
+
+    for my $k (sort keys %$opts) {
+        $options->{$k} = [ $opts->{$k} ] unless $k =~ m/^(?:_.+?|objs|plugins)$/;
+    }
+
+    $main{options} = $options;
+    $main{groups}  = $groups;
+    $main{'map'}   = $map;
+
+    return XMLout({ options=>$options, groups=>$groups, 'map'=>$map }, RootName=>"MapGen");
 }
 # }}}
 
