@@ -1,13 +1,9 @@
 
-- add a door dropper...
-  + considers the room/corridor boundaries (secret, locked, stuck, openable)
-  + considers open corridor/corridor boundaries (slso)
-  + considers closed corridor/corridor bondaries (slso)
+- door dropper...
+  + add locked/stuck status
+  + finish shifting the doors animations off the doors/walls
 
-- consider a povray plugin
-  + this will be the funnest part of all
-
-- split out the generic visualization stuff into a Visualization.pm
+- bug??!?! Sometimes the crosshair-in-room-remover removes crosshairs from walls... find this
 
 - xml dumps?
 - asn.1 dumps?  (why?)

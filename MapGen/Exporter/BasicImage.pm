@@ -1,4 +1,4 @@
-# $Id: BasicImage.pm,v 1.16 2005/04/03 15:33:19 jettero Exp $
+# $Id: BasicImage.pm,v 1.17 2005/04/03 16:10:55 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::Visualization::BasicImage;
@@ -102,10 +102,10 @@ sub genmap {
 
             my $ns_l = (($Xp-$dM) - ($xp+$dM));  # for the doors...
             my $ew_l = (($Yp-$dM) - ($yp+$dM));
-            my $ns_h = $ns_l * $sr;
-            my $ew_h = $ew_l * $sr;
-            my $ns_b = sqrt( $ns_l ** 2 - $ns_h ** 2 );
-            my $ew_b = sqrt( $ew_l ** 2 - $ew_h ** 2 );
+            my $ns_h = int ($ns_l * $sr);
+            my $ew_h = int ($ew_l * $sr);
+            my $ns_b = int( sqrt( $ns_l ** 2 - $ns_h ** 2 ) );
+            my $ew_b = int( sqrt( $ew_l ** 2 - $ew_h ** 2 ) );
 
             $gd->line( $xp, $yp => $Xp, $yp, $black );
             $gd->line( $xp, $Yp => $Xp, $Yp, $black );
@@ -154,79 +154,79 @@ sub genmap {
 
                         # draw the door line/arcs ... sadly, this is a 16 part if-else block {{{
                         if( $oi eq "sne" ) {
-                            $gd->arc(  $Xp-$dM, $Yp, $wx, $wy, 180, 180+$oa,       $grey );
-                            $gd->line( $Xp-$dM, $Yp => ($Xp-$dM)-$ns_b, $Yp-$ns_h, $grey );
+                            $gd->arc(  $Xp-$dM, $Yp-$dm, $wx, $wy, 180, 180+$oa,           $red );
+                            $gd->line( $Xp-$dM, $Yp-$dm => ($Xp-$dM)-$ns_b, $Yp-$dm-$ns_h, $red );
 
                         } elsif( $oi eq "nne" ) {  # same as above, but $Yp changes to $yp
-                            $gd->arc(  $Xp-$dM, $yp, $wx, $wy, 180, 180+$oa,       $grey );
-                            $gd->line( $Xp-$dM, $yp => ($Xp-$dM)-$ns_b, $yp-$ns_h, $grey );
+                            $gd->arc(  $Xp-$dM, $yp-$dm, $wx, $wy, 180, 180+$oa,           $red );
+                            $gd->line( $Xp-$dM, $yp-$dm => ($Xp-$dM)-$ns_b, $yp-$dm-$ns_h, $red );
 
 
                         } elsif( $oi eq "sse" ) {  # same as two above, but 180-$oa and +$ns_h
-                            $gd->arc(  $Xp-$dM, $Yp, $wx, $wy, 180-$oa, 180,       $grey );
-                            $gd->line( $Xp-$dM, $Yp => ($Xp-$dM)-$ns_b, $Yp+$ns_h, $grey );
+                            $gd->arc(  $Xp-$dM, $Yp+$dm, $wx, $wy, 180-$oa, 180,           $red );
+                            $gd->line( $Xp-$dM, $Yp+$dm => ($Xp-$dM)-$ns_b, $Yp+$dm+$ns_h, $red );
 
                         } elsif( $oi eq "nse" ) {  # same as above, but $Yp to $yp
-                            $gd->arc(  $Xp-$dM, $yp, $wx, $wy, 180-$oa, 180,       $grey );
-                            $gd->line( $Xp-$dM, $yp => ($Xp-$dM)-$ns_b, $yp+$ns_h, $grey );
+                            $gd->arc(  $Xp-$dM, $yp+$dm, $wx, $wy, 180-$oa, 180,           $red );
+                            $gd->line( $Xp-$dM, $yp+$dm => ($Xp-$dM)-$ns_b, $yp+$dm+$ns_h, $red );
 
 
                         } elsif( $oi eq "snw" ) { # same as sne, but 360-$oa, $xp, and +$ns_b
-                            $gd->arc(  $xp+$dM, $Yp, $wx, $wy, 360-$oa, 360,       $grey );
-                            $gd->line( $xp+$dM, $Yp => ($xp+$dM)+$ns_b, $Yp-$ns_h, $grey );
+                            $gd->arc(  $xp+$dM, $Yp-$dm, $wx, $wy, 360-$oa, 360,           $red );
+                            $gd->line( $xp+$dM, $Yp-$dm => ($xp+$dM)+$ns_b, $Yp-$dm-$ns_h, $red );
 
                         } elsif( $oi eq "nnw" ) { # same as above, but $yp
-                            $gd->arc(  $xp+$dM, $yp, $wx, $wy, 360-$oa, 360,       $grey );
-                            $gd->line( $xp+$dM, $yp => ($xp+$dM)+$ns_b, $yp-$ns_h, $grey );
+                            $gd->arc(  $xp+$dM, $yp-$dm, $wx, $wy, 360-$oa, 360,           $red );
+                            $gd->line( $xp+$dM, $yp-$dm => ($xp+$dM)+$ns_b, $yp-$dm-$ns_h, $red );
 
 
                         } elsif( $oi eq "ssw" ) { # same as sse, but $xp, +$ns_b, and 360+$oa
-                            $gd->arc(  $xp+$dM, $Yp, $wx, $wy, 360, 360+$oa,       $grey );
-                            $gd->line( $xp+$dM, $Yp => ($xp+$dM)+$ns_b, $Yp+$ns_h, $grey );
+                            $gd->arc(  $xp+$dM, $Yp+$dm, $wx, $wy, 360, 360+$oa,       $red );
+                            $gd->line( $xp+$dM, $Yp+$dm => ($xp+$dM)+$ns_b, $Yp+$dm+$ns_h, $red );
 
                         } elsif( $oi eq "nsw" ) { # same as above, but $yp
-                            $gd->arc(  $xp+$dM, $yp, $wx, $wy, 360, 360+$oa,       $grey );
-                            $gd->line( $xp+$dM, $yp => ($xp+$dM)+$ns_b, $yp+$ns_h, $grey );
+                            $gd->arc(  $xp+$dM, $yp+$dm, $wx, $wy, 360, 360+$oa,       $red );
+                            $gd->line( $xp+$dM, $yp+$dm => ($xp+$dM)+$ns_b, $yp+$dm+$ns_h, $red );
 
 
                         } elsif( $oi eq "een" ) {
-                            $gd->arc(  $Xp, $yp+$dM, $wx, $wy, 90-$oa, 90,         $grey );
-                            $gd->line( $Xp, $yp+$dM => $Xp+$ew_h, ($yp+$dM)+$ew_b, $grey );
+                            $gd->arc(  $Xp+$dm, $yp+$dM, $wx, $wy, 90-$oa, 90,         $red );
+                            $gd->line( $Xp+$dm, $yp+$dM => $Xp+$dm+$ew_h, ($yp+$dM)+$ew_b, $red );
 
                         } elsif( $oi eq "wen" ) { # same as above but $Xp to $xp
-                            $gd->arc(  $xp, $yp+$dM, $wx, $wy, 90-$oa, 90,         $grey );
-                            $gd->line( $xp, $yp+$dM => $xp+$ew_h, ($yp+$dM)+$ew_b, $grey );
+                            $gd->arc(  $xp+$dm, $yp+$dM, $wx, $wy, 90-$oa, 90,         $red );
+                            $gd->line( $xp+$dm, $yp+$dM => $xp+$dm+$ew_h, ($yp+$dM)+$ew_b, $red );
 
 
                         } elsif( $oi eq "ewn" ) { # same as two above, but 90+$oa and -$ew_h
-                            $gd->arc(  $Xp, $yp+$dM, $wx, $wy, 90, 90+$oa,         $grey );
-                            $gd->line( $Xp, $yp+$dM => $Xp-$ew_h, ($yp+$dM)+$ew_b, $grey );
+                            $gd->arc(  $Xp-$dm, $yp+$dM, $wx, $wy, 90, 90+$oa,         $red );
+                            $gd->line( $Xp-$dm, $yp+$dM => $Xp-$dm-$ew_h, ($yp+$dM)+$ew_b, $red );
 
                         } elsif( $oi eq "wwn" ) { # same as above but $Xp to $xp
-                            $gd->arc(  $xp, $yp+$dM, $wx, $wy, 90, 90+$oa,         $grey );
-                            $gd->line( $xp, $yp+$dM => $xp-$ew_h, ($yp+$dM)+$ew_b, $grey );
+                            $gd->arc(  $xp-$dm, $yp+$dM, $wx, $wy, 90, 90+$oa,         $red );
+                            $gd->line( $xp-$dm, $yp+$dM => $xp-$dm-$ew_h, ($yp+$dM)+$ew_b, $red );
 
 
                         } elsif( $oi eq "ees" ) { # same as een, but $Yp, -$ew_b and 270+$oa
-                            $gd->arc(  $Xp, $Yp-$dM, $wx, $wy, 270, 270+$oa,       $grey );
-                            $gd->line( $Xp, $Yp-$dM => $Xp+$ew_h, ($Yp-$dM)-$ew_b, $grey );
+                            $gd->arc(  $Xp+$dm, $Yp-$dM, $wx, $wy, 270, 270+$oa,       $red );
+                            $gd->line( $Xp+$dm, $Yp-$dM => $Xp+$dm+$ew_h, ($Yp-$dM)-$ew_b, $red );
 
                         } elsif( $oi eq "wes" ) { # same as above, but $xp
-                            $gd->arc(  $xp, $Yp-$dM, $wx, $wy, 270, 270+$oa,       $grey );
-                            $gd->line( $xp, $Yp-$dM => $xp+$ew_h, ($Yp-$dM)-$ew_b, $grey );
+                            $gd->arc(  $xp+$dm, $Yp-$dM, $wx, $wy, 270, 270+$oa,       $red );
+                            $gd->line( $xp+$dm, $Yp-$dM => $xp+$dm+$ew_h, ($Yp-$dM)-$ew_b, $red );
 
                         } elsif( $oi eq "ews" ) { # same as ewn above, but 
-                            $gd->arc(  $Xp, $Yp-$dM, $wx, $wy, 270-$oa, 270,       $grey );
-                            $gd->line( $Xp, $Yp-$dM => $Xp-$ew_h, ($Yp-$dM)-$ew_b, $grey );
+                            $gd->arc(  $Xp-$dm, $Yp-$dM, $wx, $wy, 270-$oa, 270,       $red );
+                            $gd->line( $Xp-$dm, $Yp-$dM => $Xp-$dm-$ew_h, ($Yp-$dM)-$ew_b, $red );
 
                         } elsif( $oi eq "wws" ) { # same as above, but $xp
-                            $gd->arc(  $xp, $Yp-$dM, $wx, $wy, 270-$oa, 270,       $grey );
-                            $gd->line( $xp, $Yp-$dM => $xp-$ew_h, ($Yp-$dM)-$ew_b, $grey );
+                            $gd->arc(  $xp-$dm, $Yp-$dM, $wx, $wy, 270-$oa, 270,       $red );
+                            $gd->line( $xp-$dm, $Yp-$dM => $xp-$dm-$ew_h, ($Yp-$dM)-$ew_b, $red );
 
                         }
                         # }}}
 
-                        $door->{_drawn}{$dir} = 1;
+                        # $door->{_drawn}{$dir} = 1;
                     }
                 }
             }
