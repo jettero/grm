@@ -1,5 +1,5 @@
 #!/bin/bash
-# $Id: go.sh,v 1.17 2005/03/27 12:53:27 jettero Exp $
+# $Id: go.sh,v 1.18 2005/03/29 16:22:08 jettero Exp $
 # vi:tw=0:
 
 make || exit 1
@@ -14,7 +14,7 @@ perl $dprof -Iblib/lib -MGames::RolePlay::MapGen -e \
     # "50x37"
 }); 
 
-# set_generator $map("Games::RolePlay::MapGen::Generator::Perfect");
+# set_generator $map("Perfect");
 
 generate $map; 
 

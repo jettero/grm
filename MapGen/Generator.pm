@@ -1,4 +1,4 @@
-# $Id: Generator.pm,v 1.2 2005/03/25 21:19:12 jettero Exp $
+# $Id: Generator.pm,v 1.3 2005/03/29 16:22:08 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::Generator;
@@ -43,7 +43,11 @@ sub go {
 
     croak "ERROR: room sizes are of the form 9x9, 3x10, 2x2, etc" unless $opts->{min_size} =~ m/^\d+x\d+$/ and $opts->{max_size} =~ m/^\d+x\d+$/;
 
-    return $this->genmap( $opts );
+    my ($map, $groups) = $this->genmap( $opts );
+
+    $this->post_genmap( $opts, $map, $groups );
+
+    return ($map, $groups);
 }
 # }}}
 # gen_bounding_size {{{
@@ -58,6 +62,23 @@ sub gen_bounding_size {
     }
 }
 # }}}
+# post_genmap  {{{
+sub post_genmap  {
+    my $this = shift;
+    my ($opts, $map, $groups) = @_;
+
+    $this->doorgen(      $opts, $map, $groups );
+    $this->trapgen(      $opts, $map, $groups );
+    $this->encountergen( $opts, $map, $groups );
+    $this->treasuregen(  $opts, $map, $groups );
+}
+# }}}
+
+# Meant to be overloaded elsewhere:
+sub trapgen      {}
+sub doorgen      {}
+sub encountergen {}
+sub treasuregen  {}
 
 __END__
 # Below is stub documentation for your module. You better edit it!

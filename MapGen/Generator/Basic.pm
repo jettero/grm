@@ -1,4 +1,4 @@
-# $Id: Basic.pm,v 1.32 2005/03/27 12:35:04 jettero Exp $
+# $Id: Basic.pm,v 1.33 2005/03/29 16:22:08 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::Generator::Basic;
@@ -315,8 +315,6 @@ sub cleanup_pseudo_rooms {
 }
 # }}}
 
-sub doorgen {}  # mean to be overloaded elsewhere
-
 # genmap {{{
 sub genmap {
     my $this = shift;
@@ -329,7 +327,6 @@ sub genmap {
     $this->mark_things_as_pseudo_rooms( $map, $groups );
     $this->drop_rooms( $opts, $map, $groups );
     $this->cleanup_pseudo_rooms( $map, $groups );
-    $this->doorgen( $opts, $map, $groups );
 
     return ($map, $groups);
 }

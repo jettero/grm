@@ -1,4 +1,4 @@
-# $Id: MapGen.pm,v 1.35 2005/03/29 14:46:33 jettero Exp $
+# $Id: MapGen.pm,v 1.36 2005/03/29 16:22:08 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::_group;
@@ -23,8 +23,8 @@ our $VERSION = "0.17";
 our $AUTOLOAD;
 
 our %known_opts = (
-    generator              => "Games::RolePlay::MapGen::Generator::BasicDoorsAndTraps",
-    visualization          => "Games::RolePlay::MapGen::Visualization::Text",
+    generator              => "Basic",
+    visualization          => "Text",
     bounding_box           => "50x50",
     tile_size              => "3 ft",
     cell_size              => "20x20",
@@ -118,10 +118,20 @@ sub generate {
         die "ERROR: problem creating new generator object" if $err;
     }
 
+    eval qq( require $this->{generator} ); 
+    if( $@ ) {
+        eval qq( require Games::RolePlay::MapGen::Generator::$this->{generator} );
+        if( $@ ) {
+            croak "ERROR locating generator module:\n\t$@\n " if $@;
+        }
+
+        $this->{generator} = "Games::RolePlay::MapGen::Generator::$this->{generator}";
+    }
+
     my $obj;
     my @opts = map(($_=>$this->{$_}), grep {defined $this->{$_}} keys %$this);
 
-    eval qq( require $this->{generator}; \$obj = new $this->{generator} (\@opts); );
+    eval qq( \$obj = new $this->{generator} (\@opts); );
     if( $@ ) {
         die   "ERROR generating generator:\n\t$@\n " if $@ =~ m/ERROR/;
         croak "ERROR generating generator:\n\t$@\n " if $@;
@@ -148,10 +158,21 @@ sub visualize {
         die "problem creating new visualization object" if $err;
     }
 
+    eval qq( require $this->{visualization} );
+    if( $@ ) {
+        eval qq( require Games::RolePlay::MapGen::Visualization::$this->{visualization});
+        if( $@ ) {
+            croak "ERROR locating visualization module:\n\t$@\n " if $@;
+        }
+
+        $this->{visualization} = "Games::RolePlay::MapGen::Visualization::$this->{visualization}";
+
+    }
+
     my $obj;
     my @opts = map(($_=>$this->{$_}), grep {defined $this->{$_}} keys %$this);
 
-    eval qq( require $this->{visualization}; \$obj = new $this->{visualization} (\@opts); );
+    eval qq( \$obj = new $this->{visualization} (\@opts); );
     if( $@ ) {
         die   "ERROR generating visualization:\n\t$@\n " if $@ =~ m/ERROR/;
         croak "ERROR generating visualization:\n\t$@\n " if $@;
@@ -174,10 +195,12 @@ Games::RolePlay::MapGen - The base object for generating dungeons and maps
 
     use Games::RolePlay::MapGen;
 
-    my $map = new Games::RolePlay::MapGen;
+    $map->set_generator("Basic");             # This is actually the default generator,
+    $map->add_generator_plugin("BasicDoors"); # however, you must add the doors.
+    generate $map("map.txt");                 # It'll generate a text map by default.
 
-    generate  $map;
-    visualize $map ("map.txt");
+    $map->set_visualization( "BasicImage" );  # But a graphical map is probably more useful.
+    generate $map("map.png");
 
 =head1 AUTHOR
 

@@ -1,11 +1,10 @@
-# $Id: BasicDoorsAndTraps.pm,v 1.2 2005/03/29 14:46:33 jettero Exp $
+# $Id: BasicDoors.pm,v 1.1 2005/03/29 16:22:08 jettero Exp $
 # vi:tw=0 syntax=perl:
 
-package Games::RolePlay::MapGen::Generator::BasicDoorsAndTraps;
+package Games::RolePlay::MapGen::GeneratorPlugin::BasicDoors;
 
 use strict;
 use Carp;
-use base qw(Games::RolePlay::MapGen::Generator::Basic);
 use Games::RolePlay::MapGen::Tools qw( choice roll _group irange str_eval );
 
 1;
@@ -25,7 +24,7 @@ __END__
 
 =head1 NAME
 
-Games::RolePlay::MapGen::Generator::BasicDoorsAndTraps - The basic generator with a simple doors and traps generator
+Games::RolePlay::MapGen::GeneratorPlugin::BasicDoorsAndTraps - The basic generator with a simple doors and traps generator
 
 =head1 SYNOPSIS
 
@@ -33,16 +32,17 @@ Games::RolePlay::MapGen::Generator::BasicDoorsAndTraps - The basic generator wit
 
     my $map = new Games::RolePlay::MapGen;
     
-    $map->set_generator( "Games::RolePlay::MapGen::Generator::BasicDoorsAndTraps" );
+    $map->set_generator( "Games::RolePlay::MapGen::GeneratorPlugin::Basic" );
+    $map->add_generator_plugin( "BasicDoors" );
 
     generate $map;
 
 =head1 DESCRIPTION
 
-This module really just drops rooms onto Games::RolePlay::MapGen::Generator::Basic.
+This module really just drops rooms onto Games::RolePlay::MapGen::GeneratorPlugin::Basic.
 
 =head1 SEE ALSO
 
-Games::RolePlay::MapGen, ::Generator::Perfect, ::Generator::SparseAndLoops, ::Generator::Basic
+Games::RolePlay::MapGen
 
 =cut
