@@ -1,4 +1,4 @@
-# $Id: MapGen.pm,v 1.42 2005/04/01 14:04:46 jettero Exp $
+# $Id: MapGen.pm,v 1.43 2005/04/01 16:59:42 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen;
@@ -37,13 +37,62 @@ our %known_opts = (
 
 1;
 
+# _check_mod_path {{{
+sub _check_mod_path  {
+    my $this = shift;
+    my $omod = shift;
+       $omod =~ s/\:\:/\//g;
+
+    my $found = 0;
+    my $mod;
+    for my $toadd ("", "Games/RolePlay/MapGen/Generator/", "Games/RolePlay/MapGen/GeneratorPlugin/", "Games/RolePlay/MapGen/Visualization/") {
+        $mod = "$toadd$omod";
+        for my $dir (@INC) {
+            # warn "trying $dir/$mod.pm" if $dir =~ m/blib/ and $mod =~ m/Text/;
+            if( -f "$dir/$mod.pm" ) {
+                $found = 1;
+                goto _NO_MORE_MOD_CHECK;
+            }
+        }
+    }
+
+    _NO_MORE_MOD_CHECK:
+    return undef unless $found;
+
+    $mod =~ s/\/+/\:\:/g;
+    return $mod;
+}
+# }}}
+
 # AUTOLOAD {{{
 sub AUTOLOAD {
     my $this = shift;
     my $sub  = $AUTOLOAD;
 
-    if( $sub =~ m/MapGen\:\:set_([\w\d\_]+)$/ ) {
-        delete $this->{objs}{$1} if $this->{objs}{$1};
+    if( $sub =~ m/MapGen\:\:set_(generator|visualization)$/ ) {
+        my $type = $1;
+        my $modu = shift;
+
+        delete $this->{objs}{$type} if $this->{objs}{$type};
+
+        croak "Couldn't locate module \"$modu\"" unless $this->{$type} = $this->_check_mod_path( $modu );
+
+        return;
+
+    } elsif( $sub =~ m/MapGen\:\:add_(\w+)_plugin$/ ) {
+        my $type = $1;
+        my $plug = shift;
+        my $newn;
+
+        delete $this->{objs}{$type} if $this->{objs}{$type};
+
+        croak "Couldn't locate module \"$plug\"" unless $newn = $this->_check_mod_path( $plug );
+
+        push @{ $this->{plugins}{$type} }, $newn;
+
+        return;
+
+    } elsif( $sub =~ m/MapGen\:\:set_([\w\d\_]+)$/ ) {
         $this->{$1} = shift;
 
         croak "ERROR: set_$1() doesn't let you unset a setting.  Value undefined..." unless defined $this->{$1};
@@ -51,9 +100,7 @@ sub AUTOLOAD {
         if( my $e = $this->check_opts ) { croak $e }
 
         return;
-    } elsif( $sub =~ m/MapGen\:\:add_(\w+)_plugin$/ ) {
-        my $type = $1;
-        my $plug = shift;
+
     }
 
     croak "ERROR: function $sub() not found";
@@ -88,8 +135,9 @@ sub new {
 
     if( my $e = $this->check_opts ) { croak $e }
 
+    no strict 'refs';
     for my $k (keys %known_opts) {
-        $this->{$k} = $known_opts{$k} unless $this->{$k};
+        "set_$k"->($this, $known_opts{$k} ) unless defined $this->{$k};
     }
 
     return $this;
@@ -145,14 +193,7 @@ sub generate {
     }
 
     eval qq( require $this->{generator} ); 
-    if( $@ ) {
-        eval qq( require Games::RolePlay::MapGen::Generator::$this->{generator} );
-        if( $@ ) {
-            croak "ERROR locating generator module:\n\t$@\n " if $@;
-        }
-
-        $this->{generator} = "Games::RolePlay::MapGen::Generator::$this->{generator}";
-    }
+    croak "ERROR locating generator module:\n\t$@\n " if $@;
 
     my $obj;
     my @opts = map(($_=>$this->{$_}), grep {defined $this->{$_}} keys %$this);
@@ -185,15 +226,7 @@ sub visualize {
     }
 
     eval qq( require $this->{visualization} );
-    if( $@ ) {
-        eval qq( require Games::RolePlay::MapGen::Visualization::$this->{visualization});
-        if( $@ ) {
-            croak "ERROR locating visualization module:\n\t$@\n " if $@;
-        }
-
-        $this->{visualization} = "Games::RolePlay::MapGen::Visualization::$this->{visualization}";
-
-    }
+    croak "ERROR locating visualization module:\n\t$@\n " if $@;
 
     my $obj;
     my @opts = map(($_=>$this->{$_}), grep {defined $this->{$_}} keys %$this);
