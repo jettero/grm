@@ -1,4 +1,4 @@
-# $Id: MapGen.pm,v 1.4 2005/03/17 12:28:46 jettero Exp $
+# $Id: MapGen.pm,v 1.5 2005/03/18 12:31:36 jettero Exp $
 # vi:tw=0:
 
 package Games::RolePlay::MapGen;
@@ -11,7 +11,7 @@ our $VERSION = "0.01";
 our $AUTOLOAD;
 
 our %known_opts = (
-    generator => "Games::RolePlay::MapGen::BasicGenerator"
+    generator => "Games::RolePlay::MapGen::Generator::Basic"
 );
 
 1;
@@ -61,6 +61,11 @@ sub new {
 
 sub generate {
     my $this = shift;
+
+    $this->{generator} = $known_opts{generator} if defined $known_opts{generator};
+    croak "generator is a required option for generate()" unless $this->{generator};
+
+    require $this->{generator};
 }
 
 __END__

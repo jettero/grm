@@ -5,3 +5,4 @@ README
 Makefile.PL
 t/00_load.t
 t/01_mg_new_auto.t
+t/05_generate.t

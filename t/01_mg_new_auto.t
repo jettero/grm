@@ -1,9 +1,9 @@
-# $Id: 01_mg_new_auto.t,v 1.3 2005/03/17 12:29:52 jettero Exp $
+# $Id: 01_mg_new_auto.t,v 1.4 2005/03/18 12:31:36 jettero Exp $
 
 use strict;
 use Test;
 
-plan tests => 4;
+plan tests => 5;
 
 use Games::RolePlay::MapGen;
 
@@ -26,4 +26,11 @@ START_WITH_ARRAY: {
 
     ok( $map->{test_arg},   2 );
     ok( $map->{test_arg_2}, 3 );
+}
+
+BORKED: {
+    my $map = new Games::RolePlay::MapGen;
+
+    eval '$map->set_stupid_borked_arg( 9 )';
+    ok($@ ne "");
 }
