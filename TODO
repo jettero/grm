@@ -1,4 +1,14 @@
+
+
 - finish the room dropper
-- author the maze pruner
-- split out the generic visualization stuff into a Visualization.pm
+  + this shouldn't take too horribly long
+
 - make the povray plugin
+  + this will be the funnest part of all
+
+- split out the generic visualization stuff into a Visualization.pm
+  + this'll prolly take care of itself during the povray plugin
+
+- GL plugin?  Oh, yes, I think so.
+  + this will be the funnest part of all
+
