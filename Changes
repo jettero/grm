@@ -1,27 +1,33 @@
-0.1:  Fri Mar 25 14:44:44 EST 2005
-   - jettero this is just a test actually.
+0.12:  Fri Mar 25 14:45:30 EST 2005
+   - jettero just got a note from Jamis Buck -- an answer to
+     a question actually. He officially approves of my
+     project. Perhaps it's better to say he doesn't
+     disapprove. Whatever. Thanks Jamis!
 
 0.09:  Fri Mar 25 14:42:56 EST 2005
-   - jettero just got a note from Jamis Buck -- an answer to a question
-     actually. He officially approves of my project. Perhaps it's better to say
-     he doesn't disapprove. Whatever. Thanks Jamis!
+   - jettero just got a note from Jamis Buck -- an answer to
+     a question actually. He officially approves of my
+     project. Perhaps it's better to say he doesn't
+     disapprove. Whatever. Thanks Jamis!
 
 0.08:  Fri Mar 25 14:41:46 EST 2005
-   - jettero began working on the dead-end remover, but it appears to have some
-     bugs
+   - jettero began working on the dead-end remover, but it
+     appears to have some bugs
 
 0.07:  Fri Mar 25 10:30:15 EST 2005
-   - jettero split up the generator further and added the sparseness code
+   - jettero split up the generator further and added the
+     sparseness code
 
 0.06:  Thu Mar 24 11:50:57 EST 2005
    - jettero started a GD visualization object
 
 0.05:  Thu Mar 24 11:38:11 EST 2005
-   - jettero finished the perfect maze algorithm from Jemis' website.
+   - jettero finished the perfect maze algorithm from Jemis'
+     website.
 
 0.04:  Thu Mar 24 11:08:46 EST 2005
-   - jettero created a room dropper... but he needs to quick adapt the perfect
-     maze algorithm before he can use it
+   - jettero created a room dropper... but he needs to quick
+     adapt the perfect maze algorithm before he can use it
 
 0.03:  Sun Mar 20 08:26:58 EST 2005
    - jettero added a huge test suite for the Tools.pm
