@@ -1,4 +1,4 @@
-# $Id: Basic.pm,v 1.26 2005/03/25 21:19:12 jettero Exp $
+# $Id: Basic.pm,v 1.27 2005/03/25 21:25:22 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::Generator::Basic;
@@ -16,7 +16,10 @@ sub genmap {
     my $opts = $this->gen_opts;
     my ($map, $groups) = $this->SUPER::genmap(@_);
 
-    # $this->mark_various_things
+    # There are a few types of random corridors that look enough like rooms
+    # That I didn't think they should count against the room drop score below.
+    # In fact, we'd really rather cover them up if possible.
+    $this->mark_things_as_pseudo_rooms( $map );
 
     return ($map, $groups);
 }

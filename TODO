@@ -1,7 +1,11 @@
 
-
 - finish the room dropper
-  + this shouldn't take too horribly long
+  + marks pseudo-rooms with a negative corridor count
+
+- add a door dropper...
+  + considers the room/corridor boundaries (secret, locked, stuck, openable)
+  + considers open corridor/corridor boundaries (slso)
+  + considers closed corridor/corridor bondaries (slso)
 
 - make the povray plugin
   + this will be the funnest part of all
