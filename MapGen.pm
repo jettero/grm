@@ -1,4 +1,4 @@
-# $Id: MapGen.pm,v 1.37 2005/03/30 15:39:42 jettero Exp $
+# $Id: MapGen.pm,v 1.38 2005/03/30 16:27:10 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::_group;
@@ -18,6 +18,7 @@ package Games::RolePlay::MapGen;
 use strict;
 use AutoLoader;
 use Carp;
+use Data::Dumper; $Data::Dumper::Indent = 1; $Data::Dumper::SortKeys = 1;
 
 our $VERSION = "0.18";
 our $AUTOLOAD;
@@ -102,6 +103,29 @@ sub new {
 }
 # }}}
 
+# save_map {{{
+sub save_map {
+    my $this     = shift;
+    my $filename = shift;
+
+    open _SAVE, ">$filename" or die "couldn't open $filename for write: $!";
+    print _SAVE Data::Dumper->Dump([$this->{_the_map}, $this->{_the_groups}], [qw($this->{_the_map} $this->{_the_groups})]);
+    close _SAVE;
+}
+# }}}
+# load_map {{{
+sub load_map {
+    my $this     = shift;
+    my $filename = shift;
+
+    open _LOAD, "$filename" or die "couldn't open $filename for read: $!";
+    my $entire_file = <_LOAD>;
+    close _LOAD;
+
+    eval $entire_file;
+    die "ERROR while evaluating saved map: $@" if $@;
+}
+# }}}
 # generate {{{
 sub generate {
     my $this = shift;
