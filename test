@@ -1,13 +1,5 @@
 #!/bin/sh
-# $Id: test,v 1.3 2005/03/20 16:44:55 jettero Exp $
+# $Id: test,v 1.4 2005/03/24 21:29:45 jettero Exp $
 
 ./makeitfromscratch
 make test || exit 1
-
-# echo 
-# echo 
-# echo waiting to show map.txt press enter...
-# echo
-# read X
-
-cat map.txt

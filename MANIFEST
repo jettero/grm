@@ -5,6 +5,6 @@ README
 Makefile.PL
 t/00_load.t
 t/01_mg_new_auto.t
-t/05_generate.t
+t/05_perfect.t
 t/03_tools.t
 TODO

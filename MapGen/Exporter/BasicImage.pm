@@ -1,4 +1,4 @@
-# $Id: BasicImage.pm,v 1.3 2005/03/24 20:50:08 jettero Exp $
+# $Id: BasicImage.pm,v 1.4 2005/03/24 21:29:45 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::Visualization::BasicImage;
@@ -63,7 +63,7 @@ sub _genmap {
     my $gd    = new GD::Image(1+($opts->{x_size} * @{$m->[0]}), 1+($opts->{y_size} * @$m));
     my $white = $gd->colorAllocate(255, 255, 255);
     my $black = $gd->colorAllocate(  0,   0,   0);
-    my $grey  = $gd->colorAllocate(220, 220, 220);
+    my $grey  = $gd->colorAllocate(240, 240, 240);
 
     $gd->interlaced('true');
 

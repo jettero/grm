@@ -1,4 +1,4 @@
-# $Id: Basic.pm,v 1.20 2005/03/24 18:55:10 jettero Exp $
+# $Id: Basic.pm,v 1.21 2005/03/24 21:29:45 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::Generator::Basic;
@@ -26,6 +26,12 @@ sub _genmap {
     my $this = shift;
     my $opts = $this->_gen_opts;
     my ($map, $groups) = $this->SUPER::_genmap(@_);
+
+    my $sum = sub { my $c = 0; for (qw(n s e w)) { $c ++ if $_[0]->{od}{$_} } $c };
+
+    my @end_tiles = grep { $sum->($_) == 1 } map(@$_, @$map);
+
+    die int @end_tiles;
 
     return ($map, $groups);
 }
@@ -55,7 +61,7 @@ Games::RolePlay::MapGen::Generator::Basic - The basic random bounded dungeon gen
 only one direction (in otherwords, if the cell is the end of a dead-end hallway), "erase" that cell
 by removing the corridor.
 
-3. Repeat step #3 sparseness times (ie, if sparseness is five, repeat step #6 five times).
+3. Repeat step #2 sparseness times (ie, if sparseness is five, repeat step #6 five times).
 
 2. Add Rooms
 

@@ -1,2 +1,4 @@
-- Finish the room dropper
-- Make the povray plugin
+- finish the room dropper
+- author the maze pruner
+- split out the generic visualization stuff into a Visualization.pm
+- make the povray plugin
