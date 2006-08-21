@@ -1,4 +1,4 @@
-# $Id: BasicImage.pm,v 1.21 2005/04/04 15:17:19 jettero Exp $
+# $Id: BasicImage.pm,v 1.22 2006/08/21 22:51:16 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::Exporter::BasicImage;
@@ -73,7 +73,6 @@ sub genmap {
     my $green  = $gd->colorAllocate(0x00, 0xbb, 0x00);
     my $purple = $gd->colorAllocate(0xff, 0x00, 0xff);
     my $brown  = $gd->colorAllocate(0xaa, 0x90, 0x00);
-
 
     my $door_arc_color     = $lgrey;
     my $door_color         = $brown;

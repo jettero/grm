@@ -1,5 +1,5 @@
 #!/usr/bin/perl -Iblib/lib
-# $Id: go.pl,v 1.15 2005/04/12 11:13:03 jettero Exp $
+# $Id: go.pl,v 1.16 2006/08/21 22:51:16 jettero Exp $
 # vi:tw=0:
 
 BEGIN { system("make || (perl Makefile.PL && make)") == 0 or die }
@@ -9,8 +9,8 @@ use Games::RolePlay::MapGen;
 
   my $map = new Games::RolePlay::MapGen({
       cell_size=>
-          # "20x20", 
-          "30x30", 
+          "23x23", 
+          # "30x30", 
           # "24x32", 
           # "80x80", 
 
