@@ -1,4 +1,4 @@
-# $Id: 05_export.t,v 1.4 2006/08/22 00:31:22 jettero Exp $
+# $Id: 05_export.t,v 1.5 2006/08/22 15:55:22 jettero Exp $
 
 use strict;
 use Test;
@@ -7,7 +7,7 @@ use Games::RolePlay::MapGen;
 my $map = new Games::RolePlay::MapGen({bounding_box => join("x", 25, 25) });
 generate $map;
 
-plan tests => 3 + 2;
+plan tests => 3 + (25*25);
 
 # if you know of a way to actually test these, you go ahead and email me, ok?
 
@@ -26,9 +26,6 @@ export $map("map.xml");
 ok( -f "map.xml" );
 
 use XML::Simple;
-
-REDO:
-generate $map;
 set_exporter $map("XML");
 export $map("map.xml"); 
 
@@ -40,16 +37,8 @@ my $xmap = XMLin( join("\n", <IN>) )->{'map'}; close IN;
 ## DEBUG ## print OUT Dumper($xmap);
 ## DEBUG ## close OUT;
 
-my $max_y = 0;
-my $max_x = 0;
 for my $row (@{ $xmap->{row} }) {
     for my $tile (@{ $row->{tile} }) {
-        $max_x = $tile->{xpos} if $tile->{xpos} > $max_x;
+        ok( 1 );
     }
-    $max_y = $row->{ypos};
 }
-
-goto REDO unless $max_y == 24 and $max_y == 24;
-
-ok( $max_x, 24 );
-ok( $max_y, 24 );

@@ -1,4 +1,4 @@
-# $Id: XML.pm,v 1.3 2005/04/05 15:05:21 jettero Exp $
+# $Id: XML.pm,v 1.4 2006/08/22 15:55:22 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::Exporter::XML;
@@ -126,6 +126,9 @@ sub genmap {
                 $h->{closure} = $closures if int @$closures;
 
                 push @{ $row->{tile} }, $h;
+
+            } else {
+                push @{ $row->{tile} }, {xpos=>$j, type=>"wall"}; # this didn't used to be here... it made parsing craptastic
             }
         }
 
