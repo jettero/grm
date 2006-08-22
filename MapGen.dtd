@@ -1,0 +1,23 @@
+<!-- 
+     $Id: MapGen.dtd,v 1.1 2006/08/22 16:35:56 jettero Exp $
+-->
+
+<!ELEMENT MapGen (option*, tile_group*, map)>
+<!ELEMENT option EMPTY>
+<!ELEMENT tile_group EMPTY>
+<!ELEMENT closure EMPTY>
+<!ELEMENT map (row*)>
+<!ELEMENT row (tile*)>
+<!ELEMENT tile (closure*)>
+
+<!ATTLIST row ypos CDATA #REQUIRED>
+<!ATTLIST tile xpos CDATA #REQUIRED>
+<!ATTLIST tile type CDATA #REQUIRED>
+<!ATTLIST closure dir CDATA #REQUIRED>
+<!ATTLIST closure type CDATA #REQUIRED>
+<!ATTLIST option name CDATA #REQUIRED>
+<!ATTLIST option value CDATA #REQUIRED>
+<!ATTLIST tile_group name CDATA #REQUIRED>
+<!ATTLIST tile_group type CDATA #REQUIRED>
+<!ATTLIST tile_group loc CDATA #REQUIRED>
+<!ATTLIST tile_group size CDATA #REQUIRED>

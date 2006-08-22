@@ -1,4 +1,4 @@
-# $Id: XML.pm,v 1.4 2006/08/22 15:55:22 jettero Exp $
+# $Id: XML.pm,v 1.5 2006/08/22 16:35:56 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::Exporter::XML;
@@ -33,7 +33,8 @@ sub go {
     my $map = $this->genmap($opts);
     unless( $opts->{fname} eq "-retonly" ) {
         open _MAP_OUT, ">$opts->{fname}" or die "ERROR: couldn't open $opts->{fname} for write: $!";
-        print _MAP_OUT $map;
+        print _MAP_OUT "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n<!DOCTYPE MapGen SYSTEM \"MapGen.dtd\">\n";
+        print _MAP_OUT "\n", $map;
         close _MAP_OUT;
     }
 
@@ -81,7 +82,7 @@ sub genmap {
         push @$groups, $ah->(
             name => $g->{name},
             type => $g->{type},
-            loc  => "(" . join(", ", @{ $g->{loc}  }) . ")",
+            loc  => join(",", @{ $g->{loc}  }),
             size => join("x", @{ $g->{size} }),
         );
     }
