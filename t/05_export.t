@@ -1,11 +1,13 @@
-# $Id: 05_export.t,v 1.6 2006/08/22 16:35:56 jettero Exp $
+# $Id: 05_export.t,v 1.7 2006/08/22 19:19:45 jettero Exp $
 
 use strict;
 use Test;
 
 use Games::RolePlay::MapGen;
 my $map = new Games::RolePlay::MapGen({bounding_box => join("x", 25, 25) });
-generate $map;
+   $map->add_generator_plugin("BasicDoors");
+   $map->generate;
+
 
 plan tests => 3 + (25*25) + 1;
 
@@ -30,7 +32,7 @@ set_exporter $map("XML");
 export $map("map.xml"); 
 
 
-skip( (not (-f "/usr/bin/xmllint")) => system("xmllint --postvalid map.xml &>/dev/null"), 0);
+skip( (not (-f "/usr/bin/xmllint")) => system("xmllint --postvalid --noout map.xml"), 0);
 
 open IN, "map.xml" or die $!;
 my $xmap = XMLin( join("\n", <IN>) )->{'map'}; close IN;

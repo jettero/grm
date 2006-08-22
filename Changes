@@ -1,6 +1,7 @@
 0.27:  Tue Aug 22 11:55:20 EDT 2006
    - jettero updated the xml exporter slightly, added xml validation to the
      exporter test and built a DTD for the XML output.
+   - jettero also added an xsl to transform the xml output into a map in html... (neat, fyi)
 
 0.26:  Mon Apr  4 11:17:19 EDT 2005
    - jettero renamed Visualizations ----> Exporters
