@@ -1,0 +1,13 @@
+#!/bin/bash
+# $Id: ci,v 1.1 2006/08/22 00:31:16 jettero Exp $
+# vi:syntax=gentoo-init-d:
+
+# source /sbin/functions.sh
+# set -e; trap "eend 997" ERR
+
+
+cvs up
+cvs ci -m ci
+
+chmod 700 CVS
+#chmod 755 *.pl
