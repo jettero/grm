@@ -67,7 +67,7 @@
                                     <xsl:value-of select="@dir"/>
                                     <xsl:value-of select="@type"/>
                                     <xsl:if test='@type="door" and @secret="yes"'>secret</xsl:if>
-                                    <xsl:if test='@type="door" and @locked="yes"'>locked</xsl:if>
+                                    <xsl:if test='@type="door" and (@locked="yes" or @stuck="yes")'>locked</xsl:if>
                                 </xsl:for-each>
                                 <xsl:if test="@locked='yes'">
                                     locked
