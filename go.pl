@@ -1,5 +1,5 @@
 #!/usr/bin/perl -Iblib/lib
-# $Id: go.pl,v 1.17 2006/08/22 19:19:45 jettero Exp $
+# $Id: go.pl,v 1.18 2006/08/28 17:18:40 jettero Exp $
 # vi:tw=0:
 
 BEGIN { system("make || (perl Makefile.PL && make)") == 0 or die }
@@ -25,13 +25,13 @@ sub generate {
 
       num_rooms=>
           # "70d4", 
-          "3d8", 
-          # "2d4", 
+          # "3d8", 
+          "2d4", 
 
       bounding_box => 
           # "3x3"
           # "15x15"
-          "30x30"
+          "40x27"
           # "63x22"
           # "50x37"
           # "200x200"
