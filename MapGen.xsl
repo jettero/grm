@@ -2,6 +2,7 @@
 <!DOCTYPE stylesheet [
     <!ENTITY tilegraphic "&#xa0;" >
     <!ENTITY literalspace "&#x20;" >
+    <!ENTITY cellsplit "&#x253c;" >
 ]>
 
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
@@ -26,8 +27,8 @@
                     height: <xsl:value-of select=" substring-after(/MapGen/option[@name='cell_size']/@value, 'x')"/>px;
                 }</xsl:if>
 
-                td.corridor { background: #ccc; border: 1px dashed #bbb; }
-                td.room     { background: #fff; border: 1px dashed #ddd; }
+                td.corridor { background: #ccc; border: 1px dashed #bbb; color: #bbb; }
+                td.room     { background: #fff; border: 1px dashed #ddd; color: #ddd; }
 
                 td.northwall { border-top:    1px solid #333; }
                 td.eastwall  { border-right:  1px solid #333; }
@@ -45,7 +46,7 @@
                 <xsl:for-each select="map/row">
                     <tr>
                         <xsl:for-each select="tile">
-                            <td>
+                            <td align="center" valign="center">
                                 <xsl:attribute name="class">tile <xsl:value-of select="@type"/> <xsl:for-each select="closure">
                                     <xsl:text> </xsl:text>
                                     <xsl:value-of select="@dir"/>
@@ -55,12 +56,7 @@
                                     locked
                                 </xsl:if>
                                 </xsl:attribute>
-                                <xsl:choose>
-                                    <xsl:when test="/MapGen/option[@name='tile_size']/@value = '10 ft'">
-                                        <!-- If you know of other good standard sizes to support, please let me know.  -Paul -->
-                                    </xsl:when>
-                                    <xsl:otherwise>&tilegraphic;</xsl:otherwise>
-                                </xsl:choose>
+                                &tilegraphic;
                             </td>
                         </xsl:for-each>
                     </tr>
