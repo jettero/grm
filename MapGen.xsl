@@ -35,10 +35,25 @@
                 td.southwall { border-bottom: 1px solid #333; }
                 td.westwall  { border-left:   1px solid #333; }
 
-                td.northdoor { border-top:    2px solid brown; }
-                td.eastdoor  { border-right:  2px solid brown; }
-                td.southdoor { border-bottom: 2px solid brown; }
-                td.westdoor  { border-left:   2px solid brown; }
+                td.northdoor { border-top:    2px solid green; }
+                td.eastdoor  { border-right:  2px solid green; }
+                td.southdoor { border-bottom: 2px solid green; }
+                td.westdoor  { border-left:   2px solid green; }
+
+                td.northdoorsecret { border-top:    2px solid blue; }
+                td.eastdoorsecret  { border-right:  2px solid blue; }
+                td.southdoorsecret { border-bottom: 2px solid blue; }
+                td.westdoorsecret  { border-left:   2px solid blue; }
+
+                td.northdoorlocked { border-top:    2px solid red; }
+                td.eastdoorlocked  { border-right:  2px solid red; }
+                td.southdoorlocked { border-bottom: 2px solid red; }
+                td.westdoorlocked  { border-left:   2px solid red; }
+
+                td.northdoorsecretlocked { border-top:    2px solid purple; }
+                td.eastdoorsecretlocked  { border-right:  2px solid purple; }
+                td.southdoorsecretlocked { border-bottom: 2px solid purple; }
+                td.westdoorsecretlocked  { border-left:   2px solid purple; }
             </style>
         </head>
         <body>
@@ -51,6 +66,8 @@
                                     <xsl:text> </xsl:text>
                                     <xsl:value-of select="@dir"/>
                                     <xsl:value-of select="@type"/>
+                                    <xsl:if test='@type="door" and @secret="yes"'>secret</xsl:if>
+                                    <xsl:if test='@type="door" and @locked="yes"'>locked</xsl:if>
                                 </xsl:for-each>
                                 <xsl:if test="@locked='yes'">
                                     locked
