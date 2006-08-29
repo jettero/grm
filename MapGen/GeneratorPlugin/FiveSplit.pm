@@ -1,4 +1,4 @@
-# $Id: FiveSplit.pm,v 1.7 2006/08/29 20:19:29 jettero Exp $
+# $Id: FiveSplit.pm,v 1.8 2006/08/29 20:36:14 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::GeneratorPlugin::FiveSplit;
@@ -58,6 +58,8 @@ sub split_map {
             $tile->{y} = $y;
         }
     }
+
+    $map->interconnect_map; # rebuild the neighbor tables
 }
 # }}}
 # _generate_nextmaprow {{{

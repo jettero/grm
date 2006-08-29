@@ -1,4 +1,4 @@
-# $Id: Tools.pm,v 1.20 2006/08/29 20:04:17 jettero Exp $
+# $Id: Tools.pm,v 1.21 2006/08/29 20:36:14 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 # package ::_interconnected_map {{{
@@ -97,6 +97,7 @@ sub dup {
 
     $this->{$_}     = $that->{$_}     for grep {not ref $that->{$_}} keys %$that;
     $this->{od}{$_} = $that->{od}{$_} for keys %{ $that->{od} };
+    $this->{group}  = $that->{group};
     $this->{_dup} = 1;
 
     return $this;
