@@ -1,4 +1,4 @@
-# $Id: FiveSplit.pm,v 1.3 2006/08/29 18:15:32 jettero Exp $
+# $Id: FiveSplit.pm,v 1.4 2006/08/29 19:37:29 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::GeneratorPlugin::FiveSplit;
@@ -49,6 +49,15 @@ sub split_map {
 
     @$map = map {  $this->_generate_samemaprow( $_, $mults )  } @$map;
     @$map = map {( $this->_generate_nextmaprow( $_, $mults ) )} @$map;
+
+    for my $y ( 0 .. $ysize ) {
+        for my $x ( 0 .. $xsize ) {
+            my $tile = $map->[$y][$x];
+
+            $tile->{x} = $x;
+            $tile->{y} = $y;
+        }
+    }
 }
 # }}}
 # _generate_nextmaprow {{{
@@ -62,8 +71,17 @@ sub _generate_nextmaprow {
     for( 1 .. $mults ) {
         my $another_row = [];
 
-        for my $oldtile (@$oldrow) {
-            push @$another_row, $oldtile->dup;
+        for my $oldtile (@{ $retrows[$#retrows] }) {
+            my $nt = $oldtile->dup;
+
+            if( $oldtile->{type} ) {
+                die "unknown type, assuming open" unless $oldtile->{type} eq "room" or $oldtile->{type} eq "corridor";
+
+                $oldtile->{od}{s} = 1;
+                     $nt->{od}{n} = 1;
+            }
+
+            push @$another_row, $nt;
         }
 
         push @retrows, $another_row;
@@ -83,7 +101,19 @@ sub _generate_samemaprow {
     my $newrow = [];
     for my $oldtile (@$oldrow) {
         push @$newrow, $oldtile;
-        push @$newrow, $oldtile->dup for 1 .. $mults;
+        for ( 1 .. $mults ) {
+            my $nt = $oldtile->dup;
+
+            if( $oldtile->{type} ) {
+                die "unknown type, assuming open" unless $oldtile->{type} eq "room" or $oldtile->{type} eq "corridor";
+
+                $oldtile->{od}{e} = 1;
+                     $nt->{od}{w} = 1;
+            }
+
+            push @$newrow, $nt;
+            $oldtile = $nt;
+        }
     }
 
     return $newrow;

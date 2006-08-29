@@ -1,5 +1,5 @@
 #!/usr/bin/perl -Iblib/lib
-# $Id: go.pl,v 1.21 2006/08/29 18:15:32 jettero Exp $
+# $Id: go.pl,v 1.22 2006/08/29 19:37:29 jettero Exp $
 # vi:tw=0:
 
 BEGIN { system("make || (perl Makefile.PL && make)") == 0 or die }
@@ -29,12 +29,9 @@ sub generate {
           "2d4", 
 
       bounding_box => 
-          # "3x3"
-          "15x15"
+          # "15x15"
+            "20x15"
           # "40x27"
-          # "63x22"
-          # "50x37"
-          # "200x200"
   }); 
 
   add_generator_plugin $map "BasicDoors"; # this should work with basicdoors first or last!

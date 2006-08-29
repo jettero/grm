@@ -1,4 +1,4 @@
-# $Id: Tools.pm,v 1.18 2006/08/29 18:15:32 jettero Exp $
+# $Id: Tools.pm,v 1.19 2006/08/29 19:37:29 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 # package ::_interconnected_map {{{
@@ -90,7 +90,17 @@ use strict;
 
 1;
 
-sub dup { my $this = shift; return bless { %$this, _dup=>1 }, $this->{__c} }
+sub dup {
+    my $that  = shift;
+    my $class = $that->{__c};
+    my $this  = bless {od=>{n=>1, s=>1, e=>1, w=>1}}, $class;
+
+    $this->{$_}     = $that->{$_}     for grep {not ref $that->{$_}} keys %$that;
+    $this->{od}{$_} = $that->{od}{$_} for keys %{ $that->{od} };
+
+    return $this;
+}
+
 sub new { my $class = shift; bless { @_, __c=>$class, v=>0, od=>{n=>0, s=>0, e=>0, w=>0} }, $class }
 sub DESTROY { warn "tile verbosely dying" if $ENV{VERBOSE_TILE_DEATH} }  # search for VERBOSE above...
 # }}}
