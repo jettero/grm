@@ -1,5 +1,5 @@
 #!/usr/bin/perl -Iblib/lib
-# $Id: go.pl,v 1.19 2006/08/29 13:25:42 jettero Exp $
+# $Id: go.pl,v 1.20 2006/08/29 18:12:16 jettero Exp $
 # vi:tw=0:
 
 BEGIN { system("make || (perl Makefile.PL && make)") == 0 or die }
@@ -30,15 +30,15 @@ sub generate {
 
       bounding_box => 
           # "3x3"
-          # "15x15"
-          "40x27"
+          "15x15"
+          # "40x27"
           # "63x22"
           # "50x37"
           # "200x200"
   }); 
 
-  add_generator_plugin $map "BasicDoors";
   add_generator_plugin $map "FiveSplit";
+  add_generator_plugin $map "BasicDoors";
 
   generate $map; 
   export   $map "map.txt";
