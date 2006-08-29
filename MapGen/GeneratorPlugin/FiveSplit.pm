@@ -1,4 +1,4 @@
-# $Id: FiveSplit.pm,v 1.5 2006/08/29 20:04:17 jettero Exp $
+# $Id: FiveSplit.pm,v 1.6 2006/08/29 20:16:50 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::GeneratorPlugin::FiveSplit;
@@ -47,28 +47,15 @@ sub split_map {
     @$map = map {  $this->_generate_samemaprow( $_, $mults )  } @$map;
     @$map = map {( $this->_generate_nextmaprow( $_, $mults ) )} @$map;
 
-    for my $y ( 0 .. $#{ $map } ) {
-        for my $x ( 0 .. $#{ $map->[$y] } ) {
+    my $ysize = $#$map;
+    my $xsize = $#{ $map->[0] };
+
+    for my $y ( 0 .. $ysize ) {
+        for my $x ( 0 .. $xsize ) {
             my $tile = $map->[$y][$x];
 
             $tile->{x} = $x;
             $tile->{y} = $y;
-
-            if( not $tile->{_dup} ) {
-                for my $d (qw(n s)) {
-                    if( $tile->{od}{$d} > 1 ) {
-                        my @a = ($tile);
-                        push @a, $map->[$y][$_] for $x+1 .. $x+$mults;
-                    }
-                }
-
-                for my $d (qw(e w)) {
-                    if( $tile->{od}{$d} > 1 ) {
-                        my @a = ($tile);
-                        push @a, $map->[$_][$x] for $y+1 .. $y+$mults;
-                    }
-                }
-            }
         }
     }
 }
@@ -147,6 +134,9 @@ Games::RolePlay::MapGen::GeneratorPlugin::FiveSplit - Split tiles larger than 5f
     my $map = new Games::RolePlay::MapGen;
     
     $map->add_generator_plugin( "FiveSplit" );
+    # WARNING:  do this before you add treasure, door, and trap plugins, or
+    # those items will all be duplicated along with the tiles!!
+     
 
 =head1 DESCRIPTION
 
