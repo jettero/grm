@@ -1,4 +1,4 @@
-# $Id: BasicDoors.pm,v 1.6 2006/08/29 13:25:42 jettero Exp $
+# $Id: BasicDoors.pm,v 1.7 2006/08/29 20:04:17 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::GeneratorPlugin::BasicDoors;
@@ -84,6 +84,7 @@ sub doorgen {
                                     minor => &choice( @{$minor_dirs->{$dir}} ),
                                 },
 
+                                siblings => [$t, $n],
                             );
                         }
 
