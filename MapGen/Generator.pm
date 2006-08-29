@@ -1,4 +1,4 @@
-# $Id: Generator.pm,v 1.5 2005/04/02 15:43:36 jettero Exp $
+# $Id: Generator.pm,v 1.6 2006/08/29 18:12:16 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::Generator;
@@ -20,6 +20,8 @@ sub new {
         door => [ ],
         encr => [ ],
         tres => [ ],
+
+        post => [ ], # after the entire map is built, this executes on the topnode
     };
 
     return $this;
@@ -54,9 +56,9 @@ sub go {
 
     my ($map, $groups) = $this->genmap( $opts );
 
-    $this->post_genmap( $opts, $map, $groups );
+    my $changed_options = $this->post_genmap( $opts, $map, $groups );
 
-    return ($map, $groups);
+    return ($map, $groups, $changed_options);
 }
 # }}}
 # gen_bounding_size {{{
@@ -80,6 +82,15 @@ sub post_genmap  {
     $this->trapgen(      $opts, $map, $groups );
     $this->encountergen( $opts, $map, $groups );
     $this->treasuregen(  $opts, $map, $groups );
+
+    $this->post( $opts, $map, $groups );
+
+    my $changed_options = {};
+    for my $k (keys %$opts) {
+        $changed_options->{$k} = $opts->{$k} if $opts->{$k} ne $this->{o};
+    }
+
+    return $changed_options;
 }
 # }}}
 
@@ -88,7 +99,9 @@ sub trapgen      { my $this = shift; $_->trapgen(@_)      for @{ $this->{plugins
 sub doorgen      { my $this = shift; $_->doorgen(@_)      for @{ $this->{plugins}{door} } }
 sub encountergen { my $this = shift; $_->encountergen(@_) for @{ $this->{plugins}{encr} } }
 sub treasuregen  { my $this = shift; $_->treasuregen(@_)  for @{ $this->{plugins}{tres} } }
+sub post         { my $this = shift; $_->post(@_)         for @{ $this->{plugins}{post} } }
 
+# add_plugin {{{
 sub add_plugin {
     my $this   = shift;
     my $plugin = shift;
@@ -112,6 +125,7 @@ sub add_plugin {
         push @$pt, $obj;
     }
 }
+# }}}
 
 __END__
 # Below is stub documentation for your module. You better edit it!

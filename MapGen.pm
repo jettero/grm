@@ -1,4 +1,4 @@
-# $Id: MapGen.pm,v 1.58 2006/08/29 13:25:42 jettero Exp $
+# $Id: MapGen.pm,v 1.59 2006/08/29 18:12:16 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen;
@@ -187,8 +187,15 @@ sub generate {
 
     __MADE_GEN_OBJ:
     if( my $gen = $this->{objs}{generator} ) {
+        my $new_opts;
 
-        ($this->{_the_map}, $this->{_the_groups}) = $gen->go( @_ );
+        ($this->{_the_map}, $this->{_the_groups}, $new_opts) = $gen->go( @_ );
+
+        if( $new_opts and keys %$new_opts ) {
+            for my $k (keys %$new_opts) {
+                $this->{$k} = $new_opts->{$k};
+            }
+        }
 
         return;
 

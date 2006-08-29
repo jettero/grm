@@ -1,4 +1,4 @@
-# $Id: FiveSplit.pm,v 1.2 2006/08/29 18:12:16 jettero Exp $
+# $Id: FiveSplit.pm,v 1.3 2006/08/29 18:15:32 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::GeneratorPlugin::FiveSplit;
@@ -9,13 +9,15 @@ use Games::RolePlay::MapGen::Tools qw( roll choice );
 
 1;
 
+# new {{{
 sub new {
     my $class = shift;
     my $this  = [qw(post)]; # general finishing filter
 
     return bless $this, $class;
 }
-
+# }}}
+# post {{{
 sub post {
     my ($this, $opts, $map, $groups) = @_;
 
@@ -35,7 +37,8 @@ sub post {
 
     $this->split_map($mults => $map) if $mults > 1;
 }
-
+# }}}
+# split_map {{{
 sub split_map {
     my $this  = shift;
     my $mults = shift; $mults --; # we use this as a counter of the number of _extra_ tiles to generate (that's one less)
@@ -47,13 +50,14 @@ sub split_map {
     @$map = map {  $this->_generate_samemaprow( $_, $mults )  } @$map;
     @$map = map {( $this->_generate_nextmaprow( $_, $mults ) )} @$map;
 }
-
+# }}}
+# _generate_nextmaprow {{{
 sub _generate_nextmaprow {
     my $this   = shift;
     my $oldrow = shift;
     my $mults  = shift;
 
-    my @retrows = ($newrow);
+    my @retrows = ($oldrow);
 
     for( 1 .. $mults ) {
         my $another_row = [];
@@ -67,9 +71,10 @@ sub _generate_nextmaprow {
 
     my $newrow = $oldrow;
 
-    return $newrow;
+    return @retrows;
 }
-
+# }}}
+# _generate_samemaprow {{{
 sub _generate_samemaprow {
     my $this   = shift;
     my $oldrow = shift;
@@ -83,6 +88,7 @@ sub _generate_samemaprow {
 
     return $newrow;
 }
+# }}}
 
 __END__
 # Below is stub documentation for your module. You better edit it!
