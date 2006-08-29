@@ -1,4 +1,4 @@
-# $Id: FiveSplit.pm,v 1.8 2006/08/29 20:36:14 jettero Exp $
+# $Id: FiveSplit.pm,v 1.9 2006/08/29 21:45:45 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::GeneratorPlugin::FiveSplit;
@@ -22,16 +22,11 @@ sub pre {
     my ($this, $opts, $map, $groups) = @_;
 
     my $mults = 0;
-    if( $opts->{tile_size} =~ m/(\d+)\s*ft/ ) {
-        my $ft = $1;
-        $mults = $ft / 5;
-        die "$opts->{tile_size} <-- tile size must be evenly divisible by 5ft in order to FiveSplit" if $mults =~ m/\./;
+    my $ft = int $opts->{tile_size};
+    $mults = $ft / 5;
+    die "$opts->{tile_size} <-- tile size must be evenly divisible by 5 in order to FiveSplit" if $mults =~ m/\./;
 
-        $opts->{tile_size} = "5 ft";
-
-    } else {
-        die "$opts->{tile_size} <-- tile size must be measured in integer feet in order to FiveSplit";
-    }
+    $opts->{tile_size} = 5;
 
     $opts->{bounding_box} = join("x", map { $_*$mults } split /x/, $opts->{bounding_box});
 

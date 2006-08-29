@@ -1,4 +1,4 @@
-# $Id: BasicDoors.pm,v 1.7 2006/08/29 20:04:17 jettero Exp $
+# $Id: BasicDoors.pm,v 1.8 2006/08/29 21:45:45 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::GeneratorPlugin::BasicDoors;
@@ -11,6 +11,7 @@ $Games::RolePlay::MapGen::known_opts{       "open_room_corridor_door_percent" } 
 $Games::RolePlay::MapGen::known_opts{     "closed_room_corridor_door_percent" } = { door =>  5, secret => 95, stuck => 10, locked => 30 };
 $Games::RolePlay::MapGen::known_opts{   "open_corridor_corridor_door_percent" } = { door =>  1, secret => 10, stuck => 25, locked => 50 };
 $Games::RolePlay::MapGen::known_opts{ "closed_corridor_corridor_door_percent" } = { door =>  1, secret => 95, stuck => 10, locked => 30 };
+$Games::RolePlay::MapGen::known_opts{ "max_span"                              } = 20;
 
 1;
 
@@ -72,6 +73,10 @@ sub doorgen {
                             my $d2 = sprintf("(%2d, %2d, $dir)", $j, $i);
 
                             # print STDERR "$d1 dooring $d2\n";
+
+                            # Even when we're successfull, we won't make a door
+                            # unless we can span an opening entirely (using
+                            # walls).
 
                             my $opp = $Games::RolePlay::MapGen::opp{$dir};
 
@@ -141,6 +146,12 @@ Notice that there are no room_room settings.  If any two tiles are both
 room type tiles, then the tile is skipped unless the tiles are in different
 rooms.  If they _are_ in different rooms, then the opening is treated as if
 it were a room_corridor opening (whether open or closed).
+
+=head2 max_span
+
+In order to put a door somewhere, and have it make sense, the BasicDoors plugin
+builds walls around the door to complete a span and close something off.  It
+will not do this for a span larger than max_span.
 
 =head1 SEE ALSO
 

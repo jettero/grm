@@ -1,4 +1,4 @@
-# $Id: MapGen.pm,v 1.59 2006/08/29 18:12:16 jettero Exp $
+# $Id: MapGen.pm,v 1.60 2006/08/29 21:45:45 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen;
@@ -18,7 +18,7 @@ our %known_opts = (
     generator              => "Basic",
     exporter               => "Text",
     bounding_box           => "50x50",
-    tile_size              => "10 ft",
+    tile_size              => 10,
     cell_size              => "20x20",
 
     num_rooms              => "1d4+1",
