@@ -1,5 +1,5 @@
 #!/usr/bin/perl -Iblib/lib
-# $Id: go.pl,v 1.25 2006/08/29 20:39:13 jettero Exp $
+# $Id: go.pl,v 1.26 2006/08/29 20:39:47 jettero Exp $
 # vi:tw=0:
 
 BEGIN { system("make || (perl Makefile.PL && make)") == 0 or die }
@@ -17,7 +17,7 @@ system("chmod 644     ~/www/MapGen.*")   == 0 or die;
 
 sub generate {
   my $map = new Games::RolePlay::MapGen({
-      tile_size => "10 ft",
+      tile_size => "15 ft",
 
       cell_size=>
           "23x23", 
