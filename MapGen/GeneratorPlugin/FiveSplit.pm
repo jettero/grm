@@ -1,4 +1,4 @@
-# $Id: FiveSplit.pm,v 1.6 2006/08/29 20:16:50 jettero Exp $
+# $Id: FiveSplit.pm,v 1.7 2006/08/29 20:19:29 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::GeneratorPlugin::FiveSplit;
@@ -12,13 +12,13 @@ use Games::RolePlay::MapGen::Tools qw( roll choice );
 # new {{{
 sub new {
     my $class = shift;
-    my $this  = [qw(post)]; # general finishing filter
+    my $this  = [qw(pre)]; # general finishing filter that happens BEFORE doors, treasures, and the like
 
     return bless $this, $class;
 }
 # }}}
-# post {{{
-sub post {
+# pre {{{
+sub pre {
     my ($this, $opts, $map, $groups) = @_;
 
     my $mults = 0;
@@ -134,9 +134,6 @@ Games::RolePlay::MapGen::GeneratorPlugin::FiveSplit - Split tiles larger than 5f
     my $map = new Games::RolePlay::MapGen;
     
     $map->add_generator_plugin( "FiveSplit" );
-    # WARNING:  do this before you add treasure, door, and trap plugins, or
-    # those items will all be duplicated along with the tiles!!
-     
 
 =head1 DESCRIPTION
 

@@ -1,4 +1,4 @@
-# $Id: Generator.pm,v 1.6 2006/08/29 18:12:16 jettero Exp $
+# $Id: Generator.pm,v 1.7 2006/08/29 20:19:29 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::Generator;
@@ -16,12 +16,14 @@ sub new {
     my $this  = bless {o => {@_}}, $class;
 
     $this->{plugins} = {
+         pre => [ ], # after the entire map is built, this executes on the topnode (before treasure and traps are added)
+
         trap => [ ],
         door => [ ],
         encr => [ ],
         tres => [ ],
 
-        post => [ ], # after the entire map is built, this executes on the topnode
+        post => [ ], # after the entire map is built and treasure traps and doors are added
     };
 
     return $this;
@@ -78,6 +80,8 @@ sub post_genmap  {
     my $this = shift;
     my ($opts, $map, $groups) = @_;
 
+    $this->pre( $opts, $map, $groups );
+
     $this->doorgen(      $opts, $map, $groups );
     $this->trapgen(      $opts, $map, $groups );
     $this->encountergen( $opts, $map, $groups );
@@ -100,6 +104,7 @@ sub doorgen      { my $this = shift; $_->doorgen(@_)      for @{ $this->{plugins
 sub encountergen { my $this = shift; $_->encountergen(@_) for @{ $this->{plugins}{encr} } }
 sub treasuregen  { my $this = shift; $_->treasuregen(@_)  for @{ $this->{plugins}{tres} } }
 sub post         { my $this = shift; $_->post(@_)         for @{ $this->{plugins}{post} } }
+sub pre          { my $this = shift; $_->pre(@_)          for @{ $this->{plugins}{pre} } }
 
 # add_plugin {{{
 sub add_plugin {
