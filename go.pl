@@ -1,5 +1,5 @@
 #!/usr/bin/perl -Iblib/lib
-# $Id: go.pl,v 1.18 2006/08/28 17:18:40 jettero Exp $
+# $Id: go.pl,v 1.19 2006/08/29 13:25:42 jettero Exp $
 # vi:tw=0:
 
 BEGIN { system("make || (perl Makefile.PL && make)") == 0 or die }
@@ -38,6 +38,8 @@ sub generate {
   }); 
 
   add_generator_plugin $map "BasicDoors";
+  add_generator_plugin $map "FiveSplit";
+
   generate $map; 
   export   $map "map.txt";
   save_map $map "map.map";

@@ -1,4 +1,4 @@
-# $Id: BasicDoors.pm,v 1.5 2005/04/02 23:47:06 jettero Exp $
+# $Id: BasicDoors.pm,v 1.6 2006/08/29 13:25:42 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::GeneratorPlugin::BasicDoors;
@@ -103,7 +103,7 @@ __END__
 
 =head1 NAME
 
-Games::RolePlay::MapGen::GeneratorPlugin::BasicDoorsAndTraps - The basic generator with a simple doors and traps generator
+Games::RolePlay::MapGen::GeneratorPlugin::BasicDoors - The basic generator for simple doors.
 
 =head1 SYNOPSIS
 
