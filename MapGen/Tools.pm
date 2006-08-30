@@ -1,4 +1,4 @@
-# $Id: Tools.pm,v 1.21 2006/08/29 20:36:14 jettero Exp $
+# $Id: Tools.pm,v 1.22 2006/08/30 17:03:05 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 # package ::_interconnected_map {{{
@@ -23,6 +23,23 @@ sub interconnect_map {
             $map->[$i][$j]->{nb}{n} = $map->[$i-1][$j] unless $i == 0;
             $map->[$i][$j]->{nb}{e} = $map->[$i][$j+1] unless $j == $jend;
             $map->[$i][$j]->{nb}{w} = $map->[$i][$j-1] unless $j == 0;
+        }
+    }
+
+    # check
+    for my $y (0 .. $#$map) {
+        for my $x (0 .. $#{ $map->[$y] }) {
+            for my $d (qw(n e s w)) {
+                my $o = {n=>"s", s=>"n", e=>"w", w=>"e"}->{$d};
+
+                my $t = $map->[$y][$x];
+                my $n = $t->{nb}{$d};
+
+                next unless $n;
+
+                warn "od issues with ($x, $y):$d-$o" unless $t->{od}{$d} == $n->{od}{$o};
+                warn "nb issues with ($x, $y):$d-$o" unless $n->{nb}{$o} == $t;
+            }
         }
     }
 }

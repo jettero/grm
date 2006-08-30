@@ -1,4 +1,4 @@
-# $Id: FiveSplit.pm,v 1.10 2006/08/30 13:10:24 jettero Exp $
+# $Id: FiveSplit.pm,v 1.11 2006/08/30 17:03:05 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::GeneratorPlugin::FiveSplit;
@@ -42,11 +42,8 @@ sub split_map {
     @$map = map {  $this->_generate_samemaprow( $_, $mults )  } @$map;
     @$map = map {( $this->_generate_nextmaprow( $_, $mults ) )} @$map;
 
-    my $ysize = $#$map;
-    my $xsize = $#{ $map->[0] };
-
-    for my $y ( 0 .. $ysize ) {
-        for my $x ( 0 .. $xsize ) {
+    for my $y ( 0 .. $#$map ) {
+        for my $x ( 0 .. $#{ $map->[$y] }) {
             my $tile = $map->[$y][$x];
 
             $tile->{x} = $x;
