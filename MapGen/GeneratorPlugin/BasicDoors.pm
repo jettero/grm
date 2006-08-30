@@ -1,4 +1,4 @@
-# $Id: BasicDoors.pm,v 1.15 2006/08/30 17:03:05 jettero Exp $
+# $Id: BasicDoors.pm,v 1.16 2006/08/30 17:31:41 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::GeneratorPlugin::BasicDoors;
@@ -76,8 +76,11 @@ sub doorgen {
 
                             my ($span, $nspn) = $this->_find_span($dir=>$opp, $t=>$n);
 
-                            $_{_bchkt}{$dir} = $_->{od}{$dir} = 0 for @$span;
-                            $_{_bchkt}{$opp} = $_->{od}{$opp} = 0 for @$nspn;
+                                $_->{od}{$dir} = 0 for @$span;
+                            $_->{_bchkt}{$dir} = 1 for @$span;
+
+                                $_->{od}{$opp} = 0 for @$nspn;
+                            $_->{_bchkt}{$opp} = 1 for @$nspn;
 
                             $t = choice(@$span);
                             $n = $t->{nb}{$dir};
@@ -95,12 +98,10 @@ sub doorgen {
                                     major => &choice( $dir, $opp ),
                                     minor => &choice( @{$minor_dirs->{$dir}} ),
                                 },
-
-                                siblings => [$t, $n],
                             );
                         }
 
-                        $t->{_bchkt}{$dir} = 1;
+                        # $t->{_bchkt}{$dir} = 1; # handled above in the span now
                     }
                 }
             }
@@ -113,19 +114,23 @@ sub doorgen {
 # _find_span {{{
 sub _find_span {
     my $this = shift;
-    my $opp  = shift;
     my $dir  = shift;
-    my $span = [shift];
-    my $nspn = [shift];
+    my $opp  = shift;
+    my $t    = shift;
+    my $n    = shift;
+    my $span = [$t];
+    my $nspn = [$n];
+
+    warn "WARNING: something is fishy $t->{x},$t->{y}:$dir nb!> $n->{x},$n->{y}:$opp" unless $t->{nb}{$dir} == $n;
+    warn "WARNING: something is fishy $t->{x},$t->{y}:$dir <!nb $n->{x},$n->{y}:$opp" unless $n->{nb}{$opp} == $t;
 
     my ($ud, $pd) = (qw(n s));
        ($ud, $pd) = (qw(e w)) if $dir eq "n" or $dir eq "s";
 
     my $ls = 0;
-    my ($t, $n);
     while( $ls != int @$span ) { $ls = int @$span;
         $t = $span->[0];
-        $n = $nspn->[0];
+        $n = $nspn->[0]; warn "WARNING: something is fishy" unless $n->{nb}{$opp} == $t and $t->{nb}{$dir} == $n;
         if( $t->{od}{$ud} == 1 and (my $c = $t->{nb}{$ud}) ) {
             print DGL "\t\t ud t.od t.nb clear\n";
             if( $n->{od}{$ud} == 1 and (my $d = $n->{nb}{$ud}) ) {
@@ -142,7 +147,7 @@ sub _find_span {
         }
 
         $t = $span->[$#{ $span }];
-        $n = $nspn->[$#{ $nspn }];
+        $n = $nspn->[$#{ $nspn }]; warn "WARNING: something is fishy" unless $n->{nb}{$opp} == $t and $t->{nb}{$dir} == $n;
         if( $t->{od}{$pd} == 1 and (my $c = $t->{nb}{$pd}) ) {
             print DGL "\t\t pd t.od t.nb clear\n";
             if( $n->{od}{$pd} == 1 and (my $d = $n->{nb}{$pd}) ) {

@@ -1,4 +1,4 @@
-# $Id: Tools.pm,v 1.22 2006/08/30 17:03:05 jettero Exp $
+# $Id: Tools.pm,v 1.23 2006/08/30 17:31:41 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 # package ::_interconnected_map {{{
@@ -19,6 +19,7 @@ sub interconnect_map {
         my $jend = $#{ $map->[$i] };
 
         for my $j (0 .. $jend) {
+            $map->[$i][$j]->{nb} = {}; # clear it all out
             $map->[$i][$j]->{nb}{s} = $map->[$i+1][$j] unless $i == $#$map;
             $map->[$i][$j]->{nb}{n} = $map->[$i-1][$j] unless $i == 0;
             $map->[$i][$j]->{nb}{e} = $map->[$i][$j+1] unless $j == $jend;

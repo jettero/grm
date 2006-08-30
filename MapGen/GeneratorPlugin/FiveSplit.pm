@@ -1,4 +1,4 @@
-# $Id: FiveSplit.pm,v 1.11 2006/08/30 17:03:05 jettero Exp $
+# $Id: FiveSplit.pm,v 1.12 2006/08/30 17:31:41 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::GeneratorPlugin::FiveSplit;
@@ -48,8 +48,6 @@ sub split_map {
 
             $tile->{x} = $x;
             $tile->{y} = $y;
-
-            delete $tile->{nb}; # this is wrong now and rebuilt below
         }
     }
 
