@@ -59,9 +59,9 @@
         <body>
             <table cellspacing="0" cellpadding="0" class="map">
                 <xsl:for-each select="map/row">
-                    <tr> <xsl:variable name="y" select="position()"/>
+                    <tr> <xsl:variable name="y" select="position()-1"/>
                         <xsl:for-each select="tile">
-                            <td align="center" valign="center"> <xsl:variable name="x" select="position()"/>
+                            <td align="center" valign="center"> <xsl:variable name="x" select="position()-1"/>
                                 <xsl:attribute name="class">tile <xsl:value-of select="@type"/> <xsl:for-each select="closure">
                                     <xsl:text> </xsl:text>
                                     <xsl:value-of select="@dir"/>
@@ -73,7 +73,7 @@
                                     locked
                                 </xsl:if>
                                 </xsl:attribute>
-                                <xsl:attribute name="title">(<xsl:value-of select="$x-1"/>,<xsl:value-of select="$y-1"/>)</xsl:attribute>
+                                <xsl:attribute name="title">(<xsl:value-of select="$x"/>,<xsl:value-of select="$y"/>)</xsl:attribute>
                                 &tilegraphic;
                             </td>
                         </xsl:for-each>

@@ -1,4 +1,4 @@
-# $Id: BasicDoors.pm,v 1.11 2006/08/30 14:29:09 jettero Exp $
+# $Id: BasicDoors.pm,v 1.12 2006/08/30 14:58:49 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::GeneratorPlugin::BasicDoors;
@@ -126,7 +126,7 @@ sub _find_span {
     while( $ls != int @$span ) { $ls = int @$span;
         $t = $span->[0];
         $n = $nspn->[0];
-        print DGL "\t consider \$t($t->{x},$t->{y}):$ud and \$n($n->{x},$n->{y}):$ud -- tod.$t->{od}{$ud} nod.$n->{od}{$ud}\n";
+        print DGL "\t consider \$t($t->{x},$t->{y}):$ud and \$n($n->{x},$n->{y}):$ud -- tod.$t->{od}{$ud} nod.$n->{od}{$ud} -- tnb.$t->{nb}{$ud}{x},$t->{nb}{$ud}{y}:$t->{nb}{$ud}{od}{$dir} nnb.$n->{nb}{$ud}{x},$n->{nb}{$ud}{y}\n";
         if( $t->{od}{$ud} == 1 and (my $c = $t->{nb}{$ud}) ) {
             if( $n->{od}{$ud} == 1 and (my $d = $n->{nb}{$ud}) ) {
                 if( $c->{od}{$dir} == 1 ) {
@@ -138,7 +138,7 @@ sub _find_span {
 
         $t = $span->[$#{ $span }];
         $n = $nspn->[$#{ $nspn }];
-        print DGL "\t consider \$t($t->{x},$t->{y}):$pd and \$n($n->{x},$n->{y}):$pd -- tod.$t->{od}{$pd} nod.$n->{od}{$pd}\n";
+        print DGL "\t consider \$t($t->{x},$t->{y}):$pd and \$n($n->{x},$n->{y}):$pd -- tod.$t->{od}{$pd} nod.$n->{od}{$pd} -- tnb.$t->{nb}{$pd}{x},$t->{nb}{$pd}{y}:$t->{nb}{$ud}{od}{$dir} nnb.$n->{nb}{$pd}{x},$n->{nb}{$pd}{y}\n";
         if( $t->{od}{$pd} == 1 and (my $c = $t->{nb}{$pd}) ) {
             if( $n->{od}{$pd} == 1 and (my $d = $n->{nb}{$pd}) ) {
                 if( $c->{od}{$dir} == 1 ) {
