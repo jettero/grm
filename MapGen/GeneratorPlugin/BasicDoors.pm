@@ -1,4 +1,4 @@
-# $Id: BasicDoors.pm,v 1.9 2006/08/30 12:21:49 jettero Exp $
+# $Id: BasicDoors.pm,v 1.10 2006/08/30 13:10:24 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::GeneratorPlugin::BasicDoors;
@@ -38,6 +38,9 @@ sub doorgen {
         w => [qw(n s)],
     };
 
+    warn "generating doorgen.log";
+    open DGL, ">doorgen.log" or die $!;
+
     for my $i ( 0 .. $#$map ) {
         my $jend = $#{ $map->[$i] };
 
@@ -45,7 +48,7 @@ sub doorgen {
             my $t = $map->[$i][$j];
 
             if( $t->{type} ) {
-                for my $dir (qw(n e s w)) {
+                for my $dir (qw(n e s w)) { my $opp = $Games::RolePlay::MapGen::opp{$dir};
                     my $n = $t->{nb}{$dir};
                     next unless $n and $n->{type};
 
@@ -69,10 +72,9 @@ sub doorgen {
                         die "chances error for $tkey" unless defined $chances;
 
                         if( (my $r = roll(1, 10000)) <= (my $c = $chances->{door}*100) ) {
-                            my $opp = $Games::RolePlay::MapGen::opp{$dir};
-                            my ($span, $nspn) = $this->_find_span($dir=>$opp, $t=>$n);
+                            print DGL "\n-- \$t is ($t->{x},$t->{y}):$dir and \$n is ($n->{x},$n->{y}):$opp max_span=$opts->{max_span}; tile_size=$opts->{tile_size}\n";
 
-                            warn "check max_span here $opts->{max_span} $opts->{tile_size} ias=" . (int @$span);
+                            my ($span, $nspn) = $this->_find_span($dir=>$opp, $t=>$n);
 
                             $_{_bchkt}{$dir} = $_->{od}{$dir} = 0 for @$span;
                             $_{_bchkt}{$opp} = $_->{od}{$opp} = 0 for @$nspn;
@@ -80,10 +82,10 @@ sub doorgen {
                             $t = choice(@$span);
                             $n = $t->{nb}{$dir};
 
+                            print DGL "\tintspan=", (int@$span), " chosen \$t is ($t->{x},$t->{y}):$dir and \$n is ($n->{x},$n->{y}):$opp\n";
+
                             my $d1 = sprintf("%40s: (%5d, %5d)", $tkey, $r, $c);
                             my $d2 = sprintf("(%2d, %2d, $dir)", $j, $i);
-
-                            # print STDERR "$d1 dooring $d2\n";
 
                             $t->{od}{$dir} = $n->{od}{$opp} = &_door(
 
