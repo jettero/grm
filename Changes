@@ -1,3 +1,6 @@
+0.29:  Wed Aug 30 14:22:43 EDT 2006
+   - jettero added a corridor widening generator plugin.
+
 0.28:  Mon Aug 28 14:55:46 EDT 2006
    - jettero fixed a few distrubution things and skelled a
      FiveSplit generator plugin
