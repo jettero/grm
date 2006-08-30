@@ -9,3 +9,4 @@ Makefile
 maze.log
 tmon.out
 debug.log
+doorgen.log
