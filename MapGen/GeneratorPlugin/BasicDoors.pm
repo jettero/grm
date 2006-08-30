@@ -1,4 +1,4 @@
-# $Id: BasicDoors.pm,v 1.16 2006/08/30 17:31:41 jettero Exp $
+# $Id: BasicDoors.pm,v 1.17 2006/08/30 17:50:32 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::GeneratorPlugin::BasicDoors;
@@ -11,7 +11,7 @@ $Games::RolePlay::MapGen::known_opts{       "open_room_corridor_door_percent" } 
 $Games::RolePlay::MapGen::known_opts{     "closed_room_corridor_door_percent" } = { door =>  5, secret => 95, stuck => 10, locked => 30 };
 $Games::RolePlay::MapGen::known_opts{   "open_corridor_corridor_door_percent" } = { door =>  1, secret => 10, stuck => 25, locked => 50 };
 $Games::RolePlay::MapGen::known_opts{ "closed_corridor_corridor_door_percent" } = { door =>  1, secret => 95, stuck => 10, locked => 30 };
-$Games::RolePlay::MapGen::known_opts{ "max_span"                              } = 20;
+$Games::RolePlay::MapGen::known_opts{ "max_span"                              } = 50;
 
 1;
 
@@ -38,8 +38,10 @@ sub doorgen {
         w => [qw(n s)],
     };
 
-    warn "generating doorgen.log";
-    open DGL, ">doorgen.log" or die $!;
+    my $max_span = $opts->{max_span} / ($opts->{tile_size} || 1);
+       $max_span = 1 unless $max_span > 0;
+
+       warn "max_span=$max_span";
 
     for my $i ( 0 .. $#$map ) {
         my $jend = $#{ $map->[$i] };
@@ -72,20 +74,18 @@ sub doorgen {
                         die "chances error for $tkey" unless defined $chances;
 
                         if( (my $r = roll(1, 10000)) <= (my $c = $chances->{door}*100) ) {
-                            print DGL "\n-- \$t is ($t->{x},$t->{y}):$dir and \$n is ($n->{x},$n->{y}):$opp max_span=$opts->{max_span}; tile_size=$opts->{tile_size}\n";
-
                             my ($span, $nspn) = $this->_find_span($dir=>$opp, $t=>$n);
 
-                                $_->{od}{$dir} = 0 for @$span;
                             $_->{_bchkt}{$dir} = 1 for @$span;
-
-                                $_->{od}{$opp} = 0 for @$nspn;
                             $_->{_bchkt}{$opp} = 1 for @$nspn;
+
+                            next unless @$span <= $max_span;
+
+                            $_->{od}{$dir} = 0 for @$span;
+                            $_->{od}{$opp} = 0 for @$nspn;
 
                             $t = choice(@$span);
                             $n = $t->{nb}{$dir};
-
-                            print DGL "\tintspan=", (int@$span), " chosen \$t is ($t->{x},$t->{y}):$dir and \$n is ($n->{x},$n->{y}):$opp\n";
 
                             my $d1 = sprintf("%40s: (%5d, %5d)", $tkey, $r, $c);
                             my $d2 = sprintf("(%2d, %2d, $dir)", $j, $i);
@@ -132,16 +132,10 @@ sub _find_span {
         $t = $span->[0];
         $n = $nspn->[0]; warn "WARNING: something is fishy" unless $n->{nb}{$opp} == $t and $t->{nb}{$dir} == $n;
         if( $t->{od}{$ud} == 1 and (my $c = $t->{nb}{$ud}) ) {
-            print DGL "\t\t ud t.od t.nb clear\n";
             if( $n->{od}{$ud} == 1 and (my $d = $n->{nb}{$ud}) ) {
-                print DGL "\t\t ud n.od n.nb clear\n";
                 if( $c->{od}{$dir} == 1 ) {
-                    print DGL "\t\t added\n";
                     unshift @$span, $c;
                     unshift @$nspn, $d;
-
-                } else {
-                    print DGL "\t\t ud nb od NOT clear ($c->{od}{$dir}, $d->{od}{$opp}) \n";
                 }
             }
         }
@@ -149,16 +143,10 @@ sub _find_span {
         $t = $span->[$#{ $span }];
         $n = $nspn->[$#{ $nspn }]; warn "WARNING: something is fishy" unless $n->{nb}{$opp} == $t and $t->{nb}{$dir} == $n;
         if( $t->{od}{$pd} == 1 and (my $c = $t->{nb}{$pd}) ) {
-            print DGL "\t\t pd t.od t.nb clear\n";
             if( $n->{od}{$pd} == 1 and (my $d = $n->{nb}{$pd}) ) {
-                print DGL "\t\t pd n.od n.nb clear\n";
                 if( $c->{od}{$dir} == 1 ) {
-                    print DGL "\t\t added\n";
                     push @$span, $c;
                     push @$nspn, $d;
-
-                } else {
-                    print DGL "\t\t pd nb od NOT clear ($c->{od}{$dir}, $d->{od}{$opp}) \n";
                 }
             }
         }
