@@ -1,4 +1,4 @@
-# $Id: BasicDoors.pm,v 1.8 2006/08/29 21:45:45 jettero Exp $
+# $Id: BasicDoors.pm,v 1.9 2006/08/30 12:21:49 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::GeneratorPlugin::BasicDoors;
@@ -69,16 +69,21 @@ sub doorgen {
                         die "chances error for $tkey" unless defined $chances;
 
                         if( (my $r = roll(1, 10000)) <= (my $c = $chances->{door}*100) ) {
+                            my $opp = $Games::RolePlay::MapGen::opp{$dir};
+                            my ($span, $nspn) = $this->_find_span($dir=>$opp, $t=>$n);
+
+                            warn "check max_span here $opts->{max_span} $opts->{tile_size} ias=" . (int @$span);
+
+                            $_{_bchkt}{$dir} = $_->{od}{$dir} = 0 for @$span;
+                            $_{_bchkt}{$opp} = $_->{od}{$opp} = 0 for @$nspn;
+
+                            $t = choice(@$span);
+                            $n = $t->{nb}{$dir};
+
                             my $d1 = sprintf("%40s: (%5d, %5d)", $tkey, $r, $c);
                             my $d2 = sprintf("(%2d, %2d, $dir)", $j, $i);
 
                             # print STDERR "$d1 dooring $d2\n";
-
-                            # Even when we're successfull, we won't make a door
-                            # unless we can span an opening entirely (using
-                            # walls).
-
-                            my $opp = $Games::RolePlay::MapGen::opp{$dir};
 
                             $t->{od}{$dir} = $n->{od}{$opp} = &_door(
 
@@ -101,6 +106,46 @@ sub doorgen {
     }
 
     delete $_->{_bchkt} for map(@$_, @$map); # btw, bchkt stands for: basic doors checked tile [direction]
+}
+# }}}
+# _find_span {{{
+sub _find_span {
+    my $this = shift;
+    my $opp  = shift;
+    my $dir  = shift;
+    my $span = [shift];
+    my $nspn = [shift];
+
+    my ($ud, $pd) = (qw(n s));
+       ($ud, $pd) = (qw(e w)) if $dir eq "n" or $dir eq "s";
+
+    my $ls = 0;
+    my ($t, $n);
+    while( $ls != int @$span ) { $ls = int @$span;
+        $t = $span->[0];
+        $n = $nspn->[0];
+        if( $t->{od}{$ud} == 1 and (my $c = $t->{nb}{$ud}) ) {
+            if( $n->{od}{$ud} == 1 and (my $d = $n->{nb}{$ud}) ) {
+                if( $c->{od}{$dir} == 1 ) {
+                    unshift @$span, $c;
+                    unshift @$nspn, $d;
+                }
+            }
+        }
+
+        $t = $span->[$#{ $span }];
+        $n = $nspn->[$#{ $nspn }];
+        if( $t->{od}{$pd} == 1 and (my $c = $t->{nb}{$pd}) ) {
+            if( $n->{od}{$pd} == 1 and (my $d = $n->{nb}{$pd}) ) {
+                if( $c->{od}{$dir} == 1 ) {
+                    push @$span, $c;
+                    push @$nspn, $d;
+                }
+            }
+        }
+    }
+
+    return ($span, $nspn);
 }
 # }}}
 
