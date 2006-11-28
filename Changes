@@ -1,6 +1,10 @@
+0.30:  Tue Nov 28 13:33:16 EST 2006
+   - jettero added XML::Simple to the prereqs
+
 0.29:  Wed Aug 30 14:22:43 EDT 2006
-   - jettero added a corridor widening generator plugin and adapted BasicDoors
-     to be able to span gaps... it's all very neato.
+   - jettero added a corridor widening generator plugin and
+     adapted BasicDoors to be able to span gaps... it's all
+     very neato.
 
 0.28:  Mon Aug 28 14:55:46 EDT 2006
    - jettero fixed a few distrubution things and skelled a

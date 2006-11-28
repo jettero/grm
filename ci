@@ -1,13 +1,28 @@
 #!/bin/bash
-# $Id: ci,v 1.1 2006/08/22 00:31:16 jettero Exp $
 # vi:syntax=gentoo-init-d:
 
-# source /sbin/functions.sh
-# set -e; trap "eend 997" ERR
+source /sbin/functions.sh
+set -e; trap "eend 997" ERR
 
+ebegin "pulling/merging updates"
+cg update
+eend $?
 
-cvs up
-cvs ci -m ci
+ebegin "updating update index (cache)"
+(git-update-index --refresh >/dev/null)
+einfo "(updated)";
+eend $?
 
-chmod 700 CVS
-#chmod 755 *.pl
+ebegin "committing changes"
+if [ -z "$*" ]; then
+    cg commit -m "$0"
+
+else 
+    cg commit -m "$*"
+fi
+eend $?
+
+ebegin "pushing commit to repo"
+cg push
+eend $?
+
