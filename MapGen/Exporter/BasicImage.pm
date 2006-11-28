@@ -1,4 +1,3 @@
-# $Id: BasicImage.pm,v 1.22 2006/08/21 22:51:16 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::Exporter::BasicImage;

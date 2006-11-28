@@ -1,4 +1,3 @@
-# $Id: 07_basic.t,v 1.6 2005/04/04 15:17:20 jettero Exp $
 
 use strict;
 use Test;

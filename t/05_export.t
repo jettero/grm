@@ -1,4 +1,3 @@
-# $Id: 05_export.t,v 1.7 2006/08/22 19:19:45 jettero Exp $
 
 use strict;
 use Test;

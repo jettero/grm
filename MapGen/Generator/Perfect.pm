@@ -1,4 +1,3 @@
-# $Id: Perfect.pm,v 1.9 2005/04/02 17:26:17 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::Generator::Perfect;

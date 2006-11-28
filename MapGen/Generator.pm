@@ -1,4 +1,3 @@
-# $Id: Generator.pm,v 1.7 2006/08/29 20:19:29 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::Generator;

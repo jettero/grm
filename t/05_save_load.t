@@ -1,4 +1,3 @@
-# $Id: 05_save_load.t,v 1.2 2005/03/30 16:56:04 jettero Exp $
 
 use strict;
 use Test;

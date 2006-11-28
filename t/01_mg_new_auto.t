@@ -1,4 +1,3 @@
-# $Id: 01_mg_new_auto.t,v 1.4 2005/03/18 12:31:36 jettero Exp $
 
 use strict;
 use Test;

@@ -1,5 +1,4 @@
 #!/usr/bin/perl -w -Iblib/lib
-# $Id: go.pl,v 1.31 2006/08/30 17:50:32 jettero Exp $
 # vi:tw=0:
 
 BEGIN { system("make || (perl Makefile.PL && make)") == 0 or die }

@@ -1,6 +1,4 @@
 
-# $Id: 03_tools.t,v 1.7 2005/03/30 15:39:24 jettero Exp $
-
 use strict;
 use Test;
 

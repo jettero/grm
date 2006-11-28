@@ -1,4 +1,3 @@
-# $Id: FiveSplit.pm,v 1.12 2006/08/30 17:31:41 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::GeneratorPlugin::FiveSplit;

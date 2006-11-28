@@ -1,4 +1,3 @@
-# $Id: Tools.pm,v 1.23 2006/08/30 17:31:41 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 # package ::_interconnected_map {{{

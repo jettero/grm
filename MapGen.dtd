@@ -1,6 +1,3 @@
-<!-- 
-     $Id: MapGen.dtd,v 1.2 2006/08/22 19:19:45 jettero Exp $
--->
 
 <!ELEMENT MapGen (option*, tile_group*, map)>
 <!ELEMENT option EMPTY>

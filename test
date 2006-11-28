@@ -1,5 +1,4 @@
 #!/bin/sh
-# $Id: test,v 1.4 2005/03/24 21:29:45 jettero Exp $
 
 ./makeitfromscratch
 make test || exit 1

@@ -1,6 +1,4 @@
 
-# $Id: 04_irange.t,v 1.1 2005/03/30 15:39:24 jettero Exp $
-
 use strict;
 use Test;
 

@@ -1,4 +1,3 @@
-# $Id: Text.pm,v 1.17 2005/04/04 17:23:59 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::Exporter::Text;

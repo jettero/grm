@@ -1,4 +1,3 @@
-# $Id: BasicDoors.pm,v 1.17 2006/08/30 17:50:32 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::GeneratorPlugin::BasicDoors;
@@ -41,7 +40,7 @@ sub doorgen {
     my $max_span = $opts->{max_span} / ($opts->{tile_size} || 1);
        $max_span = 1 unless $max_span > 0;
 
-       warn "max_span=$max_span";
+     # warn "max_span=$max_span";
 
     for my $i ( 0 .. $#$map ) {
         my $jend = $#{ $map->[$i] };

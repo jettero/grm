@@ -1,4 +1,3 @@
-# $Id: XML.pm,v 1.6 2006/08/22 19:19:45 jettero Exp $
 # vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::Exporter::XML;
