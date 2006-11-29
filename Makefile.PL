@@ -6,7 +6,7 @@ WriteMakefile(
     'NAME'         => 'Games::RolePlay::MapGen',
     'VERSION_FROM' => 'MapGen.pm',
     'PREREQ_PM'     => { 
-        'XML::Simplet' => 0,
+        'XML::Simple' => 0,
     },
 
     clean => { FILES => "*.txt *.png *.log *.map *.xml map.dumper.*" },

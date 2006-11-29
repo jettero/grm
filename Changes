@@ -1,3 +1,6 @@
+0.29.2:  Wed Nov 29 09:41:55 EST 2006
+   - omfg, changed the XML::Simplet prereq to XML::Simple
+
 0.29.1:  Tue Nov 28 13:33:16 EST 2006
    - jettero added XML::Simple to the prereqs
 
