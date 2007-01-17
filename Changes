@@ -1,3 +1,6 @@
+0.29:  Wed Jan 17 09:37:32 EST 2007
+   - jettero added the Tie::IxHash requirement
+
 0.29.2:  Wed Nov 29 09:41:55 EST 2006
    - omfg, changed the XML::Simplet prereq to XML::Simple
 

@@ -4,8 +4,14 @@
 source /sbin/functions.sh
 set -e; trap "eend 997" ERR
 
+figlet 'Checking IN'
+
 ebegin "pulling/merging updates"
 cg update
+eend $?
+
+ebegin "rcskeywords -m"
+rcskeywords -m
 eend $?
 
 ebegin "updating update index (cache)"

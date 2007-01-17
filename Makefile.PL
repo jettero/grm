@@ -7,6 +7,7 @@ WriteMakefile(
     'VERSION_FROM' => 'MapGen.pm',
     'PREREQ_PM'     => { 
         'XML::Simple' => 0,
+        'Tie::IxHash' => 0,
     },
 
     clean => { FILES => "*.txt *.png *.log *.map *.xml map.dumper.*" },
