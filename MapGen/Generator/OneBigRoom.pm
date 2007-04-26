@@ -74,7 +74,7 @@ __END__
 
 =head1 NAME
 
-Games::RolePlay::MapGen::Generator::Basic - The basic random bounded dungeon generator
+Games::RolePlay::MapGen::Generator::OneBigRoom - The basic random bounded dungeon generator
 
 =head1 SYNOPSIS
 
@@ -82,13 +82,13 @@ Games::RolePlay::MapGen::Generator::Basic - The basic random bounded dungeon gen
 
     my $map = new Games::RolePlay::MapGen;
     
-    $map->set_generator( "Games::RolePlay::MapGen::Generator::Basic" );
+    $map->set_generator( "OneBigRoom" );
 
     generate $map;
 
 =head1 DESCRIPTION
 
-This module really just drops rooms onto Jamis Buck's fantastic maze generator.
+This module generates one huge room that takes up the whole map.  Rather like the contsruct program in the matrix.
 
 =head1 SEE ALSO
 

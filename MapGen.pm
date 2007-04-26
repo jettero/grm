@@ -90,6 +90,9 @@ sub AUTOLOAD {
     my $this = shift;
     my $sub  = $AUTOLOAD;
 
+    # sub set_generator
+    # sub set_exporter
+
     if( $sub =~ m/MapGen\:\:set_(generator|exporter)$/ ) {
         my $type = $1;
         my $modu = shift;
