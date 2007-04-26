@@ -6,7 +6,8 @@ BEGIN { system("make || (perl Makefile.PL && make)") == 0 or die }
 use strict;
 use Games::RolePlay::MapGen;
 
-&generate;
+# &std_generate;
+&obr_generate;
 
 system("cp MapGen.dtd ~/www/MapGen.dtd") == 0 or die;
 system("cp MapGen.xsl ~/www/MapGen.xsl") == 0 or die;
@@ -14,7 +15,23 @@ system("cp map.xml    ~/www/MapGen.xml") == 0 or die;
 system("cp map.png    ~/www/MapGen.png") == 0 or die;
 system("chmod 644     ~/www/MapGen.*")   == 0 or die;
 
-sub generate {
+sub obr_generate {
+    my $map = new Games::RolePlay::MapGen({
+        tile_size    => 10,
+        cell_size    => "23x23", 
+        bounding_box => "15x15",
+    });
+
+    $map->set_generator("OneBigRoom");
+    $map->set_exporter( "BasicImage" );       # But a graphical map is probably more useful.
+
+    generate $map; 
+    export   $map "map.png";
+
+    exec qw(xv map.png);
+}
+
+sub std_generate {
   my $map = new Games::RolePlay::MapGen({
       tile_size => 10,
 
