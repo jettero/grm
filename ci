@@ -1,4 +1,5 @@
 #!/bin/bash
+# $Id: ci,v 1.2 2007/01/25 12:23:22 jettero Exp $
 # vi:syntax=gentoo-init-d:
 
 source /sbin/functions.sh
@@ -21,7 +22,7 @@ eend $?
 
 ebegin "committing changes"
 if [ -z "$*" ]; then
-    cg commit -m "$0"
+    cg commit
 
 else 
     cg commit -m "$*"
