@@ -7,7 +7,6 @@ my $map = new Games::RolePlay::MapGen({bounding_box => join("x", 25, 25) });
    $map->add_generator_plugin("BasicDoors");
    $map->generate;
 
-
 plan tests => 3 + (25*25) + 1;
 
 # if you know of a way to actually test these, you go ahead and email me, ok?
@@ -16,9 +15,15 @@ set_exporter $map("Text");
 export $map("map.txt"); 
 ok( -f "map.txt" );
 
-set_exporter $map("BasicImage");
-export $map("map.png"); 
-ok( -f "map.png" );
+eval "use GD;"; 
+if( $@ ) {
+    ok( 1 ); # this should probably be a skip() instead... meh
+
+} else {
+    set_exporter $map("BasicImage");
+    export $map("map.png"); 
+    ok( -f "map.png" );
+}
 
 # However, this I could actually test... if I got around to it.
 

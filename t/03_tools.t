@@ -8,7 +8,7 @@ use Games::RolePlay::MapGen::Tools qw(choice roll random irange range str_eval _
 
 # choice 4 {{{
 my %h = ( 1=>1, 2=>2, 3=>3, 4=>4 );
-alarm 3; # in case it loops, which it shouldn't
+#alarm 3; # in case it loops, which it shouldn't
 while( my @k = keys %h ) {
     my $e = choice(@k);
 
@@ -20,7 +20,7 @@ while( my @k = keys %h ) {
 # }}}
 # roll 8 {{{
 %h = ();
-alarm 3; # in case it loops, which it shouldn't
+#alarm 3; # in case it loops, which it shouldn't
 while( not( $h{1} and $h{2} and $h{3} and $h{4} and $h{5} and $h{6} and $h{7} and $h{8} ) ) {
     my $roll = roll(1, 8);
 
@@ -32,7 +32,7 @@ while( not( $h{1} and $h{2} and $h{3} and $h{4} and $h{5} and $h{6} and $h{7} an
 # }}}
 # str_eval 8 + 4 + 4 + (2) {{{
 %h = ();
-alarm 3; # in case it loops, which it shouldn't
+#alarm 3; # in case it loops, which it shouldn't
 while( not( $h{1} and $h{2} and $h{3} and $h{4} and $h{5} and $h{6} and $h{7} and $h{8} ) ) {
     my $roll = &str_eval("1d8");
 
@@ -44,7 +44,7 @@ while( not( $h{1} and $h{2} and $h{3} and $h{4} and $h{5} and $h{6} and $h{7} an
     ok(1);
 }
 %h = ();
-alarm 3; # in case it loops, which it shouldn't
+#alarm 3; # in case it loops, which it shouldn't
 while( not( $h{2} and $h{3} and $h{4} and $h{5} ) ) {
     my $roll = &str_eval("1d4+1");
 
@@ -56,7 +56,7 @@ while( not( $h{2} and $h{3} and $h{4} and $h{5} ) ) {
     ok(1);
 }
 %h = ();
-alarm 3; # in case it loops, which it shouldn't
+#alarm 3; # in case it loops, which it shouldn't
 while( not( $h{0} and $h{1} and $h{2} and $h{3} ) ) {
     my $roll = &str_eval("1d4-1");
 
@@ -72,7 +72,7 @@ ok( &str_eval(1073), 1073 );
 # }}}
 # random 8 {{{
 %h = ();
-alarm 3; # in case it loops, which it shouldn't
+#alarm 3; # in case it loops, which it shouldn't
 while( not( $h{0} and $h{1} and $h{2} and $h{3} and $h{4} and $h{5} and $h{6} and $h{7} ) ) {
     my $roll = random( 8 );
 
@@ -84,7 +84,7 @@ while( not( $h{0} and $h{1} and $h{2} and $h{3} and $h{4} and $h{5} and $h{6} an
 # }}}
 # range 604 {{{
 
-alarm 30; # this is far more than should be needed.
+#alarm 30; # this is far more than should be needed.
 1 while sprintf('%0.4f', range(0, 7)) != "0.0"; ok( 1 );
 1 while sprintf('%0.4f', range(0, 7)) != "7.0"; ok( 1 );
 

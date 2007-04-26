@@ -2,7 +2,6 @@ MapGen.dtd
 MapGen.pm
 MapGen.xsl
 README
-META.yml
 Changes
 Makefile.PL
 MANIFEST
