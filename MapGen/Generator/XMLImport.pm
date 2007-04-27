@@ -11,7 +11,10 @@ use Games::RolePlay::MapGen::Tools qw( _group _tile );
 
 sub genmap {
     my $this = shift;
-    my $opts = $this->gen_opts;
+    my $opts = shift;
+
+    use Data::Dumper; $Data::Dumper::Indent = $Data::Dumper::Sortkeys = 1;
+    die Dumper( $opts ):
 }
 
 __END__

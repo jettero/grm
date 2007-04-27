@@ -25,10 +25,16 @@ sub obr_generate {
     $map->set_generator("OneBigRoom");
     $map->set_exporter( "BasicImage" );       # But a graphical map is probably more useful.
 
-    generate $map; 
-    export   $map "map.png";
+    $map->generate; 
+    $map->export( "map.png" );
 
-    exec qw(xv map.png);
+    # exec qw(xv map.png);
+
+    $map->set_exporter( "XML" );
+    $map->export( "map.xml" );
+
+    $map->set_generator("XMLImport");
+    $map->generate; 
 }
 
 sub std_generate {
