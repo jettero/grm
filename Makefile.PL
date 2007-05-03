@@ -8,6 +8,7 @@ WriteMakefile(
     'PREREQ_PM'     => { 
         'XML::Simple' => 0,
         'Tie::IxHash' => 0,
+        'XML::XPath'  => 0,
     },
 
     clean => { FILES => "*.txt *.png *.log *.map *.xml map.dumper.*" },

@@ -69,7 +69,7 @@ sub genmap {
             my $v = $opts->{$k};
 
             if( ref $v ) {
-                push @$options, $ah->( name=>$k, value=>join(" ", map { "$_: $v->{$_};" } keys %$v ));
+                push @$options, $ah->( name=>$k, value=>join(" ", map { "$_: $v->{$_};" } sort keys %$v ));
 
             } else {
                 push @$options, $ah->( name=>$k, value=>$v );
@@ -141,6 +141,13 @@ sub genmap {
         tile_group => $groups,
         'map'      => { row => $map },
     );
+
+    ## DEBUG ## our $c; $c = 1 unless defined $c; $c ++;
+    ## DEBUG ## open my $out, ">lol.$c";
+    ## DEBUG ## use Data::Dumper; $Data::Dumper::Indent = $Data::Dumper::Sortkeys = 1;
+    ## DEBUG ## print $out Dumper(\%main), "\n";
+    ## DEBUG ## close $out;
+    ## DEBUG ## warn "eff dude (lol.$c)";
 
     return XMLout(\%main, 
         RootName => "MapGen",

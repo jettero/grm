@@ -6,8 +6,8 @@ BEGIN { system("make || (perl Makefile.PL && make)") == 0 or die }
 use strict;
 use Games::RolePlay::MapGen;
 
-# &std_generate;
-&obr_generate;
+&std_generate;
+# &obr_generate;
 
 system("cp MapGen.dtd ~/www/MapGen.dtd") == 0 or die;
 system("cp MapGen.xsl ~/www/MapGen.xsl") == 0 or die;
@@ -28,13 +28,7 @@ sub obr_generate {
     $map->generate; 
     $map->export( "map.png" );
 
-    # exec qw(xv map.png);
-
-    $map->set_exporter( "XML" );
-    $map->export( "map.xml" );
-
-    $map->set_generator("XMLImport");
-    $map->generate; 
+    exec qw(xv map.png);
 }
 
 sub std_generate {
@@ -72,4 +66,12 @@ sub std_generate {
 
   set_exporter $map "XML";
   export       $map "map.xml";
+
+  $map = Games::RolePlay::MapGen->new();
+  $map->set_generator("XMLImport");
+  $map->generate( xml_input_file => "map.xml" );
+  $map->set_exporter( "XML" );
+  $map->export( "ma2.xml" );
+
+  # exec qq(diff -u map.xml ma2.xml | vim --cmd 'let no_plugin_maps = 1' -c 'runtime! macros/less.vim' -c 'set fdl=99' -);
 }

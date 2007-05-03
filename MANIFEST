@@ -23,3 +23,5 @@ MapGen/Generator.pm
 MapGen/Exporter/Text.pm
 MapGen/Exporter/BasicImage.pm
 MapGen/Exporter/XML.pm
+MapGen/Generator/OneBigRoom.pm
+META.yml
