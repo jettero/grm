@@ -6,7 +6,7 @@ BEGIN { system("make || (perl Makefile.PL && make)") == 0 or die }
 use strict;
 use Games::RolePlay::MapGen;
 
-&std_generate;
+# &std_generate;
 # &obr_generate;
 
 system("cp MapGen.dtd ~/www/MapGen.dtd") == 0 or die;
@@ -14,6 +14,17 @@ system("cp MapGen.xsl ~/www/MapGen.xsl") == 0 or die;
 system("cp map.xml    ~/www/MapGen.xml") == 0 or die;
 system("cp map.png    ~/www/MapGen.png") == 0 or die;
 system("chmod 644     ~/www/MapGen.*")   == 0 or die;
+
+sub queue_play {
+    my $map = new Games::RolePlay::MapGen({
+        tile_size    => 5,
+        cell_size    => "23x23", 
+        bounding_box => "15x15",
+    });
+
+    $map->set_generator("OneBigRoom");
+    $map->generate; 
+}
 
 sub obr_generate {
     my $map = new Games::RolePlay::MapGen({

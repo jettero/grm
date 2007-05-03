@@ -149,7 +149,7 @@ __END__
 
 =head1 NAME
 
-Games::RolePlay::MapGen::Generator::Basic - The basic random bounded dungeon generator
+Games::RolePlay::MapGen::Generator::XMLImport - Slurp up XML map data into MapGen memory form
 
 =head1 SYNOPSIS
 
@@ -157,16 +157,13 @@ Games::RolePlay::MapGen::Generator::Basic - The basic random bounded dungeon gen
 
     my $map = new Games::RolePlay::MapGen;
     
-    $map->set_generator( "XMLImport", xml_input_file => "my_map.xml" );
+    $map->set_generator( "XMLImport" );
+    $map->generate( xml_input_file => "map.xml" );
 
     generate $map;
 
-=head1 DESCRIPTION
-
-This module really just drops rooms onto Jamis Buck's fantastic maze generator.
-
 =head1 SEE ALSO
 
-Games::RolePlay::MapGen, Games::RolePlay::MapGen::Generator::Perfect, Games::RolePlay::MapGen::Generator::SparseAndLoops
+Games::RolePlay::MapGen
 
 =cut
