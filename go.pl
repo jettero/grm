@@ -6,6 +6,8 @@ BEGIN { system("make || (perl Makefile.PL && make)") == 0 or die }
 use strict;
 use Games::RolePlay::MapGen;
 
+&queue_play;
+
 # &std_generate;
 # &obr_generate;
 
@@ -17,13 +19,18 @@ system("chmod 644     ~/www/MapGen.*")   == 0 or die;
 
 sub queue_play {
     my $map = new Games::RolePlay::MapGen({
-        tile_size    => 5,
+        tile_size    => 10,
         cell_size    => "23x23", 
         bounding_box => "15x15",
     });
 
-    $map->set_generator("OneBigRoom");
+    $map->set_generator( "OneBigRoom" );
+    $map->add_generator_plugin( "FiveSplit" );
     $map->generate; 
+
+    $map->set_exporter( "BasicImage" );
+    $map->export( "map.png" );
+    exec qw(xv map.png);
 }
 
 sub obr_generate {
@@ -34,7 +41,7 @@ sub obr_generate {
     });
 
     $map->set_generator("OneBigRoom");
-    $map->set_exporter( "BasicImage" );       # But a graphical map is probably more useful.
+    $map->set_exporter( "BasicImage" );
 
     $map->generate; 
     $map->export( "map.png" );
