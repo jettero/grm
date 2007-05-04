@@ -28,9 +28,28 @@ sub queue_play {
     $map->add_generator_plugin( "FiveSplit" );
     $map->generate; 
 
-    $map->set_exporter( "BasicImage" );
-    $map->export( "map.png" );
-    exec qw(xv map.png);
+    my $queue = $map->queue;
+       $queue->add( tag1 => (2,2) );
+       $queue->add( tag2 => (3,5) );
+
+    my @l = $queue->location( "tag1" );
+
+    warn "\n\n";
+    warn " distance: " . $queue->distance( tag1 => "tag2" );
+    warn " location: [@l]";
+    warn "ldistance: " . $queue->ldistance( (3,4) => (2,1) );
+
+    my $s1 = 1;
+    my $s7 = 7;
+
+    my $a = bless \$s1, "lol1";
+    my $b = bless \$s7, "lol7";
+
+    $queue->add( $a => (9,9) );
+    $queue->add( $b => (9,9) );
+
+    warn "   \@(9 9): $_" for $queue->objs_at_location(9, 9);
+    warn "  visible: $_" for $queue->objs_in_line_of_sight(9, 9);
 }
 
 sub obr_generate {

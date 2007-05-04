@@ -114,7 +114,7 @@ sub genmap {
                         my $door = $tile->{od}{$d};
 
                         push @$closures, $ah->( dir => $dir, type => "door", 
-                            (map { $_ => $door->{$_} ? "yes" : "no" } qw(locked stuck secret)),
+                            (map { $_ => $door->{$_} ? "yes" : "no" } qw(locked stuck secret open)),
 
                             (map { $_."_open_dir" => {n=>"north", e=>"east", s=>"south", w=>"west"}->{$door->{open_dir}{$_}} } qw(major minor)),
                         );

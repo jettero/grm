@@ -265,6 +265,17 @@ sub export {
 }
 # }}}
 
+# queue {{{
+sub queue {
+    my $this = shift;
+    eval "use Games::RolePlay::MapGen::Queue"; die $@ if $@;
+
+    my $queue = Games::RolePlay::MapGen::Queue->new( $this->{_the_map} );
+
+    return $queue;
+}
+# }}}
+
 __END__
 # Below is stub documentation for your module. You better edit it!
 

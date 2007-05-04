@@ -25,3 +25,5 @@ MapGen/Exporter/BasicImage.pm
 MapGen/Exporter/XML.pm
 MapGen/Generator/OneBigRoom.pm
 META.yml
+MapGen/Queue.pm
+t/09_xml_export_import.t

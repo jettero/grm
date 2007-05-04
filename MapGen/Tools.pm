@@ -138,6 +138,7 @@ sub new {
     $this->{stuck}    = 0 unless $this->{stuck};
     $this->{secret}   = 0 unless $this->{secret};
     $this->{open_dir} = { major=>undef, minor=>undef } unless ref($this->{open_dir});
+    $this->{'open'}   = 0 unless $this->{'open'};
 
     return $this;
 }
@@ -256,8 +257,8 @@ Games::RolePlay::MapGen::Tools - Some support tools and objects for the mapgen s
 
     use Games::RolePlay::MapGen::Tools qw( choice roll random range str_eval );
 
-    my $r1 = roll(1, 20);                   # 1d20
-    my $r2 = random(20);                    # 0-20
+    my $r1 = roll(1, 20);                   # 1d20, 1-20
+    my $r2 = random(20);                    # 0-19
     my $r3 = range(50, 100);                # some number between 50 and 100 (not an integer!)
     my $r4 = range(9000, 10000, 1);         # 100% positively correlated with the last range (ie, not random at all)
     my $r5 = range(7, 12, -1);              # 100% negatively correlated with the last range (ie, not random at all)
