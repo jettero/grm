@@ -1,9 +1,17 @@
-# $Id: Queue.pm 270.7007.98bvuVNhSEr4mDz1PiubHXVYiQs 2007-05-04 19:33:56 -0400 $
+# $Id: Queue.pm 464.13261.bumnIlb8Ywd9qeXfBICH0qW81TQ 2007-05-06 14:59:42 -0400 $
 
 package Games::RolePlay::MapGen::Queue;
 
 use strict;
 use Carp;
+use Exporter;
+use constant {
+    LOS_NO_COVER        => 1,
+    LOS_IGNORABLE_COVER => 2,
+    LOS_COVER           => 3, };
+
+use base qw(Exporter);
+our @EXPORT = qw(LOS_NO_COVER LOS_IGNORABLE_COVER LOS_COVER);
 
 1;
 
@@ -28,13 +36,13 @@ sub _check_loc {
     my $loc  = shift;
 
     return 0 if @$loc != 2;
-    return 0 if $loc->[0] < 1;
-    return 0 if $loc->[1] < 1;
+    return 0 if $loc->[0] < 0;
+    return 0 if $loc->[1] < 0;
     return 0 if $loc->[0] > $this->{xm};
     return 0 if $loc->[1] > $this->{ym};
 
     my $type = $this->{_the_map}[ $loc->[1] ][ $loc->[0] ]{type};
-    return 0 if $type eq "wall";
+    return 0 unless $type; # the wall type is <undef>
 
     return $loc;
 }
@@ -42,17 +50,178 @@ sub _check_loc {
 # _lline_of_sight {{{
 sub _lline_of_sight {
     my $this = shift;
+    my ($lhs, $rhs) = @_;
 
+    my @lhs = (
+        [ $lhs->[0]+0, $lhs->[1]+0 ], # sw corner
+        [ $lhs->[0]+1, $lhs->[1]+0 ], # se corner
+        [ $lhs->[0]+0, $lhs->[1]+1 ], # nw corner
+        [ $lhs->[0]+1, $lhs->[1]+1 ], # ne corner
+    );
+
+    my @rhs = (
+        [ $rhs->[0]+0, $rhs->[1]+0 ], # sw corner
+        [ $rhs->[0]+1, $rhs->[1]+0 ], # se corner
+        [ $rhs->[0]+0, $rhs->[1]+1 ], # nw corner
+        [ $rhs->[0]+1, $rhs->[1]+1 ], # ne corner
+    );
+
+    my $max_x = $lhs[0][0]; my $min_x = $max_x; my $max_y = $lhs[0][1]; my $min_y = $max_y;
+    for(@lhs,@rhs) {
+        $max_x = $_->[0] if $_->[0] > $max_x;
+        $min_x = $_->[0] if $_->[0] < $min_x;
+        $max_y = $_->[1] if $_->[1] > $max_y;
+        $min_y = $_->[1] if $_->[1] < $min_y;
+    }
+
+    my @x_ext  = ($min_x+1, $max_x-1);
+    my @y_ext  = ($min_y+1, $max_y-1);
+
+    my @range  = ($x_ext[0] .. $x_ext[1]);
+    my @domain = ($y_ext[0] .. $y_ext[1]);
+
+    my $x_dir = ($lhs[0][0]<$rhs[0][0] ? "e" : "w");
+    my $y_dir = ($lhs[0][1]<$rhs[0][1] ? "s" : "n");
+
+    warn "---- lhs=[@$lhs]; rhs=[@$rhs]; range=[@range]; domain=[@domain]\n";
+
+    my @results = ();
+    LHS: for my $l (@lhs) { unshift @results, [];
+    RHS: for my $r (@rhs) { unshift @{ $results[0] }, LOS_NO_COVER;
+
+        warn "\tl=[@$l]; r=[@$r];\n";
+        #### X-walls
+        if( $l->[0] == $r->[0] ) {
+            # vertical -- @range tests false
+            die "no vertical tests available";
+
+        } else {
+            # not vertical
+            my $m = ($r->[1]-$l->[1]) / ($r->[0]-$l->[0]);
+            my $b = $l->[1] - $m * $l->[0];
+
+            for my $x (@range) {
+                my $y = $m * $x + $b;
+
+                warn "\t\tX=$x; y=$y\n";
+
+                my @tile_locs = ();
+                if( $y >= $y_ext[0] and $y <= $y_ext[1] ) {
+                    @tile_locs = ([ $x-1, int $y]);
+                    if( $y == (int $y) ) {
+                        push @tile_locs, [$x-1, $y-1];
+                    }
+                }
+
+                my $this_open = 0;
+                for my $l (@tile_locs) {
+                    my $od = $this->{_the_map}[ $l->[1] ][ $l->[0] ]{od}{ $x_dir };
+
+                    if( ref $od ) {
+                        $od = $od->{'open'};
+                        warn "\t\t\tchecking [@$l]:$x_dir od=door($od)\n";
+
+                    } else {
+                        warn "\t\t\tchecking [@$l]:$x_dir od=$od\n";
+                    }
+
+                    $this_open ++ if $od;
+                }
+
+                if( $this_open < @tile_locs ) {
+                    my $dl = sqrt( ($lhs->[0] - $x)**2 + ($lhs->[1] - $y)**2 );
+                    my $dr = sqrt( ($rhs->[0] - $x)**2 + ($rhs->[1] - $y)**2 );
+
+                    my $c = ($dl<$dr ? LOS_IGNORABLE_COVER : LOS_COVER);
+                    warn "\t\t\tc=$c (@$l)->(@$r) [x]\n";
+                    $results[0][0] = $c if $c > $results[0][0];
+
+                    # next RHS; # we don't skip ahead here in case there is LOS_COVER for both the LHS and the RHS!
+                }
+            }
+
+            for my $y (@domain) {
+                my $x = ($y-$b)/$m;
+
+                warn "\t\tx=$x; Y=$y\n";
+
+                my @tile_locs = ();
+                if( $x >= $x_ext[0] and $x <= $x_ext[1] ) {
+                    @tile_locs = ([ int $x, $y-1 ]);
+                    if( $x == (int $x) ) {
+                        push @tile_locs, [$x-1, $y-1];
+                    }
+                }
+
+                my $this_open = 0;
+                for my $l (@tile_locs) {
+                    my $od = $this->{_the_map}[ $l->[1] ][ $l->[0] ]{od}{ $y_dir };
+
+                    if( ref $od ) {
+                        $od = $od->{'open'};
+                        warn "\t\t\tchecking [@$l]:$y_dir od=door($od)\n";
+
+                    } else {
+                        warn "\t\t\tchecking [@$l]:$y_dir od=$od\n";
+                    }
+
+                    $this_open ++ if $od;
+                }
+
+                if( $this_open < @tile_locs ) {
+                    my $dl = sqrt( ($lhs->[0] - $x)**2 + ($lhs->[1] - $y)**2 );
+                    my $dr = sqrt( ($rhs->[0] - $x)**2 + ($rhs->[1] - $y)**2 );
+
+                    my $c = ($dl<$dr ? LOS_IGNORABLE_COVER : LOS_COVER);
+                    warn "\t\t\tc=$c (@$l)->(@$r) [y]\n";
+                    $results[0][0] = $c if $c > $results[0][0];
+
+                    # next RHS; # we don't skip ahead here in case there is LOS_COVER for both the LHS and the RHS!
+                }
+            }
+        }
+    }}
+
+    use Data::Dumper; $Data::Dumper::Indent = 0;
+    die Dumper( \@results )."\n";
     1; # TODO: write this
 }
 # }}}
 # _ldistance {{{
 sub _ldistance {
     my $this = shift;
-    my $lhs  = shift;
-    my $rhs  = shift;
+    my ($lhs, $rhs) = @_;
 
     return sqrt ( (($lhs->[0]-$rhs->[0]) ** 2) + (($lhs->[1]-$rhs->[1]) ** 2) );
+}
+# }}}
+# _locations_in_line_of_sight {{{
+sub _locations_in_line_of_sight {
+    my $this = shift;
+    my $init = shift;
+    my @loc  = ();
+    my @new  = ($init);
+
+    my %checked = ( "@$init" => 1 );
+    while( @new ) {
+        my @very_new = ();
+
+        for my $i (@new) {
+            for my $j ( [$i->[0]+1, $i->[1]], [$i->[0]-1, $i->[1]], [$i->[0], $i->[1]+1], [$i->[0], $i->[1]-1] ) {
+                next if $checked{"@$j"};
+                next unless $this->_check_loc($j);
+
+                $checked{"@$j"} = 1;
+
+                push @very_new, $j if $this->_lline_of_sight( $init => $j );
+            }
+        }
+
+        push @loc, @new;
+        @new = @very_new;
+    }
+
+    return @loc;
 }
 # }}}
 
@@ -78,7 +247,6 @@ sub lline_of_sight {
 
     croak "the first two values do not appear to form a sane map location" unless $this->_check_loc(\@lhs);
     croak "the last two values do not appear to form a sane map location"  unless $this->_check_loc(\@rhs);
-
 
     return $this->_lline_of_sight(\@lhs, \@rhs); 
 }
@@ -186,6 +354,7 @@ sub objs_in_line_of_sight {
     my $loc  = $this->_check_loc(\@_) or croak "that location (@_) makes no sense";
     my @ret  = ();
 
+    die "make this use _locations_in_line_of_sight instead";
     for my $row ( 0 .. $this->{ym} ) {
         for my $col ( 0 .. $this->{xm} ) {
             my $rhs = [ $col, $row ];
@@ -199,6 +368,31 @@ sub objs_in_line_of_sight {
     }
 
     return @ret;
+}
+# }}}
+
+# random_open_location {{{
+sub random_open_location {
+    my $this = shift;
+
+    my $max = 1000;
+    my ($X, $Y) = ($this->{xm}+1, $this->{ym}+1);
+    while(1) {
+        my $x = int rand $X;
+        my $y = int rand $Y;
+
+        die "problem finding x,y during rol" if --$max < 1;
+
+        return (wantarray ? ($x,$y):[$x,$y]) if defined $this->{_the_map}[ $y ][ $x ]{type}; # the wall type is <undef>
+    }
+}
+# }}}
+# locations_in_line_of_sight {{{
+sub locations_in_line_of_sight {
+    my $this = shift;
+    my @init = @_; $this->_check_loc(\@init) or croak "that location (@_) doesn't make any sense";
+
+    return $this->_locations_in_line_of_sight(\@init);
 }
 # }}}
 

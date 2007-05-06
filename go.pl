@@ -4,10 +4,11 @@
 BEGIN { system("make || (perl Makefile.PL && make)") == 0 or die }
 
 use strict;
+use GD;
 use Games::RolePlay::MapGen;
+use Games::RolePlay::MapGen::Queue;
 
 &queue_play;
-
 # &std_generate;
 # &obr_generate;
 
@@ -22,34 +23,69 @@ sub queue_play {
         tile_size    => 10,
         cell_size    => "23x23", 
         bounding_box => "15x15",
+        num_rooms    => "1d4",
     });
 
-    $map->set_generator( "OneBigRoom" );
-    $map->add_generator_plugin( "FiveSplit" );
-    $map->generate; 
+    #$map->add_generator_plugin( "FiveSplit"  );
+    #$map->add_generator_plugin( "BasicDoors" );
+
+    $map->set_generator( "XMLImport" );
+    $map->generate( xml_input_file => "vis1.xml" ); 
+
+    $map->set_exporter( "BasicImage" );
+    $map->export( "map.png" );
 
     my $queue = $map->queue;
-       $queue->add( tag1 => (2,2) );
-       $queue->add( tag2 => (3,5) );
 
-    my @l = $queue->location( "tag1" );
+    $queue->_lline_of_sight( [22, 17] => [24, 21] );
 
-    warn "\n\n";
-    warn " distance: " . $queue->distance( tag1 => "tag2" );
-    warn " location: [@l]";
-    warn "ldistance: " . $queue->ldistance( (3,4) => (2,1) );
+    my @things = map { my $b = $_; bless \$b, "Thing$b" } ( 1 .. 10 );
 
-    my $s1 = 1;
-    my $s7 = 7;
+    $queue->add( $_ => ($queue->random_open_location) ) for @things;
 
-    my $a = bless \$s1, "lol1";
-    my $b = bless \$s7, "lol7";
+    DRAW: {
+        my $image = GD::Image->new("map.png");
+        my $dude1 = $image->colorAllocate(100, 100, 255);
+        my $dude2 = $image->colorAllocate(0, 0, 0);
+        my $item1 = $image->colorAllocate(255, 255, 0);
+        my $item2 = $image->colorAllocate(0, 0, 0);
 
-    $queue->add( $a => (9,9) );
-    $queue->add( $b => (9,9) );
+        my $visible = $image->colorAllocate(220, 220, 255);
+        my $igcover = $image->colorAllocate(232, 232, 255);
+        my $cover   = $image->colorAllocate(247, 247, 255);
 
-    warn "   \@(9 9): $_" for $queue->objs_at_location(9, 9);
-    warn "  visible: $_" for $queue->objs_in_line_of_sight(9, 9);
+        my @dude_position = $queue->random_open_location;
+           @dude_position = (22, 17);
+
+        # color visible tiles
+        if( 0 ) {
+        for my $loc ($queue->locations_in_line_of_sight( @dude_position )) {
+            my $los = $queue->lline_of_sight( @$loc );
+            my $LoS = $visible;
+               $LoS = $igcover if $los == LOS_IGNORABLE_COVER;
+               $LoS = $cover   if $los == LOS_COVER;
+
+            $image->rectangle(23*$loc->[0]+1, 23*$loc->[1]+1, 23*($loc->[0]+1)-1, 23*($loc->[1]+1)-1, $LoS);
+            $image->fill(23*$loc->[0]+2, 23*$loc->[1]+2, $LoS); # the fill is separate because of doors
+        }
+        }
+
+        # draw things
+        for(@things) {
+            my $loc = $queue->location( $_ );
+            $image->filledEllipse(23*$loc->[0]+12, 23*$loc->[1]+12, 9, 9, $item1);
+            $image->ellipse(23*$loc->[0]+12, 23*$loc->[1]+12, 9, 9, $item2);
+        }
+
+        # draw the dude
+        $image->filledEllipse(23*$dude_position[0]+12, 23*$dude_position[1]+12, 9, 9, $dude1);
+        $image->ellipse(23*$dude_position[0]+12, 23*$dude_position[1]+12, 9, 9, $dude2);
+
+        open my $marked, ">marked.png";
+        print $marked $image->png;
+    }
+
+    exec qw(xv marked.png map.png);
 }
 
 sub obr_generate {
@@ -69,7 +105,7 @@ sub obr_generate {
 }
 
 sub std_generate {
-  my $map = new Games::RolePlay::MapGen({
+  my $map = Games::RolePlay::MapGen->new({
       tile_size => 10,
 
       cell_size=>
@@ -81,34 +117,28 @@ sub std_generate {
       num_rooms=>
           # "70d4", 
           # "3d8", 
-          # "2d4", 
-            "1d4", 
+            "2d4", 
+          # "1d4", 
 
       bounding_box => 
-          # "12x9"
-            "15x15"
-          # "30x14"
-          # "40x27"
+          # "12x9",
+          # "15x15",
+            "20x20",
+          # "40x27",
   }); 
 
-  add_generator_plugin $map "FiveSplit";
-  add_generator_plugin $map "BasicDoors"; # this should work with basicdoors first or last!
+  $map->add_generator_plugin( "FiveSplit" );
+  $map->add_generator_plugin( "BasicDoors" ); # this should work with basicdoors first or last!
 
-  generate $map; 
-  export   $map "map.txt";
-  save_map $map "map.map";
+  $map->generate; 
+  $map->export( "map.txt" );
+  $map->export( "map.map" );
 
-  set_exporter $map "BasicImage";
-  export       $map "map.png";
+  $map->set_exporter( "BasicImage" );
+  $map->export( "map.png" );
 
-  set_exporter $map "XML";
-  export       $map "map.xml";
-
-  $map = Games::RolePlay::MapGen->new();
-  $map->set_generator("XMLImport");
-  $map->generate( xml_input_file => "map.xml" );
   $map->set_exporter( "XML" );
-  $map->export( "ma2.xml" );
+  $map->export( "map.xml" );
 
-  # exec qq(diff -u map.xml ma2.xml | vim --cmd 'let no_plugin_maps = 1' -c 'runtime! macros/less.vim' -c 'set fdl=99' -);
+  exec qq(xv map.png);
 }
