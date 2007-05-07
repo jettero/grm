@@ -1,15 +1,24 @@
 
+New:
 
-    New LoS strategy:
+[ ] 0) See the old-new.
+[ ] 1) instead of saying it's visible if _one_ of the vectors can get there
+[ ]    instead, only use them for cover calc
+[ ] 2) use center to center for visicalc
 
-[ ]  1. Find all the possible closed {od} between C0 and C1 as vectors.
-[ ]  2. Find all 16 vectors from C0 corners to C1 corners.
-[ ]  3. See which of the corner vectors have a projections onto the solid {od} vectors.
-[ ]     a. projectsions is false, we need the intersection
-[ ]     b. see http://perlmonks.org/?node_id=253983
-[ ]  4. Conclusions
-[ ]      a. If there's at least one corner vector without a projection, there's an LoS
-[ ]      b. If any set of 4 C0 vectors have no projection, there's no cover
+(must read phb/dmg to determine if this is correct, cuz the mess in ~/www/marked/ isn't.)
+
+
+   Old-new LoS strategy:
+
+[x]  1. Find all the possible closed {od} between C0 and C1 as vectors.
+[x]  2. Find all 16 vectors from C0 corners to C1 corners.
+[x]  3. See which of the corner vectors have a projections onto the solid {od} vectors.
+[x]     a. projectsions is false, we need the intersection
+[x]     b. see http://perlmonks.org/?node_id=253983
+[x]  4. Conclusions
+[x]      a. If there's at least one corner vector without a projection, there's an LoS
+[x]      b. If any set of 4 C0 vectors have no projection, there's no cover
 
 
 [x] Also, the LoS scores should be like so, to reflect increasing scores:
