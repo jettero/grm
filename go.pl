@@ -40,11 +40,8 @@ sub queue_play {
     warn "redir stderr>log";
     open STDERR, ">log" or die $!;
 
-    # $queue->_lline_of_sight( [22,17]=>[23,17] );
-    # $queue->_lline_of_sight( [22,17]=>[24,17] );
+    # $queue->_lline_of_sight( [22,17]=>[21,16] );
     # $queue->_lline_of_sight( [22,17]=>[24,21] );
-    # $queue->_lline_of_sight( [22,17]=>[22,24] );
-    # $queue->_lline_of_sight( [22,17]=>[23,24] );
     # die;
 
     my @things = map { my $b = $_; bless \$b, "Thing$b" } ( 1 .. 10 );
@@ -63,7 +60,8 @@ sub queue_play {
         my $cover   = $image->colorAllocate(255, 220, 220);
 
         my @dude_position = $queue->random_open_location;
-           @dude_position = (22, 17);
+         # @dude_position = (22, 17);
+           @dude_position = (3, 19);
 
         # color visible tiles
         for my $loc ($queue->locations_in_line_of_sight( @dude_position )) {
@@ -91,7 +89,7 @@ sub queue_play {
         print $marked $image->png;
     }
 
-    exec qw(xv marked.png map.png);
+    exec qw(xv -geometry +0+0 marked.png map.png);
 }
 
 sub obr_generate {
@@ -107,7 +105,7 @@ sub obr_generate {
     $map->generate; 
     $map->export( "map.png" );
 
-    exec qw(xv map.png);
+    exec qw(xv -geometry +0+0 map.png);
 }
 
 sub std_generate {
@@ -146,5 +144,5 @@ sub std_generate {
   $map->set_exporter( "XML" );
   $map->export( "map.xml" );
 
-  exec qq(xv map.png);
+  exec qq(xv -geometry +0+0 map.png);
 }

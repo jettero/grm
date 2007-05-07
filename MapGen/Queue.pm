@@ -1,4 +1,4 @@
-# $Id: Queue.pm 464.12542.U0Wu+df6MI7aVffu2iyYSHLFz70 2007-05-07 12:24:47 -0400 $
+# $Id: Queue.pm 471.12948.oVfJTZ5gsUvtxaNgbv+D/2/8UwY 2007-05-07 15:05:13 -0400 $
 
 package Games::RolePlay::MapGen::Queue;
 
@@ -63,7 +63,7 @@ sub _lline_of_sight {
     my $y_dir = ($lhs->[1] < $rhs->[1] ? "s" : "n");
 
     warn "---= lhs=[@$lhs]; rhs=[@$rhs]; X=[@X]; Y=[@Y]; x_dir=$x_dir; y_dir=$y_dir;\n";
-    #arn "\tSET\n";
+    ## DEBUG ## warn "\tSET\n";
 
     my @od_segments = (); # the solid line segments we might have to pass through
     for my $x (@X[0 .. $#X]) {
@@ -71,30 +71,32 @@ sub _lline_of_sight {
             my $x_od = $this->{_the_map}[ $y ][ $x ]{od}{ $x_dir };
             my $y_od = $this->{_the_map}[ $y ][ $x ]{od}{ $y_dir };
 
-            #arn "\t\tchecking <$x, $y>\n";
+            ## DEBUG ## warn "\t\tchecking <$x, $y>\n";
 
             for( $x_od, $y_od ) {
                 $_ = $_->{'open'} if ref $_;
             }
 
-            unless( $x_od or $x == $X[$#X] ) {
+            ## DEBUG ## $x_od = $y_od = 0;
+
+            unless( $x_od or $x == ($x_dir eq "e" ? $X[$#X]:$X[0]) ) {
                 if( $x_dir eq "e" ) { push @od_segments, [[ $x+1, $y ] => [$x+1, $y+1]] }
                 else                { push @od_segments, [[ $x,   $y ] => [$x,   $y+1]] }
             }
 
-            unless( $y_od or $y == $Y[$#Y] ) {
+            unless( $y_od or $y == ($y_dir eq "s" ? $Y[$#Y]:$Y[0]) ) {
                 if( $y_dir eq "s" ) { push @od_segments, [[ $x, $y+1 ] => [$x+1, $y+1]] }
                 else                { push @od_segments, [[ $x, $y   ] => [$x+1, $y  ]] }
             }
         }
     }
     
-    #arn "\tDONE\n";
+    ## DEBUG ## warn "\tDONE\n";
 
-    #arn "\tSET\n";
-    #arn "\t\ttarget <@$rhs>\n";
-    #arn "\t\tnon-od=[ (@{$_->[0]})->(@{$_->[1]}) ]" for @od_segments;
-    #arn "\tDONE\n";
+    ## DEBUG ## warn "\tSET\n";
+    ## DEBUG ## warn "\t\ttarget <@$rhs>\n";
+    ## DEBUG ## warn "\t\tnon-od=[ (@{$_->[0]})->(@{$_->[1]}) ]" for @od_segments;
+    ## DEBUG ## warn "\tDONE\n";
 
     my @lhs = (
         [ $lhs->[0]+0, $lhs->[1]+0 ], # sw corner
@@ -113,20 +115,27 @@ sub _lline_of_sight {
     my @results;
     for my $l (@lhs) { unshift @results, [];
     for my $r (@rhs) { unshift @{$results[0]}, LOS_YES;
-        warn "SET\n";
         my $i = 0;
         for my $od_segment (@od_segments) {
-            if( &_line_segments_intersect( (map {@$_} @$od_segment) => (@$l=>@$r) ) ) {
+            if( my @p = $this->_line_segments_intersect( (map {@$_} @$od_segment) => (@$l=>@$r) ) ) {
+                warn "SET\n" unless $i;
                 warn "\t(@{$od_segment->[0]})->(@{$od_segment->[1]}) intersects (@$l)->(@$r)\n";
                 $i ++;
 
-                $results[0][0] = LOS_COVER;
-                # TODO: set ignorable here sometimes
+                if( $results[0][0] > LOS_IGNORABLE_COVER and $this->_ldistance( \@p => $l ) < $this->_ldistance( \@p => $r ) ) {
+                    $results[0][0] = LOS_IGNORABLE_COVER;
+
+                } else {
+                    $results[0][0] = LOS_COVER;
+                }
             }
         }
         warn "\ttarget <@$rhs>\n" if $i;
-        warn "DONE\n";
+        warn "DONE\n" if $i;
     }}
+
+    use Data::Dumper; $Data::Dumper::Indent = 0;
+    warn "result=" . Dumper(\@results) . "\n";
 
     my $at_least_one_LoS = 0;
     for my $ca (@results) {
@@ -155,6 +164,7 @@ sub _lline_of_sight {
 
 
 sub _line_segments_intersect {
+    my $this = shift;
     # this is http://perlmonks.org/?node_id=253983
 
     my ( $ax,$ay, $bx,$by, $cx,$cy, $dx,$dy ) = @_;
@@ -169,21 +179,18 @@ sub _line_segments_intersect {
     # (... lengthy derivation ...)
 
     my $d = ($ax-$bx)*($cy-$dy) - ($ay-$by)*($cx-$dx);
-    return 0 if $d == 0; # parallel
+    return if $d == 0; # parallel
 
     my $p = ( ($by-$dy)*($cx-$dx) - ($bx-$dx)*($cy-$dy) ) / $d;
 
     # we probably don't need to find q because we already restricted the domain/range above
 
-    return 1 if $p >= 0 and $p <= 1;
-    return 0;
+    return unless $p >= 0 and $p <= 1;
 
-    # my $px = $p*$ax + (1-$p)*$bx;
-    # my $py = $p*$ay + (1-$p)*$by;
+    my $px = $p*$ax + (1-$p)*$bx;
+    my $py = $p*$ay + (1-$p)*$by;
 
-    # id://253983 returns the intersection, but we just want to know _if_ they intersect
-
-    #return ($px, $py);
+    return ($px, $py);
 }
 
 # }}}

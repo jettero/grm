@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 # vi:tw=0:
-# $Id: greenies.pl 66.1445.lhgFHt8XveWYOoIfdRw3V9/Ij+c 2007-05-07 09:17:05 -0400 $
+# $Id: greenies.pl 66.1460.y0TUhidKMZGR5HxYFXEW+neMp2k 2007-05-07 13:30:26 -0400 $
 
 use strict;
 use GD;
@@ -60,7 +60,7 @@ while(<STDIN>) {
         print $out $image->png;
         close $out;
 
-        system qw(xv marked_greenies.png);
+        system qw(xv -geometry +0+0 marked_greenies.png);
         unlink "marked_greenies.png" or die $!;
     }
 }
