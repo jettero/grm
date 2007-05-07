@@ -1,4 +1,0 @@
-#!/bin/sh
-
-./makeitfromscratch
-make test || exit 1

@@ -26,18 +26,22 @@ sub queue_play {
         num_rooms    => "1d4",
     });
 
-    #$map->add_generator_plugin( "FiveSplit"  );
-    #$map->add_generator_plugin( "BasicDoors" );
-
+    warn "importing";
     $map->set_generator( "XMLImport" );
     $map->generate( xml_input_file => "vis1.xml" ); 
 
+    warn "drawing";
     $map->set_exporter( "BasicImage" );
     $map->export( "map.png" );
 
+    warn "marking";
     my $queue = $map->queue;
 
-    $queue->_lline_of_sight( [22, 17] => [24, 21] );
+    warn "redir stderr>log";
+    open STDERR, ">log" or die $!;
+
+    # $queue->_lline_of_sight( [22,17]=>[24,17] ); die;
+      $queue->_lline_of_sight( [22,17]=>[24,21] ); die;
 
     my @things = map { my $b = $_; bless \$b, "Thing$b" } ( 1 .. 10 );
 
@@ -50,24 +54,22 @@ sub queue_play {
         my $item1 = $image->colorAllocate(255, 255, 0);
         my $item2 = $image->colorAllocate(0, 0, 0);
 
-        my $visible = $image->colorAllocate(220, 220, 255);
-        my $igcover = $image->colorAllocate(232, 232, 255);
-        my $cover   = $image->colorAllocate(247, 247, 255);
+        my $visible = $image->colorAllocate(220, 255, 220);
+        my $igcover = $image->colorAllocate(220, 220, 255);
+        my $cover   = $image->colorAllocate(255, 220, 220);
 
         my @dude_position = $queue->random_open_location;
            @dude_position = (22, 17);
 
         # color visible tiles
-        if( 0 ) {
         for my $loc ($queue->locations_in_line_of_sight( @dude_position )) {
-            my $los = $queue->lline_of_sight( @$loc );
+            my $los = $queue->lline_of_sight( @dude_position => @$loc );
             my $LoS = $visible;
                $LoS = $igcover if $los == LOS_IGNORABLE_COVER;
                $LoS = $cover   if $los == LOS_COVER;
 
             $image->rectangle(23*$loc->[0]+1, 23*$loc->[1]+1, 23*($loc->[0]+1)-1, 23*($loc->[1]+1)-1, $LoS);
             $image->fill(23*$loc->[0]+2, 23*$loc->[1]+2, $LoS); # the fill is separate because of doors
-        }
         }
 
         # draw things
