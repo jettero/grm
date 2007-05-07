@@ -40,8 +40,12 @@ sub queue_play {
     warn "redir stderr>log";
     open STDERR, ">log" or die $!;
 
-    # $queue->_lline_of_sight( [22,17]=>[24,17] ); die;
-      $queue->_lline_of_sight( [22,17]=>[24,21] ); die;
+    # $queue->_lline_of_sight( [22,17]=>[23,17] );
+    # $queue->_lline_of_sight( [22,17]=>[24,17] );
+    # $queue->_lline_of_sight( [22,17]=>[24,21] );
+    # $queue->_lline_of_sight( [22,17]=>[22,24] );
+    # $queue->_lline_of_sight( [22,17]=>[23,24] );
+    # die;
 
     my @things = map { my $b = $_; bless \$b, "Thing$b" } ( 1 .. 10 );
 
