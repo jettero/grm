@@ -1,0 +1,18 @@
+
+
+New LoS strategy:
+
+1. Find all the possible closed {od} between C0 and C1 as vectors.
+2. Find all 16 vectors from C0 corners to C1 corners.
+3. See which of the corner vectors have a projections onto the solid {od} vectors.
+4. Conclusions
+    a. If there's at least one corner vector without a projection, there's an LoS
+    b. If any set of 4 C0 vectors have no projection, there's no cover
+
+
+Also, the LoS scores should be like so, to reflect increasing scores:
+
+0 LOS_NO
+1 LOS_COVER
+2 LOS_IGNORABLE_COVER
+3 LOS_YES
