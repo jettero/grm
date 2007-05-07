@@ -1,4 +1,4 @@
-# $Id: Queue.pm 471.12948.oVfJTZ5gsUvtxaNgbv+D/2/8UwY 2007-05-07 15:05:13 -0400 $
+# $Id: Queue.pm 486.13339.Hn+TEbnw17RTy/Bl1FZ1izzUwRE 2007-05-07 17:59:26 -0400 $
 
 package Games::RolePlay::MapGen::Queue;
 
@@ -179,7 +179,15 @@ sub _line_segments_intersect {
     # (... lengthy derivation ...)
 
     my $d = ($ax-$bx)*($cy-$dy) - ($ay-$by)*($cx-$dx);
-    return if $d == 0; # parallel
+    if( $d == 0 ) {
+        # d=0 when len(C->D)==0 !!
+        for my $l ([$ax,$ay], [$bx, $by]) {
+        for my $r ([$cx,$cy], [$dx, $dy]) {
+            return (@$l) if $l->[0] == $r->[0] and $l->[1] == $r->[1];
+        }}
+
+        return; # probably parallel
+    }
 
     my $p = ( ($by-$dy)*($cx-$dx) - ($bx-$dx)*($cy-$dy) ) / $d;
 
@@ -381,17 +389,24 @@ sub objs_in_line_of_sight {
 # random_open_location {{{
 sub random_open_location {
     my $this = shift;
+    my @l    = $this->all_open_locations;
+    my $i    = int rand int @l;
 
-    my $max = 1000;
+    return (wantarray ? @{$l[$i]}:$l[$i]);
+}
+# }}}
+# all_open_locations {{{
+sub all_open_locations {
+    my $this = shift;
     my ($X, $Y) = ($this->{xm}+1, $this->{ym}+1);
-    while(1) {
-        my $x = int rand $X;
-        my $y = int rand $Y;
+    my @ret = ();
 
-        die "problem finding x,y during rol" if --$max < 1;
+    for my $x ( 0 .. $this->{xm} ) {
+    for my $y ( 0 .. $this->{ym} ) {
+        push @ret, [$x, $y] if defined $this->{_the_map}[ $y ][ $x ]{type}; # the wall type is <undef>
+    }}
 
-        return (wantarray ? ($x,$y):[$x,$y]) if defined $this->{_the_map}[ $y ][ $x ]{type}; # the wall type is <undef>
-    }
+    return (wantarray ? @ret:\@ret);
 }
 # }}}
 # locations_in_line_of_sight {{{

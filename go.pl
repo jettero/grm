@@ -48,7 +48,10 @@ sub queue_play {
 
     $queue->add( $_ => ($queue->random_open_location) ) for @things;
 
-    DRAW: {
+    my @all = $queue->all_open_locations;
+     # @all = ([22,17], [3,19]);
+
+    for my $dp (@all) {
         my $image = GD::Image->new("map.png");
         my $dude1 = $image->colorAllocate(100, 100, 255);
         my $dude2 = $image->colorAllocate(0, 0, 0);
@@ -59,9 +62,7 @@ sub queue_play {
         my $igcover = $image->colorAllocate(220, 220, 255);
         my $cover   = $image->colorAllocate(255, 220, 220);
 
-        my @dude_position = $queue->random_open_location;
-         # @dude_position = (22, 17);
-           @dude_position = (3, 19);
+        my @dude_position = @$dp;
 
         # color visible tiles
         for my $loc ($queue->locations_in_line_of_sight( @dude_position )) {
@@ -87,9 +88,16 @@ sub queue_play {
 
         open my $marked, ">marked.png";
         print $marked $image->png;
-    }
+        close $marked;
 
-    exec qw(xv -geometry +0+0 marked.png map.png);
+        EXEC: {
+            unless(@all>5) {
+                system(qw(xv -geometry +0+0 marked.png)) == 0 or exit 1;
+            }
+
+            system(qw(pngcrush marked.png), sprintf('marked_%02d-%02d.png', @$dp)) == 0 or exit 1;
+        }
+    }
 }
 
 sub obr_generate {
