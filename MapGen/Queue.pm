@@ -1,4 +1,4 @@
-# $Id: Queue.pm 504.13822.nCUTYzI3oZH5wU6MJ+lp1/Du/uk 2007-05-08 07:27:51 -0400 $
+# $Id: Queue.pm 537.14875.WQr6wNCTfaonYoymXbm24YnzLbM 2007-05-08 16:26:36 -0400 $
 
 package Games::RolePlay::MapGen::Queue;
 
@@ -10,10 +10,13 @@ use constant {
     LOS_COVER           => 1,
     LOS_IGNORABLE_COVER => 2,
     LOS_YES             => 3,
-    };
+};
 
 use base qw(Exporter);
 our @EXPORT = qw(LOS_NO LOS_COVER LOS_IGNORABLE_COVER LOS_YES);
+
+# our $LOS_CREATURE_WIDTH = 1.00; # pure d20 rules
+  our $LOS_CREATURE_WIDTH = 0.50; # A reasonable compromise
 
 1;
 
@@ -98,37 +101,67 @@ sub _lline_of_sight {
     ## DEBUG ## warn "\t\tnon-od=[ (@{$_->[0]})->(@{$_->[1]}) ]" for @od_segments;
     ## DEBUG ## warn "\tDONE\n";
 
-    ##---------------- LOS CALC
+    my @lhs = (
+        [ $lhs->[0] + 0.30, $lhs->[1] + 0.30 ], # sw corner
+        [ $lhs->[0] + 0.70, $lhs->[1] + 0.30 ], # se corner
+        [ $lhs->[0] + 0.30, $lhs->[1] + 0.70 ], # nw corner
+        [ $lhs->[0] + 0.70, $lhs->[1] + 0.70 ], # ne corner
+    );
+
     my @rhs = (
+        [ $rhs->[0] + 0.30, $rhs->[1] + 0.30 ], # sw corner
+        [ $rhs->[0] + 0.70, $rhs->[1] + 0.30 ], # se corner
+        [ $rhs->[0] + 0.30, $rhs->[1] + 0.70 ], # nw corner
+        [ $rhs->[0] + 0.70, $rhs->[1] + 0.70 ], # ne corner
+    );
+
+    ##---------------- LOS CALC
+    my $line = 0;
+
+    warn "SET\n";
+    warn "\@target: <@$rhs>\n";
+    warn "wall: (@{$_->[0]})->(@{$_->[1]})\n" for @od_segments;
+    LOS_CHECK:
+    for my $l (@lhs) {
+    for my $r (@rhs) {
+        my $this_line = 1;
+
+        OD_CHECK:
+        for my $od_segment (@od_segments) {
+            if( $this->_line_segments_intersect( (map {@$_} @$od_segment) => (@$l=>@$r) ) ) {
+                $this_line = 0;
+
+                last OD_CHECK;
+            }
+        }
+
+        if( $this_line ) {
+            warn "LOS: (@$l)->(@$r)\n";
+            $line = 1;
+            last LOS_CHECK;
+        }
+    }}
+    warn "DONE\n";
+
+    return LOS_NO unless $line;
+    return LOS_YES; # cover needs to be double checked
+
+    @lhs = (
+        [ $lhs->[0]+0, $lhs->[1]+0 ], # sw corner
+        [ $lhs->[0]+1, $lhs->[1]+0 ], # se corner
+        [ $lhs->[0]+0, $lhs->[1]+1 ], # nw corner
+        [ $lhs->[0]+1, $lhs->[1]+1 ], # ne corner
+    );
+
+    @rhs = (
         [ $rhs->[0]+0, $rhs->[1]+0 ], # sw corner
         [ $rhs->[0]+1, $rhs->[1]+0 ], # se corner
         [ $rhs->[0]+0, $rhs->[1]+1 ], # nw corner
         [ $rhs->[0]+1, $rhs->[1]+1 ], # ne corner
     );
 
-    my $line = 0;
-    my @dl = ($lhs->[0]+0.5, $rhs->[1]+0.5);
-
-    LOS_CALC: for my $r (@rhs) {
-        for my $od_segment (@od_segments) {
-            if( not $this->_line_segments_intersect( (map {@$_} @$od_segment) => (@dl=>@$r) ) ) {
-                $line = 1;
-
-                last LOS_CALC;
-            }
-        }
-    }
-
     ##---------------- COVER CALC
-    return LOS_NO unless $line;
-    return LOS_YES; # cover needs to be double checked
-
-    my @lhs = (
-        [ $lhs->[0]+0, $lhs->[1]+0 ], # sw corner
-        [ $lhs->[0]+1, $lhs->[1]+0 ], # se corner
-        [ $lhs->[0]+0, $lhs->[1]+1 ], # nw corner
-        [ $lhs->[0]+1, $lhs->[1]+1 ], # ne corner
-    );
+    die "this code needs to be double checked, particularly with respect to calculation of LOS_YES, since we do that above now";
 
     my @results;
     for my $l (@lhs) { unshift @results, [];

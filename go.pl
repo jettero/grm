@@ -49,7 +49,8 @@ sub queue_play {
     $queue->add( $_ => ($queue->random_open_location) ) for @things;
 
     my @all = $queue->all_open_locations;
-       @all = ([0,19], [1,19]);
+     # @all = ([0,19], [1,19]);
+       @all = ([1,19]);
 
     for my $dp (@all) {
         my $image = GD::Image->new("map.png");

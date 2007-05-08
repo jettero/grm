@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 # vi:tw=0:
-# $Id: greenies.pl 66.1460.y0TUhidKMZGR5HxYFXEW+neMp2k 2007-05-07 13:30:26 -0400 $
+# $Id: greenies.pl 66.1496.Swesd1szFKhyZW/ZBKGtO59ooVg 2007-05-08 08:14:47 -0400 $
 
 use strict;
 use GD;
@@ -21,7 +21,7 @@ while(<STDIN>) {
     my $black = $image->colorAllocate(0, 0, 0);
 
     REDO: {
-        while( m/\((\d+)[,\s]+(\d+)\).*?\((\d+)[,\s]+(\d+)\)/g ) {
+        while( m/\(([\.\-\d]+)[,\s]+([\.\-\d]+)\).*?\(([\.\-\d]+)[,\s]+([\.\-\d]+)\)/g ) {
             my @lhs = map {$_*23} ($1, $2);
             my @rhs = map {$_*23} ($3, $4);
 
@@ -34,7 +34,7 @@ while(<STDIN>) {
             $drew ++;
         }
 
-        while( m/<(\d+)[,\s]+(\d+)>/g ) {
+        while( m/<([\.\-\d]+)[,\s]+([\.\-\d]+)>/g ) {
             my @p = map {$_*23+12} ($1, $2);
 
             $image->filledEllipse(@p, 9,9, $red);
