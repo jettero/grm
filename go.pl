@@ -49,7 +49,7 @@ sub queue_play {
     $queue->add( $_ => ($queue->random_open_location) ) for @things;
 
     my @all = $queue->all_open_locations;
-     # @all = ([22,17], [3,19]);
+       @all = ([0,19], [1,19]);
 
     for my $dp (@all) {
         my $image = GD::Image->new("map.png");
@@ -91,11 +91,12 @@ sub queue_play {
         close $marked;
 
         EXEC: {
-            unless(@all>5) {
+            if(@all>5) {
+                system(qw(pngcrush marked.png), sprintf('marked_%02d-%02d.png', @$dp)) == 0 or exit 1;
+
+            } else {
                 system(qw(xv -geometry +0+0 marked.png)) == 0 or exit 1;
             }
-
-            system(qw(pngcrush marked.png), sprintf('marked_%02d-%02d.png', @$dp)) == 0 or exit 1;
         }
     }
 }

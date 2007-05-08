@@ -1,4 +1,4 @@
-# $Id: Queue.pm 486.13339.Hn+TEbnw17RTy/Bl1FZ1izzUwRE 2007-05-07 17:59:26 -0400 $
+# $Id: Queue.pm 504.13822.nCUTYzI3oZH5wU6MJ+lp1/Du/uk 2007-05-08 07:27:51 -0400 $
 
 package Games::RolePlay::MapGen::Queue;
 
@@ -98,18 +98,36 @@ sub _lline_of_sight {
     ## DEBUG ## warn "\t\tnon-od=[ (@{$_->[0]})->(@{$_->[1]}) ]" for @od_segments;
     ## DEBUG ## warn "\tDONE\n";
 
-    my @lhs = (
-        [ $lhs->[0]+0, $lhs->[1]+0 ], # sw corner
-        [ $lhs->[0]+1, $lhs->[1]+0 ], # se corner
-        [ $lhs->[0]+0, $lhs->[1]+1 ], # nw corner
-        [ $lhs->[0]+1, $lhs->[1]+1 ], # ne corner
-    );
-
+    ##---------------- LOS CALC
     my @rhs = (
         [ $rhs->[0]+0, $rhs->[1]+0 ], # sw corner
         [ $rhs->[0]+1, $rhs->[1]+0 ], # se corner
         [ $rhs->[0]+0, $rhs->[1]+1 ], # nw corner
         [ $rhs->[0]+1, $rhs->[1]+1 ], # ne corner
+    );
+
+    my $line = 0;
+    my @dl = ($lhs->[0]+0.5, $rhs->[1]+0.5);
+
+    LOS_CALC: for my $r (@rhs) {
+        for my $od_segment (@od_segments) {
+            if( not $this->_line_segments_intersect( (map {@$_} @$od_segment) => (@dl=>@$r) ) ) {
+                $line = 1;
+
+                last LOS_CALC;
+            }
+        }
+    }
+
+    ##---------------- COVER CALC
+    return LOS_NO unless $line;
+    return LOS_YES; # cover needs to be double checked
+
+    my @lhs = (
+        [ $lhs->[0]+0, $lhs->[1]+0 ], # sw corner
+        [ $lhs->[0]+1, $lhs->[1]+0 ], # se corner
+        [ $lhs->[0]+0, $lhs->[1]+1 ], # nw corner
+        [ $lhs->[0]+1, $lhs->[1]+1 ], # ne corner
     );
 
     my @results;
