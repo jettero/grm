@@ -50,7 +50,7 @@ sub queue_play {
 
     my @all = $queue->all_open_locations;
      # @all = ([0,19], [1,19]);
-       @all = ([1,19]);
+       @all = ([1,19], [3, 20]);
 
     for my $dp (@all) {
         my $image = GD::Image->new("map.png");
@@ -62,18 +62,23 @@ sub queue_play {
         my $visible = $image->colorAllocate(220, 255, 220);
         my $igcover = $image->colorAllocate(220, 220, 255);
         my $cover   = $image->colorAllocate(255, 220, 220);
+        my $mcover  = $image->colorAllocate(220, 255, 220);
 
         my @dude_position = @$dp;
 
         # color visible tiles
         for my $loc ($queue->locations_in_line_of_sight( @dude_position )) {
-            my $los = $queue->lline_of_sight( @dude_position => @$loc );
-            my $LoS = $visible;
-               $LoS = $igcover if $los == LOS_IGNORABLE_COVER;
-               $LoS = $cover   if $los == LOS_COVER;
+            my $rc = $queue->ranged_cover( @dude_position => @$loc );
+            my $mc = $queue->melee_cover(  @dude_position => @$loc );
 
-            $image->rectangle(23*$loc->[0]+1, 23*$loc->[1]+1, 23*($loc->[0]+1)-1, 23*($loc->[1]+1)-1, $LoS);
-            $image->fill(23*$loc->[0]+2, 23*$loc->[1]+2, $LoS); # the fill is separate because of doors
+            my $color = $visible;
+               $color = $cover   if $rc == LOS_COVER;
+               $color = $igcover if $rc == LOS_IGNORABLE_COVER;
+
+            $image->rectangle(23*$loc->[0]+1, 23*$loc->[1]+1, 23*($loc->[0]+1)-1, 23*($loc->[1]+1)-1, $color);
+            $image->fill(23*$loc->[0]+2, 23*$loc->[1]+2, $color); # the fill is separate because of doors
+
+            $image->rectangle(23*$loc->[0]+3, 23*$loc->[1]+3, 23*($loc->[0]+1)-3, 23*($loc->[1]+1)-3, $mcover) if $mc;
         }
 
         # draw things
