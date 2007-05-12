@@ -1,3 +1,6 @@
+0.31.0:  Wed Jan 17 09:37:32 EST 2007
+   - jettero added an XML importer
+
 0.29:  Wed Jan 17 09:37:32 EST 2007
    - jettero added the Tie::IxHash requirement
 
