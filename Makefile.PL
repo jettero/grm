@@ -11,5 +11,5 @@ WriteMakefile(
         'XML::XPath'  => 0,
     },
 
-    clean => { FILES => "m*.txt *.png *.log *.map m*.xml map.dumper.* log" },
+    clean => { FILES => "m*.txt *.png *.log *.map [0-9][0-9]_*.xml m*.xml map.dumper.* log" },
 );
