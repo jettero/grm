@@ -7,7 +7,7 @@ use AutoLoader;
 use Carp;
 use Data::Dumper; $Data::Dumper::Indent = 1; $Data::Dumper::SortKeys = 1;
 
-our $VERSION = "0.29.3";
+our $VERSION = "0.31.0";
 our $AUTOLOAD;
 
 our %opp = (n=>"s", e=>"w", s=>"n", w=>"e");
@@ -262,17 +262,6 @@ sub export {
     $this->_check_opts; # plugins, generators and exporters can add default options
 
     goto __MADE_VIS_OBJ;
-}
-# }}}
-
-# queue {{{
-sub queue {
-    my $this = shift;
-    eval "use Games::RolePlay::MapGen::Queue"; die $@ if $@;
-
-    my $queue = Games::RolePlay::MapGen::Queue->new( $this->{_the_map} );
-
-    return $queue;
 }
 # }}}
 
