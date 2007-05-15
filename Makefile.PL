@@ -10,6 +10,7 @@ WriteMakefile(
         'XML::Simple' => 0,
         'Tie::IxHash' => 0,
         'XML::XPath'  => 0,
+        'Test'        => 1.25,
     },
 
     clean => { FILES => "m*.txt *.png *.log *.map [0-9][0-9]_*.xml m*.xml map.dumper.* log" },
