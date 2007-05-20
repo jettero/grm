@@ -7,7 +7,7 @@ use AutoLoader;
 use Carp;
 use Data::Dumper; $Data::Dumper::Indent = 1; $Data::Dumper::SortKeys = 1;
 
-our $VERSION = "0.31.2";
+our $VERSION = "0.33.0";
 our $AUTOLOAD;
 
 our %opp = (n=>"s", e=>"w", s=>"n", w=>"e");
@@ -236,9 +236,7 @@ sub export {
     __MADE_VIS_OBJ:
     if( my $vis = $this->{objs}{exporter} ) {
 
-        $vis->go( _the_map => $this->{_the_map}, _the_groups => $this->{_the_groups}, (@_==1 ? (fname=>$_[0]) : @_) );
-
-        return;
+        return $vis->go( _the_map => $this->{_the_map}, _the_groups => $this->{_the_groups}, (@_==1 ? (fname=>$_[0]) : @_) );
 
     } else {
         die "problem creating new exporter object" if $err;
@@ -262,6 +260,32 @@ sub export {
     $this->_check_opts; # plugins, generators and exporters can add default options
 
     goto __MADE_VIS_OBJ;
+}
+# }}}
+
+# import_xml {{{
+sub import_xml {
+    my $this = shift;
+    my $that = shift; croak "no such file that=$that" unless -f $that;
+
+    $this = $this->new unless ref $this;
+
+    $this->set_generator( "XMLImport" );
+    $this->generate( xml_input_file => $that ); 
+
+    $this;
+}
+# }}}
+# size {{{
+sub size {
+    my $this = shift;
+    my $map  = $opts->{_the_map};
+
+    my $x = @{$map->[0]});
+    my $y = @$map;
+
+    return ($x, $y) if wantarray;
+    return [$x, $y];
 }
 # }}}
 

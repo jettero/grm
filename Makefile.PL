@@ -1,6 +1,6 @@
 # vi:set syntax=perl:
 
-use 5.008001;
+use 5.008;
 use ExtUtils::MakeMaker;
 
 WriteMakefile(
