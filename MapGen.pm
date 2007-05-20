@@ -279,9 +279,9 @@ sub import_xml {
 # size {{{
 sub size {
     my $this = shift;
-    my $map  = $opts->{_the_map};
+    my $map  = $this->{_the_map};
 
-    my $x = @{$map->[0]});
+    my $x = @{$map->[0]};
     my $y = @$map;
 
     return ($x, $y) if wantarray;
