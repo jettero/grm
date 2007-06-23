@@ -61,7 +61,7 @@ sub std_generate {
   $map->generate; 
   $map->export( "map.txt" );
   $map->export( "map.map" );
-
+  
   $map->set_exporter( "BasicImage" );
   $map->export( "map.png" );
 

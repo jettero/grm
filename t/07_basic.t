@@ -12,8 +12,8 @@ my $map = new Games::RolePlay::MapGen({bounding_box => join("x", $x, $y) });
 
 $map->set_generator("Basic");
 $map->add_generator_plugin("BasicDoors");
+$map->generate;
 
-generate $map;
 # save_map $map("$$.map");         # these are for when the tests fail and you don't know why ...
 # print STDERR " saved $$.map\n";  # but we don't normally need them.
 

@@ -2,22 +2,25 @@
 use strict;
 use Test;
 
-my ($x, $y) = (25, 25);
-
-plan tests => (2*4 * $x * $y);
+my ($x, $y) = (15, 15);
 
 use Games::RolePlay::MapGen;
 
-my $map = new Games::RolePlay::MapGen({ num_rooms=>"2d4", bounding_box=>join("x", $x, $y) });
+my $map = new Games::RolePlay::MapGen({ tile_size=>10, num_rooms=>"2d4", bounding_box=>join("x", $x, $y) });
 
-$map->set_generator("Basic");
-$map->add_generator_plugin("BasicDoors");
+$map->set_generator( "Basic" );
+$map->add_generator_plugin( "FiveSplit" );
+$map->add_generator_plugin( "BasicDoors" );
+$map->generate; 
 
-generate $map;
+($x,$y) = $map->size;
+
+plan tests => ( 2*4 * $x*$y );
+
 if( 0 ) {
     $map->set_exporter( "BasicImage" );
-    save_map $map("map.map");         # these are for when the tests fail and you don't know why ...
-    print STDERR " saved map.map\n";  # but we don't normally need them.
+    $map->export("map.png");
+    print STDERR " saved map.png\n";
 }
 
 CHECK_OPEN_DIRECTIONS_FOR_SANITY: { # they should really be the same from each direction ... or there's a problem.
@@ -34,7 +37,7 @@ CHECK_OPEN_DIRECTIONS_FOR_SANITY: { # they should really be the same from each d
                     my $o = $Games::RolePlay::MapGen::opp{$d};
                     my $r = $n->{nb}{$o} == $here;
 
-                    # warn "$d:[$k,$v]";
+                    # warn "$d:[$k,$v]-($j,$i)-($here->{x},$here->{y})-($n->{x},$n->{y})";
 
                     ok( $r );
                     ok( $n->{$k}, $v );
