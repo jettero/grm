@@ -64,7 +64,8 @@ sub genmap {
 
     my $white  = $gd->colorAllocate(0xff, 0xff, 0xff);
     my $black  = $gd->colorAllocate(0x00, 0x00, 0x00);
-    my $vlgrey = $gd->colorAllocate(0xee, 0xee, 0xee);
+    my $elgrey = $gd->colorAllocate(0xf5, 0xf5, 0xf5); # extremely light grey
+    my $vlgrey = $gd->colorAllocate(0xe5, 0xe5, 0xe5); # very light grey
     my $lgrey  = $gd->colorAllocate(0xcc, 0xcc, 0xcc);
     my $dgrey  = $gd->colorAllocate(0x60, 0x60, 0x60);
     my $grey   = $gd->colorAllocate(0x90, 0x90, 0x90);
@@ -78,7 +79,8 @@ sub genmap {
     my $door_color         = $brown;
     my $wall_color         = $black;
     my $non_map_tile_color = $dgrey;
-    my $open_color         = $vlgrey; # $white;
+    my $open_color1        = $elgrey;  # "walls"
+    my $open_color2        = $vlgrey; # ticks
 
     my $D     = 5; # the border around debugging marks
     my $B     = 1; # the border around the filled rectangles for empty tiles
@@ -121,15 +123,15 @@ sub genmap {
             $gd->line( $Xp, $yp => $Xp, $Yp, $wall_color );
             $gd->line( $xp, $yp => $xp, $Yp, $wall_color );
 
-            $gd->line( $xp+$L, $yp     => $Xp-$L, $yp,    $open_color ) if $t->{od}{n} == 1; # == 1 doesn't match doors...
-            $gd->line( $xp+$L, $Yp     => $Xp-$L, $Yp,    $open_color ) if $t->{od}{s} == 1;
-            $gd->line( $Xp,    $yp+$L, => $Xp,    $Yp-$L, $open_color ) if $t->{od}{e} == 1;
-            $gd->line( $xp,    $yp+$L, => $xp,    $Yp-$L, $open_color ) if $t->{od}{w} == 1;
+            $gd->line( $xp+$L, $yp     => $Xp-$L, $yp,    $open_color1 ) if $t->{od}{n} == 1; # == 1 doesn't match doors...
+            $gd->line( $xp+$L, $Yp     => $Xp-$L, $Yp,    $open_color1 ) if $t->{od}{s} == 1;
+            $gd->line( $Xp,    $yp+$L, => $Xp,    $Yp-$L, $open_color1 ) if $t->{od}{e} == 1;
+            $gd->line( $xp,    $yp+$L, => $xp,    $Yp-$L, $open_color1 ) if $t->{od}{w} == 1;
 
             if( $t->{od}{n} == 1 and $t->{od}{w} == 1 ) { # == 1 doesn't match doors
                 if( $t->{nb}{n}{od}{w} == 1 and $t->{nb}{w}{od}{n} == 1 ) {
-                    $gd->line( $xp-$L, $yp    => $xp+$L, $yp,    $open_color );
-                    $gd->line( $xp,    $yp-$L => $xp,    $yp+$L, $open_color );
+                    $gd->line( $xp-$L, $yp    => $xp+$L, $yp,    $open_color2 );
+                    $gd->line( $xp,    $yp-$L => $xp,    $yp+$L, $open_color2 );
                 }
             }
 
