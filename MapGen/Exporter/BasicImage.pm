@@ -64,6 +64,7 @@ sub genmap {
 
     my $white  = $gd->colorAllocate(0xff, 0xff, 0xff);
     my $black  = $gd->colorAllocate(0x00, 0x00, 0x00);
+    my $vlgrey = $gd->colorAllocate(0xee, 0xee, 0xee);
     my $lgrey  = $gd->colorAllocate(0xcc, 0xcc, 0xcc);
     my $dgrey  = $gd->colorAllocate(0x60, 0x60, 0x60);
     my $grey   = $gd->colorAllocate(0x90, 0x90, 0x90);
@@ -77,7 +78,7 @@ sub genmap {
     my $door_color         = $brown;
     my $wall_color         = $black;
     my $non_map_tile_color = $dgrey;
-    my $open_color         = $white;
+    my $open_color         = $vlgrey; # $white;
 
     my $D     = 5; # the border around debugging marks
     my $B     = 1; # the border around the filled rectangles for empty tiles
