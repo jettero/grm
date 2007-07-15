@@ -78,9 +78,10 @@ sub genmap {
     my $door_arc_color     = $lgrey;
     my $door_color         = $brown;
     my $wall_color         = $black;
-    my $non_map_tile_color = $dgrey;
-    my $open_color1        = $elgrey;  # "walls"
-    my $open_color2        = $vlgrey; # ticks
+    my $wall_tile_color    = $dgrey;  # wall-tile color
+    my $corridor_color     = $white;  # corridor-tile color
+    my $open_color1        = $elgrey; # tile edges
+    my $open_color2        = $vlgrey; # tile ticks
 
     my $D     = 5; # the border around debugging marks
     my $B     = 1; # the border around the filled rectangles for empty tiles
@@ -234,7 +235,10 @@ sub genmap {
             }
 
             if( not $t->{type} ) {
-                $gd->filledRectangle( $xp+$B, $yp+$B => $Xp-$B, $Yp-$B, $non_map_tile_color );
+                $gd->filledRectangle( $xp+$B, $yp+$B => $Xp-$B, $Yp-$B, $wall_tile_color );
+            }
+            elsif( $t->{type} eq "corridor" ) {
+                $gd->filledRectangle( $xp+$B, $yp+$B => $Xp-$B, $Yp-$B, $corridor_color );
             }
 
             if( $t->{DEBUG_red_mark} ) {
