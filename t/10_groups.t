@@ -13,6 +13,10 @@ $map->set_generator( "Basic" );
 $map->add_generator_plugin( "BasicDoors" );
 $map->generate; 
 
+$map->set_exporter( "XML" );
+$map->export( "10_groups.xml" );
+$map->save_map( "10_groups.mpb" );
+
 my $m = $map->{_the_map};
 my @g = @{$map->{_the_groups}};
 
@@ -29,7 +33,11 @@ my $tile_count = 0;
 for my $i (0 .. $y-1) { for my $j (0 .. $x-1) {
     $m->[ $j ][ $i ]{visited} = 0;
 
-    if( $m->[ $j ][ $i ]{group} ) {
+    # the pseudo groups are NOT enumerated in the official groups!!
+    # arguably, they should be deleted!
+
+    my $g = $m->[ $j ][ $i ]{group};
+    if( $g and $g->{type} ne "pseudo" ) {
         $m->[ $j ][ $i ]{needs_visit} = 1;
         $tile_count ++;
     }
@@ -61,3 +69,5 @@ for my $i (0 .. $y-1) { for my $j (0 .. $x-1) {
         ok( "($i,$j) $t->{visited}", "($i,$j) 1" );
     }
 }}
+
+$map->save_map( "10_groups.mpa" );

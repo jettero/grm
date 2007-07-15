@@ -1,11 +1,15 @@
+0.33:  Sun Jul 15 07:39:56 EDT 2007
+   - jettero fixed irritating bugs left by FiveSplit and
+     Basic.pm -- all concerning tile groups.
+
 0.32.0:  Wed May 16 2007
    - added an xml import shortcut.
-   - fixed abug in the main ::export() that failed to return the exporter go() result properly
+   - fixed abug in the main ::export() that failed to return
+     the exporter go() result properly
 
-0.31.1:  Mon May 14 2007
-0.31.2:  Tue May 15 2007
+0.31.1:  Mon May 14 2007 0.31.2:  Tue May 15 2007
    - tried to immprove the Makefile.PL and the t/ test suite
-     so the results come out a little more accurately on 
+     so the results come out a little more accurately on
      http://testers.cpan.org/ <-- lol awesome fyi
 
 0.31.0:  Wed Jan 17 09:37:32 EST 2007

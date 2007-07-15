@@ -30,6 +30,16 @@ sub pre {
     $opts->{bounding_box} = join("x", map { $_*$mults } split /x/, $opts->{bounding_box});
 
     $this->split_map($mults => $map) if $mults > 1;
+
+    for my $g (@$groups) {
+        my $l = $g->{loc};
+        my $s = $g->{size};
+
+        $l->[0] *= $mults; $l->[1] *= $mults;
+        $s->[0] *= $mults; $s->[1] *= $mults;
+
+        $g->{loc_size} = "$s->[0]x$s->[1] ($l->[0], $l->[1])";
+    }
 }
 # }}}
 # split_map {{{

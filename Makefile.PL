@@ -13,5 +13,5 @@ WriteMakefile(
         'Test'        => 1.25,
     },
 
-    clean => { FILES => "m*.txt *.png *.log *.map [0-9][0-9]_*.xml m*.xml map.dumper.* log" },
+    clean => { FILES => "m*.txt *.png *.log *.map [0-9][0-9]_*.xml m*.xml 10_groups.* map.dumper.* log" },
 );

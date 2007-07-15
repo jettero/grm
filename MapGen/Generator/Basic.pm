@@ -317,6 +317,11 @@ sub cleanup_pseudo_rooms {
             }
         }
     }
+
+    for my $tile (grep {$_->{group}} map {@$_} @$map) {
+        delete $tile->{group}
+            if $tile->{group}{type} eq "pseudo";
+    }
 }
 # }}}
 

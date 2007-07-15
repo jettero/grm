@@ -29,3 +29,5 @@ MapGen/Exporter/BasicImage.pm
 MapGen/Exporter/XML.pm
 t/08_interconnects.t
 t/08_xmlinter.t
+t/10_groups.t
+t/11_groups_a5s.t
