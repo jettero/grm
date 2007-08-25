@@ -15,7 +15,7 @@ $map->generate;
 
 ($x,$y) = $map->size;
 
-plan tests => ( 2*4 * $x*$y );
+plan tests => ( 3*4 * $x*$y );
 
 if( 0 ) {
     $map->set_exporter( "BasicImage" );
@@ -25,26 +25,26 @@ if( 0 ) {
 
 CHECK_OPEN_DIRECTIONS_FOR_SANITY: { # they should really be the same from each direction ... or there's a problem.
     my $m = $map->{_the_map};
-    for my $i (0..$y-1) {
-        for my $j (0..$x-1) {
+    for my $i (0 .. $y-1) {
+        for my $j (0 .. $x-1) {
             my $here = $m->[$i][$j];
 
             for my $ar ( [n=>[y=>$i-1]], [s=>[y=>$i+1]], [e=>[x=>$j+1]], [w=>[x=>$j-1]] ) {
                 my $d = $ar->[0];
+                my $o = $Games::RolePlay::MapGen::opp{$d};
                 my ($k, $v) = @{$ar->[1]};
 
                 if( my $n = $here->{nb}{$d} ) {
-                    my $o = $Games::RolePlay::MapGen::opp{$d};
                     my $r = $n->{nb}{$o} == $here;
-
-                    # warn "$d:[$k,$v]-($j,$i)-($here->{x},$here->{y})-($n->{x},$n->{y})";
 
                     ok( $r );
                     ok( $n->{$k}, $v );
+                    ok( $here->{od}{$d}, $n->{od}{$o} );
 
                 } else {
                     ok(1);
                     ok(1);
+                    ok( $here->{od}{$d}, 0 );
                 }
             }
         }

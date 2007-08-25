@@ -31,3 +31,4 @@ t/08_interconnects.t
 t/08_xmlinter.t
 t/10_groups.t
 t/11_groups_a5s.t
+vis1.map.xml

@@ -7,7 +7,8 @@ use strict;
 use GD;
 use Games::RolePlay::MapGen;
 
-&std_generate;
+  &import_vis1;
+# &std_generate;
 # &obr_generate;
 
 system("cp MapGen.dtd ~/www/MapGen.dtd") == 0 or die;
@@ -15,6 +16,14 @@ system("cp MapGen.xsl ~/www/MapGen.xsl") == 0 or die;
 system("cp map.xml    ~/www/MapGen.xml") == 0 or die;
 system("cp map.png    ~/www/MapGen.png") == 0 or die;
 system("chmod 644     ~/www/MapGen.*")   == 0 or die;
+
+sub import_vis1 {
+    my $map = Games::RolePlay::MapGen->import_xml( "vis1.map.xml" );
+       $map->set_exporter( "BasicImage" );
+       $map->export( "map.png" );
+
+    exec qw(xv -geometry +0+0 map.png);
+}
 
 sub obr_generate {
     my $map = new Games::RolePlay::MapGen({
