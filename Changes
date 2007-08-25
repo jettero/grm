@@ -1,3 +1,11 @@
+1.0.1:  Sat Aug 25 18:34:04 EDT 2007
+   - I fixed a drawing bug that was erasing some of the map data on an image.
+   - There exists a new test in t/08 for it.  Meh. 
+   - Sadly, the test showed that it was probably getting drawn correctly and the 
+     sad truth is that I was drawing the empty tile (white normally) over the doors 
+     that were previously drawn -- but only some of the time.  Nice.
+     fixed.
+
 0.33:  Sun Jul 15 07:39:56 EDT 2007
    - jettero fixed irritating bugs left by FiveSplit and
      Basic.pm -- all concerning tile groups.
