@@ -10,7 +10,8 @@ use Data::Dumper; $Data::Dumper::Indent = 1; $Data::Dumper::SortKeys = 1;
 our $VERSION = "1.0.1";
 our $AUTOLOAD;
 
-our %opp = (n=>"s", e=>"w", s=>"n", w=>"e");
+our %opp  = (n=>"s", e=>"w", s=>"n", w=>"e");
+our %full = (n=>"north", e=>"east", s=>"south", w=>"west");
 
 # known_opts {{{
 our %known_opts = (
