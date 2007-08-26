@@ -1,3 +1,6 @@
+1.0.2: Sun Aug 26 08:20:23 EDT 2007
+   - I added a crapload more docs.  The main module was sadly lacking.
+
 1.0.1:  Sat Aug 25 18:34:04 EDT 2007
    - I fixed a drawing bug that was erasing some of the map data on an image.
    - There exists a new test in t/08 for it.  Meh. 
