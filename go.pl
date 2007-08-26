@@ -22,6 +22,9 @@ sub import_vis1 {
        $map->set_exporter( "BasicImage" );
        $map->export( "map.png" );
 
+    ## DEBUG ## use Data::Dumper; $Data::Dumper::Indent = $Data::Dumper::Sortkeys = $Data::Dumper::Maxdepth = 1;
+    ## DEBUG ## die Dumper( $map->{_the_map}[ 1 ][ 1 ] );
+
     exec qw(xv -geometry +0+0 map.png);
 }
 

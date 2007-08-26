@@ -170,6 +170,10 @@ hand.  If there is one to find it'll be stored as the C<{nb}{s}>.
 
     my $nb_s = $tile->{nb}{s};
 
+And if you lose track, the tiles know where they are.
+
+    print "my souther neighbor: ($nb_s->{x},$nb_s->{y})\n";
+
 =head1 AUTHOR
 
 Paul Miller C<jettero@cpan.org>
