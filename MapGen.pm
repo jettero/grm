@@ -289,3 +289,6 @@ sub size {
     return [$x, $y];
 }
 # }}}
+
+__END__
+
