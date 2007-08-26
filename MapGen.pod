@@ -26,8 +26,9 @@ for this interface to be highly expandable and expected to solicit
 contributions in various ways.
 
 The interface turned out to be pretty confusing to operate even for me: the
-author.  If you wish to write some things, I will definitely assist you with
-it, and optionally include them with 
+author.  If you wish to write some things, I will definitely assist you with it
+and optionally include them with  the distribution.  However, it's set up so you
+don't need my help to publish new plugins, so that probably isn't necessary.
 
 =head2 new maps
 
@@ -195,7 +196,7 @@ Really, without his work, I never would have written this module!
 
 =head1 COPYRIGHT
 
-GPL!  I included a gpl.txt for your reading enjoyment.
+GPL!
 
 Though, additionally, I will say that I'll be tickled if you were to include
 this package in any commercial endeavor.  Also, any thoughts to the effect that
