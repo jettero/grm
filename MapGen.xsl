@@ -13,20 +13,22 @@
         <head>
             <title> MapGen </title>
             <style type="text/css">
-                body        { background: #000; color: #fff; }
-
-                table.map   { border: 1px solid #666; }
-                <xsl:if test="/MapGen/option[@name='bounding_box'] and /MapGen/option[@name='cell_size']">table.map {
-                     width: <xsl:value-of select="substring-before(/MapGen/option[@name='cell_size']/@value, 'x')*substring-before(/MapGen/option[@name='bounding_box']/@value, 'x')"/>px;
-                    height: <xsl:value-of select=" substring-after(/MapGen/option[@name='cell_size']/@value, 'x')* substring-after(/MapGen/option[@name='bounding_box']/@value, 'x')"/>px;
-                }</xsl:if>
-
-                td.tile     { width: 15px; height: 15px; background: #222; border: 1px solid #333; }
-                <xsl:if test="/MapGen/option[@name='cell_size']">td.tile {
-                     width: <xsl:value-of select="substring-before(/MapGen/option[@name='cell_size']/@value, 'x')"/>px;
-                    height: <xsl:value-of select=" substring-after(/MapGen/option[@name='cell_size']/@value, 'x')"/>px;
-                }</xsl:if>
-
+                <xsl:text>
+                    body        { background: #000; color: #fff; }
+                    table.map   { border: 1px solid #666; }
+                </xsl:text>
+                <xsl:if test="/MapGen/option[@name='bounding_box'] and /MapGen/option[@name='cell_size']">
+                <xsl:text>table.map {</xsl:text>
+                    <xsl:text> width: </xsl:text><xsl:value-of select="substring-before(/MapGen/option[@name='cell_size']/@value, 'x')*substring-before(/MapGen/option[@name='bounding_box']/@value, 'x')"/><xsl:text>px;</xsl:text>
+                    <xsl:text>height: </xsl:text><xsl:value-of select=" substring-after(/MapGen/option[@name='cell_size']/@value, 'x')* substring-after(/MapGen/option[@name='bounding_box']/@value, 'x')"/><xsl:text>px;</xsl:text>
+                <xsl:text>}</xsl:text></xsl:if>
+                <xsl:text>td.tile { width: 15px; height: 15px; background: #222; border: 1px solid #333; }</xsl:text>
+                <xsl:if test="/MapGen/option[@name='cell_size']">
+                <xsl:text>td.tile {</xsl:text>
+                    <xsl:text> width: </xsl:text><xsl:value-of select="substring-before(/MapGen/option[@name='cell_size']/@value, 'x')"/><xsl:text>px;</xsl:text>
+                    <xsl:text>height: </xsl:text><xsl:value-of select=" substring-after(/MapGen/option[@name='cell_size']/@value, 'x')"/><xsl:text>px;</xsl:text>
+                <xsl:text>}</xsl:text></xsl:if>
+                <xsl:text>
                 td.corridor { background: #ccc; border: 1px dashed #bbb; color: #bbb; }
                 td.room     { background: #fff; border: 1px dashed #ddd; color: #ddd; }
 
@@ -54,6 +56,7 @@
                 td.eastdoorsecretlocked  { border-right:  2px solid purple; }
                 td.southdoorsecretlocked { border-bottom: 2px solid purple; }
                 td.westdoorsecretlocked  { border-left:   2px solid purple; }
+                </xsl:text>
             </style>
         </head>
         <body>
@@ -62,18 +65,22 @@
                     <tr> <xsl:variable name="y" select="position()-1"/>
                         <xsl:for-each select="tile">
                             <td align="center" valign="center"> <xsl:variable name="x" select="position()-1"/>
-                                <xsl:attribute name="class">tile <xsl:value-of select="@type"/> <xsl:for-each select="closure">
-                                    <xsl:text> </xsl:text>
-                                    <xsl:value-of select="@dir"/>
-                                    <xsl:value-of select="@type"/>
-                                    <xsl:if test='@type="door" and @secret="yes"'>secret</xsl:if>
-                                    <xsl:if test='@type="door" and (@locked="yes" or @stuck="yes")'>locked</xsl:if>
-                                </xsl:for-each>
-                                <xsl:if test="@locked='yes'">
-                                    locked
-                                </xsl:if>
+                                <xsl:attribute name="class">
+                                    <xsl:text>tile </xsl:text><xsl:value-of select="@type"/><xsl:text> </xsl:text>
+                                    <xsl:for-each select="closure">
+                                        <xsl:text> </xsl:text>
+                                        <xsl:value-of select="@dir"/>
+                                        <xsl:value-of select="@type"/>
+                                        <xsl:if test='@type="door" and @secret="yes"'><xsl:text>secret</xsl:text></xsl:if>
+                                        <xsl:if test='@type="door" and (@locked="yes" or @stuck="yes")'><xsl:text>locked</xsl:text></xsl:if>
+                                    </xsl:for-each>
+                                    <xsl:if test="@locked='yes'"><xsl:text> locked</xsl:text></xsl:if>
                                 </xsl:attribute>
-                                <xsl:attribute name="title">(<xsl:value-of select="$x"/>,<xsl:value-of select="$y"/>)</xsl:attribute>
+                                <xsl:attribute name="title">
+                                    <xsl:text>(</xsl:text>
+                                        <xsl:value-of select="$x"/> <xsl:text>,</xsl:text> <xsl:value-of select="$y"/>
+                                    <xsl:text>)</xsl:text>
+                                </xsl:attribute>
                                 &tilegraphic;
                             </td>
                         </xsl:for-each>
