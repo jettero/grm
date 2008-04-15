@@ -1,7 +1,8 @@
 
 <!ELEMENT MapGen (option*, tile_group*, map)>
 <!ELEMENT option EMPTY>
-<!ELEMENT tile_group EMPTY>
+<!ELEMENT tile_group (rectangle*)>
+<!ELEMENT rectangle EMPTY>
 <!ELEMENT closure EMPTY>
 <!ELEMENT map (row*)>
 <!ELEMENT row (tile*)>
@@ -12,8 +13,8 @@
 <!ATTLIST tile type CDATA #REQUIRED>
 <!ATTLIST tile_group name CDATA #REQUIRED>
 <!ATTLIST tile_group type CDATA #REQUIRED>
-<!ATTLIST tile_group loc CDATA #REQUIRED>
-<!ATTLIST tile_group size CDATA #REQUIRED>
+<!ATTLIST rectangle loc CDATA #REQUIRED>
+<!ATTLIST rectangle size CDATA #REQUIRED>
 
 <!ATTLIST option name   CDATA #REQUIRED>
 <!ATTLIST option value  CDATA #REQUIRED>
