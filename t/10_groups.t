@@ -45,9 +45,9 @@ for my $i (0 .. $y-1) { for my $j (0 .. $x-1) {
 
 plan tests => $tile_count + $group_count;
 
-for my $g (@g) {
-    my $s = $g->{size};
-    my $l = $g->{loc};
+for my $g (@g) { for my $i (0 .. $#g) {
+    my $s = $g->[$i]{size};
+    my $l = $g->[$i]{loc};
     my $rhs = 0 + $g;
 
     for my $x ( 0 .. $s->[0]-1 ) { for my $y ( 0 .. $s->[1]-1 ) {
@@ -61,7 +61,7 @@ for my $g (@g) {
         ok( "($i,$j,$name) $lhs", "($i,$j,$g->{name}) $rhs" );
         $m->[$j][$i]{visited} = 1;
     }}
-}
+}}
 
 for my $i (0 .. $y-1) { for my $j (0 .. $x-1) {
     my $t = $m->[ $j ][ $i ];
