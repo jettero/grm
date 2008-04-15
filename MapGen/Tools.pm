@@ -120,6 +120,7 @@ sub add_rectangle {
     my $this = shift;
     my $loc  = shift;
     my $size = shift;
+    my $mapo = shift;
 
     push @{$this->{loc}},  $loc;
     push @{$this->{size}}, $size;
@@ -161,6 +162,10 @@ sub add_rectangle {
                 $mloc->[1] = $yc if $yc < $mloc->[1];
                 $Mloc->[0] = $xc if $xc > $Mloc->[0];
                 $Mloc->[1] = $yc if $yc > $Mloc->[1];
+
+                if( $mapo ) {
+                    $mapo->[ $yc ][ $xc ]{group} = $this;
+                }
             }
 
         }}
@@ -381,6 +386,11 @@ variables that need to be set by the ::Generator objects.
    Happily, there is a new method to add a rectangle that does all the work:
 
    $group->add_rectangle(\@loc, \@size);
+
+   If you pass the map object, it will mark the appropriate tiles its $self
+
+   $group->add_rectangle(\@loc, \@size, $the_map);
+    # marks $mapo->[ $y ][ $x ]{group} = $group;
 
 =head1 Games::RolePlay::MapGen::_tile
 
