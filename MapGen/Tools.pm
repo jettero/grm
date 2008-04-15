@@ -98,7 +98,90 @@ use strict;
 
 1;
 
-sub new { my $class = shift; bless {@_}, $class }
+# new {{{
+sub new {
+    my $class = shift;
+    my $this  = bless {name=>"?", loc=>[], size=>[], loc_size=>"n/a"}, $class;
+       $this->{name} = $_[0] if @_;
+
+    $this
+}
+# }}}
+# name {{{
+sub name {
+    my $this = shift;
+       $this->{name} = $_[0] if @_;
+
+    $this->{name};
+}
+# }}}
+# add_rectangle {{{
+sub add_rectangle {
+    my $this = shift;
+    my $loc  = shift;
+    my $size = shift;
+
+    push @{$this->{loc}},  $loc;
+    push @{$this->{size}}, $size;
+
+    my @i = map  { $_->[0] }
+            sort { $b->[1]<=>$a->[2] }
+            map  { my $t = $this->{size}[$_]; [$_, $t->[0]*$t->[1]] }
+            0 .. $#{$this->{loc}};
+
+    my @to_kill; # remove these, they don't say anything
+    my %points;  # don't count the same tiles over and over
+    my $sloc    = [0,0];
+    my $mloc    = [@{$this->{loc}[0]}];
+    my $Mloc    = [@{$this->{loc}[0]}];
+    my $nloc    = 0;
+    for my $i (@i) {
+        my $l = $this->{loc}[$i];
+        my $s = $this->{size}[$i];
+
+        my $x = $l->[0];
+        my $y = $l->[1];
+
+        my $i_count = 0;
+
+        for my $xi (0 .. $s->[0]-1) {
+        for my $yi (0 .. $s->[1]-1) {
+            my $xc = $x + $xi;
+            my $yc = $y + $yi;
+
+            unless( $points{$xc}{$yc} ) {
+                $points{$xc}{$yc} = 1;
+                $i_count ++;
+
+                $sloc->[0] += $xc;
+                $sloc->[1] += $yc;
+                $nloc ++;
+
+                $mloc->[0] = $xc if $xc < $mloc->[0];
+                $mloc->[1] = $yc if $yc < $mloc->[1];
+                $Mloc->[0] = $xc if $xc > $Mloc->[0];
+                $Mloc->[1] = $yc if $yc > $Mloc->[1];
+            }
+
+        }}
+
+        push @to_kill, $i unless $i_count>0;
+    }
+
+    for my $kill (sort {$b<=>$a} @to_kill) {
+        splice @{$this->{loc}},  $kill, 0;
+        splice @{$this->{size}}, $kill, 0;
+    }
+
+    my $cloc = [0,0]; 
+       $cloc = [ int($sloc->[0]/$nloc),  int($sloc->[1]/$nloc) ] if $nloc > 0;
+
+    my $extent = [ $Mloc->[0]-$mloc->[0], $Mloc->[1]-$mloc->[1] ];
+
+    $this->{loc_size} = "($cloc->[0], $cloc->[1]) $extent->[0]x$extent->[1]";
+}
+# }}}
+
 # }}}
 # package ::_tile; {{{
 package Games::RolePlay::MapGen::_tile;
@@ -274,11 +357,30 @@ Games::RolePlay::MapGen::Tools - Some support tools and objects for the mapgen s
 At this time, the ::_group object is just a blessed hash that contains some
 variables that need to be set by the ::Generator objects.
 
-    $group->{name}     = "Room #$rn";
-    $group->{loc_size} = "$size[0]x$size[1] ($spot[0], $spot[1])";
-    $group->{type}     = "room";
-    $group->{size}     = [@size];
-    $group->{loc}      = [@spot];
+   ## 1.0.3 ## $group->{name}     = "Room #$rn";
+   ## 1.0.3 ## $group->{loc_size} = "$size[0]x$size[1] ($spot[0], $spot[1])";
+   ## 1.0.3 ## $group->{type}     = "room";
+   ## 1.0.3 ## $group->{size}     = [@size];
+   ## 1.0.3 ## $group->{loc}      = [@spot];
+
+   # Starting with 1.1.0, rooms can have irregular shapes made up of
+   # rectangles.  The rectangles start at @start = @{$group->{loc}[$i]} and
+   # have @size = @{$group->{size}[$i]}.
+
+   $group->{name} = "Room #$rn";
+   $group->{type} = "room";
+   $group->{loc}  = [\@spot, \@another_spot, ...];
+   $group->{size} = [\@size, \@another_size, ...];
+
+   # The loc_size description became problematic in 1.1.x.  It will now
+   # indicate the maximum extent (x-diff x y-diff) and the "center of mass"
+   # (average location).
+
+   $group->{loc_size} = "($center[0], $center[1]) $extent[0]x$extent[1]";
+
+   Happily, there is a new method to add a rectangle that does all the work:
+
+   $group->add_rectangle(\@loc, \@size);
 
 =head1 Games::RolePlay::MapGen::_tile
 
