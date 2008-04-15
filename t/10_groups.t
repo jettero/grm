@@ -70,4 +70,4 @@ for my $i (0 .. $y-1) { for my $j (0 .. $x-1) {
     }
 }}
 
-$map->save_map( "10_groups.map" );
+$map->save_map( "10_groups.mpa" );
