@@ -101,8 +101,13 @@ use strict;
 # new {{{
 sub new {
     my $class = shift;
-    my $this  = bless {name=>"?", loc=>[], size=>[], loc_size=>"n/a"}, $class;
-       $this->{name} = $_[0] if @_;
+    my $this  = bless {name=>"?", type=>"?", loc=>[], size=>[], loc_size=>"n/a"}, $class;
+
+    if( @_ ) {
+        my $h = {@_};
+        $this->{name} = $h->{name} if exists $h->{name};
+        $this->{type} = $h->{type} if exists $h->{type};
+    }
 
     $this
 }
@@ -113,6 +118,14 @@ sub name {
        $this->{name} = $_[0] if @_;
 
     $this->{name};
+}
+# }}}
+# type {{{
+sub type {
+    my $this = shift;
+       $this->{type} = $_[0] if @_;
+
+    $this->{type};
 }
 # }}}
 # add_rectangle {{{
