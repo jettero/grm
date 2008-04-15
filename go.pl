@@ -7,9 +7,10 @@ use strict;
 use GD;
 use Games::RolePlay::MapGen;
 
-  &import_vis1;
+# &import_vis1;
 # &std_generate;
 # &obr_generate;
+  &quickx_generate;
 
 system("cp MapGen.dtd ~/www/MapGen.dtd") == 0 or die;
 system("cp MapGen.xsl ~/www/MapGen.xsl") == 0 or die;
@@ -42,6 +43,38 @@ sub obr_generate {
     $map->export( "map.png" );
 
     exec qw(xv -geometry +0+0 map.png);
+}
+
+sub quickx_generate {
+  my $map = Games::RolePlay::MapGen->new({
+      tile_size => 10,
+
+      cell_size=>
+          "23x23", 
+          # "30x30", 
+          # "24x32", 
+          # "80x80", 
+
+      num_rooms=>
+          # "70d4", 
+          # "3d8", 
+            "2d4", 
+          # "1d4", 
+
+      bounding_box => 
+          # "12x9",
+          # "15x15",
+            "20x20",
+          # "40x27",
+  }); 
+
+  $map->generate; 
+  $map->set_exporter( "XML" );
+  $map->export( "map.xml" );
+
+  my $map2 = Games::RolePlay::MapGen->import_xml( "map.xml" );
+     $map2->set_exporter( "XML" );
+     $map2->export( "map2.xml" );
 }
 
 sub std_generate {

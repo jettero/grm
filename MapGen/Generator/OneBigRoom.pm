@@ -35,11 +35,9 @@ sub genmap {
     my $groups = [];
 
     my $group = &_group;
-       $group->{name}     = "One Big Room";
-       $group->{loc_size} = "(whole map)";
-       $group->{type}     = "room";
-       $group->{size}     = [$opts->{x_size}, $opts->{y_size}];
-       $group->{loc}      = [0, 0];
+       $group->name( "One Big Room" );
+       $group->type( "room" );
+       $group->add_rectangle( [0, 0], [$opts->{x_size}, $opts->{y_size}] );
 
     my $ymax = $#map;
     my $xmax = $#{ $map[0] };

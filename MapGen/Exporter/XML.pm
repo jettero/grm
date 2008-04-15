@@ -31,11 +31,11 @@ sub go {
 
     my $map = $this->genmap($opts);
     unless( $opts->{fname} eq "-retonly" ) {
-        open _MAP_OUT, ">$opts->{fname}" or die "ERROR: couldn't open $opts->{fname} for write: $!";
-        print _MAP_OUT "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n<!DOCTYPE MapGen SYSTEM \"MapGen.dtd\">\n";
-        print _MAP_OUT "<?xml-stylesheet type=\"text/xsl\" href=\"MapGen.xsl\"?>\n\n";
-        print _MAP_OUT "\n", $map;
-        close _MAP_OUT;
+        open my $out, ">$opts->{fname}" or die "ERROR: couldn't open $opts->{fname} for write: $!";
+        print $out "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n<!DOCTYPE MapGen SYSTEM \"MapGen.dtd\">\n";
+        print $out "<?xml-stylesheet type=\"text/xsl\" href=\"MapGen.xsl\"?>\n\n";
+        print $out "\n", $map;
+        close $out;
     }
 
     return $map;
@@ -82,8 +82,12 @@ sub genmap {
         push @$groups, $ah->(
             name => $g->{name},
             type => $g->{type},
-            loc  => join(",", @{ $g->{loc}  }),
-            size => join("x", @{ $g->{size} }),
+            rectangle => [map {
+                $ah->(
+                    loc  => join(",", @{ $g->{loc}[$_]  }),
+                    size => join("x", @{ $g->{size}[$_] }),
+                )
+            } 0 .. $#{ $g->{loc} }],
         );
     }
     # }}}

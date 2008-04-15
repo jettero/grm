@@ -176,9 +176,7 @@ sub add_rectangle {
                 $Mloc->[0] = $xc if $xc > $Mloc->[0];
                 $Mloc->[1] = $yc if $yc > $Mloc->[1];
 
-                if( $mapo ) {
-                    $mapo->[ $yc ][ $xc ]{group} = $this;
-                }
+                $mapo->[ $yc ][ $xc ]{group} = $this if $mapo;
             }
 
         }}
@@ -197,6 +195,7 @@ sub add_rectangle {
     my $extent = [ $Mloc->[0]-$mloc->[0], $Mloc->[1]-$mloc->[1] ];
 
     $this->{loc_size} = "($cloc->[0], $cloc->[1]) $extent->[0]x$extent->[1]";
+    $this->{extents}  = [ @$mloc, @$Mloc ];
 }
 # }}}
 # enumerate_tiles {{{
@@ -232,6 +231,13 @@ sub enumerate_tiles {
     }
 
     @ret;
+}
+# }}}
+# enumerate_extents {{{
+sub enumerate_extents {
+    my $this = shift;
+
+    @{ $this->{extents} };
 }
 # }}}
 
@@ -439,6 +445,13 @@ variables that need to be set by the ::Generator objects.
 
    $group->add_rectangle(\@loc, \@size, $the_map);
     # marks $mapo->[ $y ][ $x ]{group} = $group;
+
+   # There is also a new $group->{extents}, which describes the min and max
+   # locations.  They are really only useful for truely rectangular rooms.
+
+   # These new methods can be used to access the group's tiles and extents:
+   my @tiles   = $group->enumerate_tiles;
+   my @extents = $group->enumerate_extents;
 
 =head1 Games::RolePlay::MapGen::_tile
 

@@ -47,10 +47,8 @@ sub mark_things_as_pseudo_rooms {
                     my $lr = $ur->{nb}{s};
 
                     my $group = &_group;
-                       $group->{type} = "pseudo";
-                       $group->{asize} = [2, 2];
-                       $group->{lsize} = 2*2;
-                       $group->{loc}  = [$ul->{x}, $ul->{y}];
+                       $group->type("pseudo");
+                       $group->add_rectangle([$ul->{x}, $ul->{y}], [2,2]);
 
                     for( $ul, $ur, $ll, $lr) {
                         # $_->{DEBUG_red_mark} = 1;
@@ -66,10 +64,8 @@ sub mark_things_as_pseudo_rooms {
                         my $lr = $lm->{nb}{e};
 
                         my $group = &_group;
-                           $group->{type} = "pseudo";
-                           $group->{asize} = [3, 2];
-                           $group->{lsize} = 3*2;
-                           $group->{loc}  = [$ul->{x}, $ul->{y}];
+                           $group->type("pseudo");
+                           $group->add_rectangle([$ul->{x}, $ul->{y}], [3,2]);
 
                         for( $ul, $um, $ur,
                              $ll, $lm, $lr ) {
@@ -89,10 +85,8 @@ sub mark_things_as_pseudo_rooms {
                         my $lr = $ll->{nb}{e};
 
                         my $group = &_group;
-                           $group->{type} = "pseudo";
-                           $group->{asize} = [2, 3];
-                           $group->{lsize} = 2*3;
-                           $group->{loc}  = [$ul->{x}, $ul->{y}];
+                           $group->type("pseudo");
+                           $group->add_rectangle([$ul->{x}, $ul->{y}], [2,3]);
 
                         for( $ul, $ur,
                              $ml, $mr,
@@ -110,6 +104,9 @@ sub mark_things_as_pseudo_rooms {
     }
 
     push @$groups, map($_->{group}, grep {$_->{group}} map(@$_, @$map));
+    for my $g (@$groups) {
+        $g->{lsize} = $g->enumerate_tiles;
+    }
 }
 # }}}
 # drop_rooms {{{
@@ -198,20 +195,16 @@ sub drop_rooms {
             pop @$loc; # ditch the score.
 
             my $group = &_group;
-               $group->{name}     = "Room #$rn";
-               $group->{loc_size} = "$size[0]x$size[1] ($loc->[0], $loc->[1])";
-               $group->{type}     = "room";
-               $group->{size}     = [@size];
-               $group->{loc}      = [@$loc];
+               $group->name( "Room #$rn" );
+               $group->type( "room" );
+               $group->add_rectangle( [@$loc], [@size] );
 
-            my $xmin = $loc->[0];          # These come up over and over so,
-            my $ymin = $loc->[1];          # for clarity, and to keep from 
-            my $xmax = $xmin + $size[0]-1; # recalculating the maxes over and
-            my $ymax = $ymin + $size[1]-1; # over; we just declare them up here.
+            my @tiles = $group->enumerate_tiles;
+            my ($xmin, $ymin, $xmax, $ymax) = $group->enumerate_extents;
 
-            for my $x ( $xmin .. $xmax ) {
-            for my $y ( $ymin .. $ymax ) {
-                my $tile = $map->[$y][$x];
+            for my $tl ( @tiles ) {
+                my ($x,$y) = @$tl;
+                my $tile = $map->[ $y ][ $x ];
 
                 if( exists $tile->{type} ) {
                     if( $tile->{type} eq "corridor" or $tile->{type} eq "pseudo" ) {
@@ -232,7 +225,7 @@ sub drop_rooms {
                     }
                 }
                 # $tile->{DEBUG_green_mark} = 1;
-            }}
+            }
 
             for my $y ($ymin .. $ymax) {
                 (my $west = $map->[$y][ $xmin ])->{od}{w} = 0;
@@ -284,18 +277,11 @@ sub cleanup_pseudo_rooms {
     @$groups = grep { my $r = 1; if( $_->{type} eq "pseudo" ) { push @pseudo, $_; $r = 0 } $r } @$groups;
 
     for my $group (@pseudo) {
-        my ($xmin, $ymin) = @{ $group->{loc}   };
-        my ($xmax, $ymax) = @{ $group->{asize} };
-
-        $xmax += $xmin -1;
-        $ymax += $ymin -1;
 
         my $intact = 1;
         my @tofix  = ();
-
-        for my $x ( $xmin .. $xmax ) {
-        for my $y ( $ymin .. $ymax ) {
-            my $tile = $map->[$y][$x];
+        for my $tl ($group->enumerate_tiles) {
+            my $tile = $map->[$tl->[1]][$tl->[0]];
 
             # $tile->{DEBUG_red_mark} = 1;
 
@@ -306,8 +292,9 @@ sub cleanup_pseudo_rooms {
             } else {
                 $intact = 0;
             }
-        }}
+        }
 
+        my ($xmin, $ymin, $xmax, $ymax) = $group->enumerate_extents;
         if( $intact ) {
             for my $tile (@tofix) {
                 $tile->{od}{n} = 1 if $tile->{y} > $ymin;

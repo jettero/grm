@@ -114,26 +114,17 @@ sub genmap {
         my $t_name = $xp->findvalue( '@name' => $tile_group )->value;
         my $t_type = $xp->findvalue( '@type' => $tile_group )->value;
 
-        my @t_loc  = split /,/, $xp->findvalue( '@loc' => $tile_group );
-        my @t_size = split /x/, $xp->findvalue( '@size' => $tile_group );
-
         my $group = &_group;
-           $group->{name}     = $t_name;
-           $group->{loc_size} = "$t_size[0]x$t_size[1] ($t_loc[0], $t_loc[1])";
-           $group->{type}     = $t_type;
-           $group->{size}     = \@t_size;
-           $group->{loc}      = \@t_loc;
+           $group->name( $t_name );
+           $group->type( $t_type );
 
-        my $xmin = $t_loc[0];
-        my $ymin = $t_loc[1];
-        my $xmax = $xmin + $t_size[0]-1;
-        my $ymax = $ymin + $t_size[1]-1;
+        my $rectangles = $tile_group->find('rectangle');
+        for my $rec ($rectangles->get_nodelist) {
+            my @r_loc  = split m/,/, $xp->findvalue( '@loc' => $rec );
+            my @r_size = split m/x/, $xp->findvalue( '@size' => $rec );
 
-        for my $x ( $xmin .. $xmax ) {
-        for my $y ( $ymin .. $ymax ) {
-            my $tile = $map->[$y][$x];
-               $tile->{group} = $group;
-        }}
+            $group->add_rectangle(\@r_loc, \@r_size, $map);
+        }
 
         push @$groups, $group;
     }

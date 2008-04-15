@@ -5,8 +5,8 @@ these files:
 [x] t/10_groups.t
 [x] MapGen/Generator/Basic.pm
 [x] MapGen/Generator/OneBigRoom.pm
-[ ] MapGen/Generator/XMLImport.pm
-[ ] MapGen/Tools.pm
+[x] MapGen/Generator/XMLImport.pm
+[x] MapGen/Tools.pm
 [ ] MapGen/GeneratorPlugin/FiveSplit.pm
 [x] MapGen/Exporter/Text.pm
-[ ] MapGen/Exporter/XML.pm
+[x] MapGen/Exporter/XML.pm
