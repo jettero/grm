@@ -1,0 +1,12 @@
+
+This TODO is concerning the new groups.  The old group code appears to occure in
+these files:
+
+[x] t/10_groups.t
+[x] MapGen/Generator/Basic.pm
+[x] MapGen/Generator/OneBigRoom.pm
+[ ] MapGen/Generator/XMLImport.pm
+[ ] MapGen/Tools.pm
+[ ] MapGen/GeneratorPlugin/FiveSplit.pm
+[x] MapGen/Exporter/Text.pm
+[ ] MapGen/Exporter/XML.pm
