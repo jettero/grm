@@ -7,6 +7,6 @@ these files:
 [x] MapGen/Generator/OneBigRoom.pm
 [x] MapGen/Generator/XMLImport.pm
 [x] MapGen/Tools.pm
-[ ] MapGen/GeneratorPlugin/FiveSplit.pm
+[x] MapGen/GeneratorPlugin/FiveSplit.pm
 [x] MapGen/Exporter/Text.pm
 [x] MapGen/Exporter/XML.pm

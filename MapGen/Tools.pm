@@ -128,6 +128,13 @@ sub type {
     $this->{type};
 }
 # }}}
+# desc {{{
+sub desc {
+    my $this = shift;
+
+    $this->{loc_size};
+}
+# }}}
 # add_rectangle {{{
 sub add_rectangle {
     my $this = shift;
@@ -135,8 +142,10 @@ sub add_rectangle {
     my $size = shift;
     my $mapo = shift;
 
-    push @{$this->{loc}},  $loc;
-    push @{$this->{size}}, $size;
+    if( $loc and $size ) {
+        push @{$this->{loc}},  $loc;
+        push @{$this->{size}}, $size;
+    }
 
     my @i = map  { $_->[0] }
             sort { $b->[1]<=>$a->[2] }
@@ -445,6 +454,7 @@ variables that need to be set by the ::Generator objects.
 
    $group->add_rectangle(\@loc, \@size, $the_map);
     # marks $mapo->[ $y ][ $x ]{group} = $group;
+    # (can be called without arguments to recalculate {loc_size})
 
    # There is also a new $group->{extents}, which describes the min and max
    # locations.  They are really only useful for truely rectangular rooms.
@@ -452,6 +462,9 @@ variables that need to be set by the ::Generator objects.
    # These new methods can be used to access the group's tiles and extents:
    my @tiles   = $group->enumerate_tiles;
    my @extents = $group->enumerate_extents;
+
+   # lastly,
+   my $desc = $group->desc; # returns the {loc_size} calculated by add_rectangle
 
 =head1 Games::RolePlay::MapGen::_tile
 

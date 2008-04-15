@@ -4,7 +4,7 @@ package Games::RolePlay::MapGen::GeneratorPlugin::FiveSplit;
 
 use strict;
 use Carp;
-use Games::RolePlay::MapGen::Tools qw( roll choice );
+use Games::RolePlay::MapGen::Tools qw( roll choice _group );
 
 1;
 
@@ -32,13 +32,15 @@ sub pre {
     $this->split_map($mults => $map) if $mults > 1;
 
     for my $g (@$groups) {
-        my $l = $g->{loc};
-        my $s = $g->{size};
+        for my $i (0 .. $#{ $g->{loc} }) {
+            my $l = $g->{loc}[ $i ];
+            my $s = $g->{size}[ $i ];
 
-        $l->[0] *= $mults; $l->[1] *= $mults;
-        $s->[0] *= $mults; $s->[1] *= $mults;
+            $l->[0] *= $mults; $l->[1] *= $mults;
+            $s->[0] *= $mults; $s->[1] *= $mults;
+        }
 
-        $g->{loc_size} = "$s->[0]x$s->[1] ($l->[0], $l->[1])";
+        $g->add_rectangle; # recalculates {loc_size} for us
     }
 }
 # }}}
