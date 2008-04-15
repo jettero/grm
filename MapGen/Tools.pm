@@ -199,6 +199,41 @@ sub add_rectangle {
     $this->{loc_size} = "($cloc->[0], $cloc->[1]) $extent->[0]x$extent->[1]";
 }
 # }}}
+# enumerate_tiles {{{
+sub enumerate_tiles {
+    my $this = shift;
+
+    my @i = map  { $_->[0] }
+            sort { $b->[1]<=>$a->[2] }
+            map  { my $t = $this->{size}[$_]; [$_, $t->[0]*$t->[1]] }
+            0 .. $#{$this->{loc}};
+
+    my @ret;
+    my %points;  # don't count the same tiles over and over
+    for my $i (@i) {
+        my $l = $this->{loc}[$i];
+        my $s = $this->{size}[$i];
+
+        my $x = $l->[0];
+        my $y = $l->[1];
+
+        for my $xi (0 .. $s->[0]-1) {
+        for my $yi (0 .. $s->[1]-1) {
+            my $xc = $x + $xi;
+            my $yc = $y + $yi;
+
+            unless( $points{$xc}{$yc} ) {
+                $points{$xc}{$yc} = 1;
+
+                push @ret, [$xc,$yc];
+            }
+
+        }}
+    }
+
+    @ret;
+}
+# }}}
 
 # }}}
 # package ::_tile; {{{
