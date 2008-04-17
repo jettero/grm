@@ -1,6 +1,6 @@
 # vi:tw=0 syntax=perl:
 
-package Games::RolePlay::MapGen::Generator::OneBigRoom;
+package Games::RolePlay::MapGen::Generator::Blank;
 
 use strict;
 use Carp;

@@ -35,3 +35,4 @@ vis1.map.xml
 MapGen.pod
 t/08_interconnects_xml.t
 MapGen/Editor.pm
+MapGen/Generator/Blank.pm

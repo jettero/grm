@@ -5,10 +5,13 @@ use strict;
 use Glib qw(TRUE FALSE);
 use Gtk2 -init; # -init tells import to ->init() your app
 use Gtk2::SimpleMenu;
+use Games::RolePlay::MapGen;
 
 use constant {
-    WINDOW => 0,
-    MENU   => 1,
+    MAP    => 0,
+    WINDOW => 1,
+    MENU   => 2,
+    MAREA  => 3,
 };
 
 1;
@@ -16,6 +19,7 @@ use constant {
 # NOTE: much of this code is ripped from
 # http://perlmonks.org/?node_id=583578
 
+# new {{{
 sub new {
     my $class = shift;
     my $this  = bless [], $class;
@@ -23,8 +27,8 @@ sub new {
     my $vbox = new Gtk2::VBox;
     my $window = $this->[WINDOW] = new Gtk2::Window("toplevel");
        $window->signal_connect( delete_event => sub { $this->quit } );
-       $window->set_size_request(640,480); # TODO: the size and postion should have some kind of persistance
-       $window->set_position('center');
+       $window->set_size_request(200,200); # TODO: should be persistant
+       $window->set_position('center');    # TODO: should be persistant
        $window->add($vbox);
 
     # NOTE: This awesome tree example comes from http://www.drdobbs.com/web-development/184416069
@@ -63,12 +67,57 @@ sub new {
         default_callback => sub { $this->unknown_menu_callback },
     );
 
-    $vbox->pack_start($menu->{widget}, 0, 0, 0);
+    $vbox->pack_start($menu->{widget}, 0,0,0);
     $window->add_accel_group($menu->{accel_group});
+
+    my $marea = $this->[MAREA] = new Gtk2::Image;
+    my $scwin = Gtk2::ScrolledWindow->new;
+    my $vp    = Gtk2::Viewport->new (undef,undef);
+
+    $scwin->add($vp);
+    $vp->add($marea);
+    $vbox->pack_start($scwin,1,1,0);
+
+    $this->draw_map;
 
     return $this;
 }
+# }}}
 
+# draw_map {{{
+sub draw_map {
+    my $this = shift;
+
+    my $map = $this->[MAP];
+       $map = $this->[MAP] = $this->new_map unless $map;
+
+    $map->set_exporter( "BasicImage" );
+    my $image = $map->export( -retonly );
+
+    my $loader = Gtk2::Gdk::PixbufLoader->new;
+       $loader->write($image->png);
+       $loader->close;
+
+    $this->[MAREA]->set_from_pixbuf($loader->get_pixbuf)
+}
+# }}}
+# new_map {{{
+sub new_map {
+    my $this = shift;
+
+    my $map = $this->[MAP] = new Games::RolePlay::MapGen({
+        tile_size    => 10,
+        cell_size    => "23x23", # TODO: these need to be settings
+        bounding_box => "15x15", # TODO: these need to be settings
+    });
+
+    $map->set_generator("Blank");
+    $map->generate; 
+    $map;
+}
+# }}}
+
+# about {{{
 sub about {
     my $this = shift;
 
@@ -87,20 +136,25 @@ sub about {
         $dialog->destroy;
     });
 }
+# }}}
 
+# unknown_menu_callback {{{
 sub unknown_menu_callback {
     my $this = shift;
 }
-
+# }}}
+# quit {{{
 sub quit {
     my $this = shift;
 
     Gtk2->main_quit;
 }
-
+# }}}
+# run {{{
 sub run {
     my $this = shift;
        $this->[WINDOW]->show_all;
 
     Gtk2->main;
 }
+# }}}
