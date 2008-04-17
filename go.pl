@@ -6,17 +6,24 @@ BEGIN { system("make || (perl Makefile.PL && make)") == 0 or die }
 use strict;
 use GD;
 use Games::RolePlay::MapGen;
+use Games::RolePlay::MapGen::Editor;
 
+# &editor;
 # &import_vis1;
 # &std_generate;
 # &obr_generate;
-  &quickx_generate;
+# &quickx_generate;
 
 system("cp MapGen.dtd ~/www/MapGen.dtd") == 0 or die;
 system("cp MapGen.xsl ~/www/MapGen.xsl") == 0 or die;
 system("cp map.xml    ~/www/MapGen.xml") == 0 or die;
 system("cp map.png    ~/www/MapGen.png") == 0 or die;
 system("chmod 644     ~/www/MapGen.*")   == 0 or die;
+
+sub editor {
+    my $editor = Games::RolePlay::MapGen::Editor;
+       $editor->run;
+}
 
 sub import_vis1 {
     my $map = Games::RolePlay::MapGen->import_xml( "vis1.map.xml" );
