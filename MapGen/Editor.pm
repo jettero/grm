@@ -18,19 +18,23 @@ sub new {
     my $class = shift;
     my $this  = bless [], $class;
 
-    my $window = $this->[WINDOW] = new Gtk2::Window ( "toplevel" );
+    my $window    = $this->[WINDOW] = new Gtk2::Window ( "toplevel" );
        $window->signal_connect( delete_event => sub { $this->quit } );
-       $window->set_size_request(640,480); # TODO: these need some kind of persistance settings eventually
+       $window->set_size_request(640,480); # TODO: the size and postion should have some kind of persistance
        $window->set_position('center');
 
-    my $main_vbox = Gtk2::VBox->new( 0, 0 );
-    $window->add($main_vbox);
+    my $main_vbox = Gtk2::VBox->new;         $window->add($main_vbox);
+    my $menu_bar  = Gtk2::MenuBar->new;      $main_vbox->pack_start($menu_bar, 0, 0, 0);
 
-    my $menu_bar = Gtk2::MenuBar->new;
-    $main_vbox->pack_start($main_vbox, 0, 0, 0);
+    my $File      = Gtk2::MenuItem->new('_File');
+    my $menu_file = Gtk2::Menu->new;
+       $menu_bar->append($File);
+       $File->set_submenu($menu_file);
 
-    my $File = Gtk2::MenuItem->new('_File');
-    $menu_bar->append($File);
+    my $Exit = Gtk2::MenuItem->new('E_xit');
+       $Exit->signal_connect('activate' => sub { $this->quit });
+       $menu_file->append($Exit);
+    
 
     return $this;
 }
@@ -43,6 +47,7 @@ sub quit {
 
 sub run {
     my $this = shift;
+       $this->[WINDOW]->show_all;
 
     Gtk2->main;
 }
