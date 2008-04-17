@@ -32,12 +32,13 @@ sub genmap {
     my $opts   = shift;
     my @map    = $this->create_tiles( $opts );
     my $map    = new Games::RolePlay::MapGen::_interconnected_map(\@map);
-    my $groups = [];
 
     my $group = &_group;
        $group->name( "One Big Room" );
        $group->type( "room" );
        $group->add_rectangle( [0, 0], [$opts->{x_size}, $opts->{y_size}] );
+
+    my $groups = [$group];
 
     my $ymax = $#map;
     my $xmax = $#{ $map[0] };
