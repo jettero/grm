@@ -5,7 +5,7 @@ package Games::RolePlay::MapGen::Generator::OneBigRoom;
 use strict;
 use Carp;
 use base qw(Games::RolePlay::MapGen::Generator);
-use Games::RolePlay::MapGen::Tools qw( _group _tile choice roll );
+use Games::RolePlay::MapGen::Tools qw( _group _tile );
 
 1;
 
