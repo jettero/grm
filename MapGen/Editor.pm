@@ -9,6 +9,8 @@ use constant {
     WINDOW => 0,
 };
 
+1;
+
 # NOTE: much of this code is ripped from
 # http://perlmonks.org/?node_id=583578
 

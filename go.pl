@@ -8,20 +8,22 @@ use GD;
 use Games::RolePlay::MapGen;
 use Games::RolePlay::MapGen::Editor;
 
-# &editor;
+  &editor;
 # &import_vis1;
 # &std_generate;
 # &obr_generate;
 # &quickx_generate;
 
-system("cp MapGen.dtd ~/www/MapGen.dtd") == 0 or die;
-system("cp MapGen.xsl ~/www/MapGen.xsl") == 0 or die;
-system("cp map.xml    ~/www/MapGen.xml") == 0 or die;
-system("cp map.png    ~/www/MapGen.png") == 0 or die;
-system("chmod 644     ~/www/MapGen.*")   == 0 or die;
+if(0) {
+    system("cp MapGen.dtd ~/www/MapGen.dtd") == 0 or die;
+    system("cp MapGen.xsl ~/www/MapGen.xsl") == 0 or die;
+    system("cp map.xml    ~/www/MapGen.xml") == 0 or die;
+    system("cp map.png    ~/www/MapGen.png") == 0 or die;
+    system("chmod 644     ~/www/MapGen.*")   == 0 or die;
+}
 
 sub editor {
-    my $editor = Games::RolePlay::MapGen::Editor;
+    my $editor = new Games::RolePlay::MapGen::Editor;
        $editor->run;
 }
 
