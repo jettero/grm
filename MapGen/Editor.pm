@@ -6,12 +6,15 @@ use Glib qw(TRUE FALSE);
 use Gtk2 -init; # -init tells import to ->init() your app
 use Gtk2::SimpleMenu;
 use Games::RolePlay::MapGen;
+use DB_File;
+use Storable qw(freeze thaw);
 
 use constant {
-    MAP    => 0,
-    WINDOW => 1,
-    MENU   => 2,
-    MAREA  => 3,
+    MAP      => 0,
+    WINDOW   => 1,
+    SETTINGS => 2,
+    MENU     => 3,
+    MAREA    => 4,
 };
 
 1;
@@ -23,6 +26,11 @@ use constant {
 sub new {
     my $class = shift;
     my $this  = bless [], $class;
+
+    warn "settings saved to 'stupid_name'"; sleep 1;
+    my %o; tie %o, DB_File => "/tmp/stupid_name" or die $!;
+
+    $this->[SETTINGS] = \%o;
 
     my $vbox = new Gtk2::VBox;
     my $window = $this->[WINDOW] = new Gtk2::Window("toplevel");
@@ -147,6 +155,11 @@ sub unknown_menu_callback {
 sub quit {
     my $this = shift;
 
+    my ($w,$h) = $this->[WINDOW]->get_size;
+    my ($x,$y) = $this->[WINDOW]->get_position;
+
+    $this->[SETTINGS]{MAIN_SIZE_POS} = freeze [$w,$h,$x,$y];
+
     Gtk2->main_quit;
 }
 # }}}
@@ -154,6 +167,15 @@ sub quit {
 sub run {
     my $this = shift;
        $this->[WINDOW]->show_all;
+
+    if( my $sp = $this->[SETTINGS]{MAIN_SIZE_POS} ) {
+        my ($w,$h,$x,$y) = @{thaw $sp};
+
+        warn "setting window params: ($w,$h,$x,$y)";
+
+        $this->[WINDOW]->resize( $w,$h );
+      # $this->[WINDOW]->set_position( $x,$y ); # TODO: this takes single scalars like "center" ... lame
+    }
 
     Gtk2->main;
 }
