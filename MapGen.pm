@@ -272,7 +272,7 @@ sub import_xml {
     $this = $this->new unless ref $this;
 
     $this->set_generator( "XMLImport" );
-    $this->generate( xml_input_file => $that ); 
+    $this->generate( xml_input_file => $that, @_ ); 
 
     $this;
 }

@@ -44,6 +44,8 @@ sub genmap {
 
     my $maprows = $xp->find('/MapGen/map/row');
     for my $row ($maprows->get_nodelist) {
+        $opts->{r_cb}->() if exists $opts->{r_cb};
+
         my $a = []; push @$map, $a;
         my $y_pos = $xp->findvalue( '@ypos' => $row )->value;
 

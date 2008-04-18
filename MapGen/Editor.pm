@@ -93,7 +93,7 @@ sub new {
     $vp->add($marea);
     $vbox->pack_start($scwin,1,1,0);
 
-    $this->read_file($ARGV[0]) if -f $ARGV[0];
+    $this->read_file($ARGV[0]) if $ARGV[0] and -f $ARGV[0];
     $this->draw_map;
 
     return $this;
@@ -128,21 +128,24 @@ sub read_file {
     my $this = shift;
     my $file = shift;
 
-    my $dialog = new Gtk2::Dialog; 
+    my $dialog = new Gtk2::Dialog;
     my $label  = new Gtk2::Label("Reading $file ...");
+    my $prog   = new Gtk2::ProgressBar;
 
     $dialog->vbox->pack_start( $label, TRUE, TRUE, 0 );
-     $label->show;
-    $dialog->show;
+    $dialog->vbox->pack_start( $prog, TRUE, TRUE, 0 );
+    $dialog->show_all;
 
-    my $map = $this->[MAP] = Games::RolePlay::MapGen->import_xml( $file );
+    for(1 .. 3) { Gtk2->main_iteration while Gtk2->events_pending; }
+    my $map = $this->[MAP] = Games::RolePlay::MapGen->import_xml( $file, r_cb => sub {
+        for(1 .. 3) { Gtk2->main_iteration while Gtk2->events_pending; }
+        $prog->pulse;
+    });
 
     $this->[FNAME] = $file;
     $this->draw_map;
 
     $dialog->destroy;
-
-    $map;
 }
 # }}}
 
