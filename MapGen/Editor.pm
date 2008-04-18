@@ -15,6 +15,7 @@ use constant {
     SETTINGS => 2,
     MENU     => 3,
     MAREA    => 4,
+    FNAME    => 5,
 };
 
 1;
@@ -110,7 +111,13 @@ sub open {
     if ('ok' eq $file_chooser->run) {
         my $filename = $file_chooser->get_filename;
 
+        # TODO: in order for this to work right, I think we need a custom signal
+        # so we can return to gtk (letting the destroy happen) and come back to
+        # draw the dialog and load the file... moan
+
+        $file_chooser->destroy;
         $this->read_file($filename);
+        return;
     }
 
     $file_chooser->destroy;
@@ -121,9 +128,19 @@ sub read_file {
     my $this = shift;
     my $file = shift;
 
+    my $dialog = new Gtk2::Dialog; 
+    my $label  = new Gtk2::Label("Reading $file ...");
+
+    $dialog->vbox->pack_start( $label, TRUE, TRUE, 0 );
+     $label->show;
+    $dialog->show;
+
     my $map = $this->[MAP] = Games::RolePlay::MapGen->import_xml( $file );
 
+    $this->[FNAME] = $file;
     $this->draw_map;
+
+    $dialog->destroy;
 
     $map;
 }
@@ -149,6 +166,8 @@ sub draw_map {
 # new_map {{{
 sub new_map {
     my $this = shift;
+
+    $this->[FNAME] = undef;
 
     my $map = $this->[MAP] = new Games::RolePlay::MapGen({
         tile_size    => 10,
@@ -198,6 +217,7 @@ sub quit {
     my ($x,$y) = $this->[WINDOW]->get_position;
 
     $this->[SETTINGS]{MAIN_SIZE_POS} = freeze [$w,$h,$x,$y];
+    $this->[SETTINGS]{LAST_FNAME}    = $this->[FNAME];
 
     Gtk2->main_quit;
 }
@@ -205,7 +225,6 @@ sub quit {
 # run {{{
 sub run {
     my $this = shift;
-       $this->[WINDOW]->show_all;
 
     if( my $sp = $this->[SETTINGS]{MAIN_SIZE_POS} ) {
         my ($w,$h,$x,$y) = @{thaw $sp};
@@ -215,6 +234,13 @@ sub run {
         $this->[WINDOW]->resize( $w,$h );
       # $this->[WINDOW]->set_position( $x,$y ); # TODO: this takes single scalars like "center" ... lame
     }
+
+    $this->[WINDOW]->show_all;
+
+  # TODO: to do this properly, we'll need to do it *after* calling ->main I thik
+  # if( my $f = $this->[SETTINGS]{LAST_FNAME} ) {
+  #     $this->read_file($f) if -f $f;
+  # }
 
     Gtk2->main;
 }
