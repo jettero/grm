@@ -142,7 +142,7 @@ sub open_file {
         Gtk2::FileChooserDialog->new ('Open a Map File',
             $this->[WINDOW], 'open', 'gtk-cancel' => 'cancel', 'gtk-ok' => 'ok');
 
-    if ('ok' eq $file_chooser->run) {
+    if( $file_chooser->run eq 'ok' ) {
         my $filename = $file_chooser->get_filename;
 
         # TODO: in order for this to work right, I think we need a custom signal
@@ -275,13 +275,47 @@ sub blank_map {
     $map;
 }
 # }}}
-# _get_generate_opts {{{
-sub _get_generate_opts {
-
-    die "put a dialog here ... there's a vbox for the Entry widgets, just do label/entry pairs in hboxes and add them to the vbox"
-}
-# }}}
 # generate {{{
+
+sub _get_generate_opts {
+    my $this = shift;
+
+    my $dialog = new Gtk2::Dialog("Map Generation Options", $this->[WINDOW],
+        [], 'gtk-cancel' => "cancel", 'gtk-ok' => "ok");
+
+    $dialog->set_default_response('ok');
+    $dialog->set_response_sensitive( ok => TRUE );
+
+    my $vbox = $dialog->vbox;
+    my $table = Gtk2::Table->new(1, 2, FALSE);
+
+    my $label = Gtk2::Label->new_with_mnemonic("_Value of entry: ");
+       $label->set_alignment(1,0.5);
+
+    $table->attach_defaults($label, 0, 1, 0,1);
+
+    my $entry = Gtk2::Entry->new();
+       $entry->set_text('5x5');
+       $entry->signal_connect(changed => sub {
+           my $text = $entry->get_text;
+
+           $dialog->set_response_sensitive( ok => ($text =~ m/^\d+x\d+$/ ? TRUE : FALSE) );
+       });
+
+    $label->set_mnemonic_widget($entry);
+
+    $table->attach_defaults($entry,1,2,0,1);
+
+    $vbox->pack_start($table,0,0,4);
+
+    $dialog->show_all;
+
+    if( $dialog->run eq "ok" ) {
+    }
+
+    $dialog->destroy;
+}
+
 sub generate {
     my $this = shift;
 
