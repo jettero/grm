@@ -136,10 +136,14 @@ sub read_file {
     $dialog->vbox->pack_start( $prog, TRUE, TRUE, 0 );
     $dialog->show_all;
 
-    for(1 .. 3) { Gtk2->main_iteration while Gtk2->events_pending; }
+    # NOTE: I'm not sure all these main_interations are necessary as written, 
+    # but certainly just doing one isn't enough for some reason.
+    Gtk2->main_iteration while Gtk2->events_pending;
+    Gtk2->main_iteration while Gtk2->events_pending;
     my $map = $this->[MAP] = Games::RolePlay::MapGen->import_xml( $file, r_cb => sub {
-        for(1 .. 3) { Gtk2->main_iteration while Gtk2->events_pending; }
+        Gtk2->main_iteration while Gtk2->events_pending;
         $prog->pulse;
+        Gtk2->main_iteration while Gtk2->events_pending;
     });
 
     $this->[FNAME] = $file;
@@ -240,10 +244,9 @@ sub run {
 
     $this->[WINDOW]->show_all;
 
-  # TODO: to do this properly, we'll need to do it *after* calling ->main I thik
-  # if( my $f = $this->[SETTINGS]{LAST_FNAME} ) {
-  #     $this->read_file($f) if -f $f;
-  # }
+    if( my $f = $this->[SETTINGS]{LAST_FNAME} ) {
+        $this->read_file($f) if -f $f;
+    }
 
     Gtk2->main;
 }
