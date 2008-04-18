@@ -7,7 +7,7 @@
   <option name="bounding_box" value="40x40" />
   <option name="cell_size" value="23x23" />
   <option name="exporter" value="Games::RolePlay::MapGen::Exporter::XML" />
-  <option name="fname" value="map.xml" />
+  <option name="fname" value="vis1.map.xml" />
   <option name="generator" value="Games::RolePlay::MapGen::Generator::Basic" />
   <option name="max_room_size" value="7x7" />
   <option name="max_size" value="9x9" />
@@ -21,18 +21,33 @@
   <option name="sparseness" value="10" />
   <option name="tile_size" value="5" />
   <option name="x_size" value="20" />
+  <option name="xml_input_file" value="vis1.map.xml" />
   <option name="y_size" value="20" />
   <option name="closed_corridor_corridor_door_percent" value="door: 1; locked: 30; secret: 95; stuck: 10;" />
   <option name="closed_room_corridor_door_percent" value="door: 5; locked: 30; secret: 95; stuck: 10;" />
   <option name="open_corridor_corridor_door_percent" value="door: 1; locked: 50; secret: 10; stuck: 25;" />
   <option name="open_room_corridor_door_percent" value="door: 95; locked: 50; secret: 2; stuck: 25;" />
-  <tile_group name="Room #1" type="room"> <rectangle loc="32,22" size="6x14" /> </tile_group>
-  <tile_group name="Room #2" type="room"> <rectangle loc="0,0" size="14x8" /> </tile_group>
-  <tile_group name="Room #3" type="room"> <rectangle loc="0,24" size="10x14" /> </tile_group>
-  <tile_group name="Room #4" type="room"> <rectangle loc="14,24" size="12x14" /> </tile_group>
-  <tile_group name="Room #5" type="room"> <rectangle loc="28,12" size="10x6" /> </tile_group>
-  <tile_group name="Room #6" type="room"> <rectangle loc="22,0" size="12x4" /> </tile_group>
-  <tile_group name="Room #7" type="room"> <rectangle loc="2,8" size="10x12" /> </tile_group>
+  <tile_group name="Room #1" type="room">
+    <rectangle loc="32,22" size="6x14" />
+  </tile_group>
+  <tile_group name="Room #2" type="room">
+    <rectangle loc="0,0" size="14x8" />
+  </tile_group>
+  <tile_group name="Room #3" type="room">
+    <rectangle loc="0,24" size="10x14" />
+  </tile_group>
+  <tile_group name="Room #4" type="room">
+    <rectangle loc="14,24" size="12x14" />
+  </tile_group>
+  <tile_group name="Room #5" type="room">
+    <rectangle loc="28,12" size="10x6" />
+  </tile_group>
+  <tile_group name="Room #6" type="room">
+    <rectangle loc="22,0" size="12x4" />
+  </tile_group>
+  <tile_group name="Room #7" type="room">
+    <rectangle loc="2,8" size="10x12" />
+  </tile_group>
   <map>
     <row ypos="0">
       <tile xpos="0" type="room">

@@ -4,7 +4,8 @@ package Games::RolePlay::MapGen::Editor;
 use strict;
 use Glib qw(TRUE FALSE);
 use Gtk2 -init; # -init tells import to ->init() your app
-use Gtk2::SimpleMenu;
+use Gtk2::Ex::Simple::Menu;
+use Gtk2::Ex::Dialogs::ErrorMsg;
 use Games::RolePlay::MapGen;
 use DB_File;
 use Storable qw(freeze thaw);
@@ -39,19 +40,38 @@ sub new {
        $window->set_size_request(200,200); # TODO: should be persistant
        $window->set_position('center');    # TODO: should be persistant
        $window->add($vbox);
-
-    # NOTE: This awesome tree example comes from http://www.drdobbs.com/web-development/184416069
-    # (but it turns out that the example in the Gtk2::SimpleMenu pod is just as helpful)
+       $window->set_title("GRM Editor");
 
     my $menu_tree = [
         _File => {
             item_type => '<Branch>',
             children => [
+                'Generate _New Map' => {
+                    item_type   => '<StockItem>',
+                    callback    => sub { $this->generate },
+                    accelerator => '<ctrl>N',
+                    extra_data  => 'gtk-new',
+                },
                 _Open => {
                     item_type   => '<StockItem>',
-                    callback    => sub { $this->open },
+                    callback    => sub { $this->open_file },
                     accelerator => '<ctrl>O',
                     extra_data  => 'gtk-open',
+                },
+                _Save => {
+                    item_type   => '<StockItem>',
+                    callback    => sub { $this->save_file },
+                    accelerator => '<ctrl>S',
+                    extra_data  => 'gtk-save',
+                },
+                'Save As...' => {
+                    item_type   => '<StockItem>',
+                    callback    => sub { $this->save_file_as },
+                    accelerator => '<ctrl>S',
+                    extra_data  => 'gtk-save-as',
+                },
+                Separator => {
+                    item_type => '<Separator>',
                 },
                 _Quit => {
                     item_type   => '<StockItem>',
@@ -77,7 +97,7 @@ sub new {
         },
     ];
 
-    my $menu = $this->[MENU] = Gtk2::SimpleMenu->new (
+    my $menu = $this->[MENU] = Gtk2::Ex::Simple::Menu->new (
         menu_tree        => $menu_tree,
         default_callback => sub { $this->unknown_menu_callback },
     );
@@ -99,9 +119,17 @@ sub new {
     return $this;
 }
 # }}}
+# error {{{
+sub error {
+    my $this  = shift;
+    my $error = shift;
 
-# open {{{
-sub open {
+    Gtk2::Ex::Dialogs::ErrorMsg->new_and_run( parent_window=>$this->[WINDOW], text=>$error );
+}
+# }}}
+
+# open_file {{{
+sub open_file {
     my $this = shift;
 
     my $file_chooser =
@@ -117,6 +145,50 @@ sub open {
 
         $file_chooser->destroy;
         $this->read_file($filename);
+        return;
+    }
+
+    $file_chooser->destroy;
+}
+# }}}
+# save_file {{{
+sub save_file {
+    my $this = shift;
+
+    unless( $this->[FNAME] ) {
+        $this->save_file_as;
+        return;
+    }
+
+    my $map = $this->[MAP];
+    eval {
+        $map->set_exporter( "XML" );
+        $map->export( $this->[FNAME] );
+    };
+
+    $this->error($@) if $@;
+}
+# }}}
+# save_file_as {{{
+sub save_file_as {
+    my $this = shift;
+
+    my $file_chooser =
+        Gtk2::FileChooserDialog->new ('Save a Map File',
+            $this->[WINDOW], 'save', 'gtk-cancel' => 'cancel', 'gtk-ok' => 'ok');
+
+    if ('ok' eq $file_chooser->run) {
+        $this->[FNAME] = $file_chooser->get_filename;
+
+        # TODO: in order for this to work right, I think we need a custom signal
+        # so we can return to gtk (letting the destroy happen) and come back to
+        # draw the dialog and load the file... moan
+
+        $file_chooser->destroy;
+        Gtk2->main_iteration while Gtk2->events_pending;
+        Gtk2->main_iteration while Gtk2->events_pending;
+        $this->save_file;
+
         return;
     }
 
@@ -140,11 +212,15 @@ sub read_file {
     # but certainly just doing one isn't enough for some reason.
     Gtk2->main_iteration while Gtk2->events_pending;
     Gtk2->main_iteration while Gtk2->events_pending;
-    my $map = $this->[MAP] = Games::RolePlay::MapGen->import_xml( $file, r_cb => sub {
-        Gtk2->main_iteration while Gtk2->events_pending;
-        $prog->pulse;
-        Gtk2->main_iteration while Gtk2->events_pending;
-    });
+    eval {
+        $this->[MAP] = Games::RolePlay::MapGen->import_xml( $file, r_cb => sub {
+            Gtk2->main_iteration while Gtk2->events_pending;
+            $prog->pulse;
+            Gtk2->main_iteration while Gtk2->events_pending;
+        });
+    };
+
+    $this->error($@) if $@;
 
     $this->[FNAME] = $file;
     $this->draw_map;
@@ -158,7 +234,7 @@ sub draw_map {
     my $this = shift;
 
     my $map = $this->[MAP];
-       $map = $this->[MAP] = $this->new_map unless $map;
+       $map = $this->[MAP] = $this->blank_map unless $map;
 
     $map->set_exporter( "BasicImage" );
     my $image = $map->export( -retonly );
@@ -170,16 +246,19 @@ sub draw_map {
     $this->[MAREA]->set_from_pixbuf($loader->get_pixbuf)
 }
 # }}}
-# new_map {{{
-sub new_map {
+# blank_map {{{
+sub blank_map {
     my $this = shift;
+
+    # NOTE: This is just the blank map generator, it has no settings.
+    # Later, we'll have a generate_map() that has all kinds of configuations options.
 
     $this->[FNAME] = undef;
 
     my $map = $this->[MAP] = new Games::RolePlay::MapGen({
         tile_size    => 10,
-        cell_size    => "23x23", # TODO: these need to be settings
-        bounding_box => "15x15", # TODO: these need to be settings
+        cell_size    => "23x23",
+        bounding_box => "25x25",
     });
 
     $map->set_generator("Blank");
@@ -192,28 +271,25 @@ sub new_map {
 sub about {
     my $this = shift;
 
-    # TODO: consider using Gtk2::AboutDialog
+    Gtk2->show_about_dialog($this->[WINDOW],
 
-    my $dialog = new Gtk2::Dialog; 
-    my $button = new Gtk2::Button("Close");
-    my $label  = new Gtk2::Label("This is a Games::RolePlay::MapGen::Editor.");
-
-    $dialog->action_area->pack_start( $button, TRUE, TRUE, 0 );
-    $button->show;
-
-    $dialog->vbox->pack_start( $label, TRUE, TRUE, 0 );
-     $label->show;
-    $dialog->show;
-
-    $button->signal_connect( clicked => sub {
-        $dialog->destroy;
-    });
+        'program-name' => "GRM Editor",
+        license        => "LGPL -- attached to the GRM distribution",
+        authors        => ['Paul Miller <jettero@cpan.org>'],
+        copyright      => 'Copyright (c) 2008 Paul Miller',
+        comments       =>
+        "This is part of the Games::RolePlay::MapGen (GRM) Distribution.
+         You can use it in your own projrects with few restrictions.
+         Use at your own risk.  Designed for fun.  Have fun.",
+    );
 }
 # }}}
 
 # unknown_menu_callback {{{
 sub unknown_menu_callback {
     my $this = shift;
+
+    warn "unknown callback: @_";
 }
 # }}}
 # quit {{{
@@ -236,7 +312,7 @@ sub run {
     if( my $sp = $this->[SETTINGS]{MAIN_SIZE_POS} ) {
         my ($w,$h,$x,$y) = @{thaw $sp};
 
-        warn "setting window params: ($w,$h,$x,$y)";
+      # warn "setting window params: ($w,$h,$x,$y)";
 
         $this->[WINDOW]->resize( $w,$h );
       # $this->[WINDOW]->set_position( $x,$y ); # TODO: this takes single scalars like "center" ... lame
@@ -244,7 +320,7 @@ sub run {
 
     $this->[WINDOW]->show_all;
 
-    if( my $f = $this->[SETTINGS]{LAST_FNAME} ) {
+    if( $this->[SETTINGS]{LOAD_LAST} and my $f = $this->[SETTINGS]{LAST_FNAME} ) {
         $this->read_file($f) if -f $f;
     }
 

@@ -68,7 +68,9 @@ sub genmap {
         unless( $k =~ m/^(?:_.+?|objs|plugins)$/ ) {
             my $v = $opts->{$k};
 
-            if( ref $v ) {
+            if( my $t = ref $v ) {
+                next if $t ne "HASH"; # probably a r_cb => sub {} code ref from XMLImporter
+
                 push @$options, $ah->( name=>$k, value=>join(" ", map { "$_: $v->{$_};" } sort keys %$v ));
 
             } else {
