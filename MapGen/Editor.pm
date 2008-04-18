@@ -73,6 +73,12 @@ sub new {
                 Separator => {
                     item_type => '<Separator>',
                 },
+                _Close => {
+                    item_type   => '<StockItem>',
+                    callback    => sub { $this->blank_map },
+                    accelerator => '<ctrl>W',
+                    extra_data  => 'gtk-close',
+                },
                 _Quit => {
                     item_type   => '<StockItem>',
                     callback    => sub { $this->quit },
@@ -263,6 +269,37 @@ sub blank_map {
 
     $map->set_generator("Blank");
     $map->generate; 
+
+    $this->draw_map;
+
+    $map;
+}
+# }}}
+# _get_generate_opts {{{
+sub _get_generate_opts {
+
+    die "put a dialog here ... there's a vbox for the Entry widgets, just do label/entry pairs in hboxes and add them to the vbox"
+}
+# }}}
+# generate {{{
+sub generate {
+    my $this = shift;
+
+    $this->[FNAME] = undef;
+
+    my ($settings, $generator, @plugins) = $this->_get_generate_opts;
+
+    my $map = $this->[MAP] = new Games::RolePlay::MapGen({
+        tile_size    => 10,
+        cell_size    => "23x23",
+        bounding_box => "25x25",
+    });
+
+    $map->set_generator("Blank");
+    $map->generate; 
+
+    $this->draw_map;
+
     $map;
 }
 # }}}
@@ -289,7 +326,7 @@ sub about {
 sub unknown_menu_callback {
     my $this = shift;
 
-    warn "unknown callback: @_";
+    warn "unknown numeric callback: @_";
 }
 # }}}
 # quit {{{
