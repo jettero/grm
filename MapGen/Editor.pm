@@ -46,6 +46,12 @@ sub new {
         _File => {
             item_type => '<Branch>',
             children => [
+                _Open => {
+                    item_type   => '<StockItem>',
+                    callback    => sub { $this->open },
+                    accelerator => '<ctrl>O',
+                    extra_data  => 'gtk-open',
+                },
                 _Quit => {
                     item_type   => '<StockItem>',
                     callback    => sub { $this->quit },
@@ -86,9 +92,40 @@ sub new {
     $vp->add($marea);
     $vbox->pack_start($scwin,1,1,0);
 
+    $this->read_file($ARGV[0]) if -f $ARGV[0];
     $this->draw_map;
 
     return $this;
+}
+# }}}
+
+# open {{{
+sub open {
+    my $this = shift;
+
+    my $file_chooser =
+        Gtk2::FileChooserDialog->new ('Open a Map File',
+            $this->[WINDOW], 'open', 'gtk-cancel' => 'cancel', 'gtk-ok' => 'ok');
+
+    if ('ok' eq $file_chooser->run) {
+        my $filename = $file_chooser->get_filename;
+
+        $this->read_file($filename);
+    }
+
+    $file_chooser->destroy;
+}
+# }}}
+# read_file {{{
+sub read_file {
+    my $this = shift;
+    my $file = shift;
+
+    my $map = $this->[MAP] = Games::RolePlay::MapGen->import_xml( $file );
+
+    $this->draw_map;
+
+    $map;
 }
 # }}}
 
@@ -128,6 +165,8 @@ sub new_map {
 # about {{{
 sub about {
     my $this = shift;
+
+    # TODO: consider using Gtk2::AboutDialog
 
     my $dialog = new Gtk2::Dialog; 
     my $button = new Gtk2::Button("Close");
