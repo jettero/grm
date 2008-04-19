@@ -95,6 +95,24 @@ sub new {
                 },
             ],
         },
+        _Edit => {
+            item_type => '<Branch>',
+            children => [
+                '_Render Settings'=> {
+                    callback    => sub { $this->render_settings },
+                    accelerator => '<ctrl>P',
+                },
+                Separator => {
+                    item_type => '<Separator>',
+                },
+                _Preferences => {
+                    item_type   => '<StockItem>',
+                    callback    => sub { $this->preferences },
+                    accelerator => '<ctrl>P',
+                    extra_data  => 'gtk-preferences',
+                },
+            ],
+        },
         _Help => {
             item_type => '<LastBranch>',
             children => [
@@ -106,6 +124,7 @@ sub new {
                 _About => {
                     item_type => '<StockItem>',
                     callback  => sub { $this->about },
+                    extra_data  => 'gtk-about',
                 },
             ],
         },
@@ -218,6 +237,7 @@ sub read_file {
     my $label  = new Gtk2::Label("Reading $file ...");
     my $prog   = new Gtk2::ProgressBar;
 
+    $dialog->set_title("File I/O");
     $dialog->vbox->pack_start( $label, TRUE, TRUE, 0 );
     $dialog->vbox->pack_start( $prog, TRUE, TRUE, 0 );
     $dialog->show_all;
@@ -225,7 +245,10 @@ sub read_file {
     # NOTE: I'm not sure all these main_interations are necessary as written, 
     # but certainly just doing one isn't enough for some reason.
     Gtk2->main_iteration while Gtk2->events_pending;
+    $prog->pulse;
     Gtk2->main_iteration while Gtk2->events_pending;
+    Gtk2->main_iteration while Gtk2->events_pending;
+
     eval {
         $this->[MAP] = Games::RolePlay::MapGen->import_xml( $file, r_cb => sub {
             Gtk2->main_iteration while Gtk2->events_pending;
@@ -283,52 +306,10 @@ sub blank_map {
     $map;
 }
 # }}}
-# _get_generate_opts {{{
-sub _get_generate_opts {
+# generate_form {{{
+sub generate_form {
     my $this = shift;
-
-    my $i = $this->[SETTINGS]{GENERATE_OPTS};
-       $i = thaw $i if $i;
-       $i = {} unless $i;
-
-    my $options = [[ # column 1
-
-        { mnemonic => "_Tile Size: ",
-          type     => "text",
-          name     => 'tile_size',
-          default  => 10, # NOTE: fixes and matches must exist and must be arrrefs
-          fixes    => [sub { $_[0] =~ s/\s+//g }],
-          matches  => [qr/^\d+$/] },
-
-        { mnemonic => "_Cell Size: ",
-          type     => "text",
-          name     => 'cell_size',
-          default  => '23x23',
-          fixes    => [sub { $_[0] =~ s/\s+//g }],
-          matches  => [qr/^\d+x\d+$/] },
-
-        { mnemonic => "_Bounding Box: ",
-          type     => "text",
-          name     => 'bounding_box',
-          default  => '20x20',
-          fixes    => [sub { $_[0] =~ s/\s+//g }],
-          matches  => [qr/^\d+x\d+$/] },
-
-    ], [ # column 2
-
-        { mnemonic => "_Generator: ",
-          type     => "choice",
-          name     => 'generator',
-          default  => $DEFAULT_GENERATOR,
-          choices  => [@GENERATORS] },
-
-        { mnemonic => "Generator _Plugins: ",
-          type     => "choices",
-          name     => 'generator_plugins',
-          defaults => [@DEFAULT_GENERATOR_PLUGINS],
-          choices  => [@GENERATOR_PLUGINS] },
-
-    ]];
+    my ($i, $options) = @_;
 
     my $dialog = new Gtk2::Dialog("Map Generation Options", $this->[WINDOW], [], 'gtk-cancel' => "cancel", 'gtk-ok' => "ok");
     my $table = Gtk2::Table->new(scalar @{$options->[0]}*2, scalar @$options, FALSE);
@@ -391,7 +372,7 @@ sub _get_generate_opts {
 
                 my $d = $item->{choices};
                 my @s = grep {$def->{$d->[$_]}} 0 .. $#$d;
-                my $slist = Gtk2::SimpleList->new( plugin_name_unseen => "text" );
+                my $slist = Gtk2::SimpleList->new( unseen_field_header => "text" );
                    $slist->get_selection->set_mode('multiple');
                    $slist->set_headers_visible(FALSE);
                    $slist->set_data_array($d);
@@ -408,7 +389,7 @@ sub _get_generate_opts {
 
                 $z = (exists $item->{z} ? $item->{z} : 2);
 
-                $item->{extract} = sub { [map {$d->[$_]} $slist->get_selected_indices] };
+                $item->{extract} = sub {warn dump([$d, $slist->get_selected_indices]); [map {$d->[$_]} $slist->get_selected_indices] };
             }
 
             $label->set_mnemonic_widget($entry);
@@ -437,8 +418,68 @@ sub _get_generate_opts {
         $dialog->set_default_response('ok');
     }
 
+    my @ret;
+    my $ret;
+    if( wantarray ) {
+        @ret = $dialog->run
+
+    } else {
+        $ret = $dialog->run
+    }
+
+    $dialog->destroy;
+    return (wantarray ? @ret : $ret);
+}
+# }}}
+# get_generate_opts {{{
+sub get_generate_opts {
+    my $this = shift;
+
+    my $i = $this->[SETTINGS]{GENERATE_OPTS};
+       $i = thaw $i if $i;
+       $i = {} unless $i;
+
+    my $options = [[ # column 1
+
+        { mnemonic => "_Tile Size: ",
+          type     => "text",
+          name     => 'tile_size',
+          default  => 10, # NOTE: fixes and matches must exist and must be arrrefs
+          fixes    => [sub { $_[0] =~ s/\s+//g }],
+          matches  => [qr/^\d+$/] },
+
+        { mnemonic => "_Cell Size: ",
+          type     => "text",
+          name     => 'cell_size',
+          default  => '23x23',
+          fixes    => [sub { $_[0] =~ s/\s+//g }],
+          matches  => [qr/^\d+x\d+$/] },
+
+        { mnemonic => "_Bounding Box: ",
+          type     => "text",
+          name     => 'bounding_box',
+          default  => '20x20',
+          fixes    => [sub { $_[0] =~ s/\s+//g }],
+          matches  => [qr/^\d+x\d+$/] },
+
+    ], [ # column 2
+
+        { mnemonic => "_Generator: ",
+          type     => "choice",
+          name     => 'generator',
+          default  => $DEFAULT_GENERATOR,
+          choices  => [@GENERATORS] },
+
+        { mnemonic => "Generator _Plugins: ",
+          type     => "choices",
+          name     => 'generator_plugins',
+          defaults => [@DEFAULT_GENERATOR_PLUGINS],
+          choices  => [@GENERATOR_PLUGINS] },
+
+    ]];
+
     my $o = {};
-    if( $dialog->run eq "ok" ) {
+    if( $this->generate_form($i, $options) eq "ok" ) {
         for my $c (@$options) {
             for my $r (@$c) {
                 $o->{$r->{name}} = $r->{extract}->();
@@ -447,7 +488,6 @@ sub _get_generate_opts {
         $this->[SETTINGS]{GENERATE_OPTS} = freeze $o;
     }
 
-    $dialog->destroy;
     return $o;
 }
 # }}}
@@ -457,7 +497,7 @@ sub generate {
 
     $this->[FNAME] = undef;
 
-    my ($settings, $generator, @plugins) = $this->_get_generate_opts;
+    my ($settings, $generator, @plugins) = $this->get_generate_opts;
     $generator = delete $settings->{generator} or return;
     @plugins   = @{ delete $settings->{generator_plugins} };
 
