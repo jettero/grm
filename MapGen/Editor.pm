@@ -330,9 +330,7 @@ sub _get_generate_opts {
 
     ]];
 
-    my $dialog = new Gtk2::Dialog("Map Generation Options", $this->[WINDOW],
-        [], 'gtk-cancel' => "cancel", 'gtk-ok' => "ok");
-
+    my $dialog = new Gtk2::Dialog("Map Generation Options", $this->[WINDOW], [], 'gtk-cancel' => "cancel", 'gtk-ok' => "ok");
     my $table = Gtk2::Table->new(scalar @{$options->[0]}*2, scalar @$options, FALSE);
 
     my $c_n = 0;
@@ -423,8 +421,21 @@ sub _get_generate_opts {
 
     $dialog->vbox->pack_start($table,0,0,4);
     $dialog->set_response_sensitive( ok => TRUE );
-    $dialog->set_default_response('ok');
     $dialog->show_all;
+
+    my ($ok_button) = grep {$_->can("get_label") and $_->get_label =~ m/ok/} $dialog->action_area->get_children;
+    if( $ok_button )  {
+        # set_default_response() doesn't seem to be enough oomph...
+        # It sets the ok button default, but lets the first entry in the Table get the actual focus
+        $ok_button->grab_focus;
+
+    } else {
+        # This is better than nothing if we can't find the ok button with the grep...
+        # It makes it so OK is selected when we tab to the action area.
+        # (We're likely to always find the ok button, but for edification purposes,
+        #  this is what we'd do if we didn't...)
+        $dialog->set_default_response('ok');
+    }
 
     my $o = {};
     if( $dialog->run eq "ok" ) {
