@@ -157,6 +157,9 @@ sub error {
     my $this  = shift;
     my $error = shift;
 
+    # The Ex dialogs use Pango Markup Language... pffft
+    $error = Glib::Markup::escape_text( $error );
+
     Gtk2::Ex::Dialogs::ErrorMsg->new_and_run( parent_window=>$this->[WINDOW], text=>$error );
 }
 # }}}
@@ -373,9 +376,9 @@ sub generate_form {
                 my $d = $item->{choices};
                 my @s = grep {$def->{$d->[$_]}} 0 .. $#$d;
                 my $slist = Gtk2::SimpleList->new( plugin_name_unseen => "text" );
-                   $slist->get_selection->set_mode('multiple');
                    $slist->set_headers_visible(FALSE);
                    $slist->set_data_array($d);
+                   $slist->get_selection->set_mode('multiple');
                    $slist->select( @s );
 
                 # NOTE: $slist->{data} = $d -- doesn't work !!!! fuckers you
@@ -389,9 +392,7 @@ sub generate_form {
 
                 $z = (exists $item->{z} ? $item->{z} : 2);
 
-                $item->{extract} = sub {
-                    warn dump([$d, [$slist->get_selected_indices], \@s]);
-                        [map {$d->[$_]} $slist->get_selected_indices] };
+                $item->{extract} = sub { [map {$d->[$_]} $slist->get_selected_indices] };
             }
 
             $label->set_mnemonic_widget($entry);
@@ -420,17 +421,19 @@ sub generate_form {
         $dialog->set_default_response('ok');
     }
 
-    my @ret;
-    my $ret;
-    if( wantarray ) {
-        @ret = $dialog->run
+    my $o = {};
+    my $r = $dialog->run;
 
-    } else {
-        $ret = $dialog->run
+    if( $r eq "ok" ) {
+        for my $c (@$options) {
+            for my $r (@$c) {
+                $o->{$r->{name}} = $r->{extract}->();
+            }
+        }
     }
 
     $dialog->destroy;
-    return (wantarray ? @ret : $ret);
+    return ($r,$o);
 }
 # }}}
 # get_generate_opts {{{
@@ -480,17 +483,12 @@ sub get_generate_opts {
 
     ]];
 
-    my $o = {};
-    if( $this->generate_form($i, $options) eq "ok" ) {
-        for my $c (@$options) {
-            for my $r (@$c) {
-                $o->{$r->{name}} = $r->{extract}->();
-            }
-        }
+    my ($result, $o) = $this->generate_form($i, $options);
+    if( $result eq "ok" ) {
         $this->[SETTINGS]{GENERATE_OPTS} = freeze $o;
     }
 
-    return $o;
+    return ($result, $o);
 }
 # }}}
 # generate {{{
@@ -499,17 +497,27 @@ sub generate {
 
     $this->[FNAME] = undef;
 
-    my ($settings, $generator, @plugins) = $this->get_generate_opts;
-    $generator = delete $settings->{generator} or return;
+    my ($result, $settings, $generator, @plugins) = $this->get_generate_opts;
+
+    return unless $result eq "ok";
+
+    $generator = delete $settings->{generator};
     @plugins   = @{ delete $settings->{generator_plugins} };
 
-    my $map = $this->[MAP] = new Games::RolePlay::MapGen($settings);
-       $map->set_generator($generator);
-       $map->add_generator_plugin( $_ ) for @plugins;
-       $map->generate; 
+    my $map;
+    eval {
+        $map = $this->[MAP] = new Games::RolePlay::MapGen($settings);
+        $map->set_generator($generator);
+        $map->add_generator_plugin( $_ ) for @plugins;
+        $map->generate; 
+    };
+
+    if( $@ ) {
+        $this->error($@);
+        return $this->blank_map;
+    }
 
     $this->draw_map;
-
     $map;
 }
 # }}}
