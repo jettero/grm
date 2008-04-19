@@ -372,8 +372,9 @@ sub generate_form {
 
                 my $d = $item->{choices};
                 my @s = grep {$def->{$d->[$_]}} 0 .. $#$d;
-                my $slist = Gtk2::SimpleList->new( unseen_field_header => "text" );
+                my $slist = Gtk2::SimpleList->new( plugin_name_unseen => "text" );
                    $slist->get_selection->set_mode('multiple');
+                   $slist->set_headers_visible(FALSE);
                    $slist->set_data_array($d);
                    $slist->select( @s );
 
