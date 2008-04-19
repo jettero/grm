@@ -7,9 +7,15 @@ use Glib qw(TRUE FALSE);
 use Gtk2 -init; # -init tells import to ->init() your app
 use Gtk2::Ex::Simple::Menu;
 use Gtk2::Ex::Dialogs::ErrorMsg;
+use Gtk2::SimpleList;
 use Games::RolePlay::MapGen;
 use DB_File;
 use Storable qw(freeze thaw);
+
+our $DEFAULT_GENERATOR         = 'Basic';
+our @GENERATORS                = (qw(Basic Blank OneBigRoom));
+our @GENERATOR_PLUGINS         = (qw(BasicDoors FiveSplit));
+our @DEFAULT_GENERATOR_PLUGINS = (qw(BasicDoors));
 
 use constant {
     MAP      => 0,
@@ -308,6 +314,20 @@ sub _get_generate_opts {
           fixes    => [sub { $_[0] =~ s/\s+//g }],
           matches  => [qr/^\d+x\d+$/] },
 
+    ], [ # column 2
+
+        { mnemonic => "_Generator: ",
+          type     => "choice",
+          name     => 'generator',
+          default  => $DEFAULT_GENERATOR,
+          choices  => [@GENERATORS] },
+
+        { mnemonic => "Generator _Plugins: ",
+          type     => "choices",
+          name     => 'generator_plugins',
+          defaults => [@DEFAULT_GENERATOR_PLUGINS],
+          choices  => [@GENERATOR_PLUGINS] },
+
     ]];
 
     my $dialog = new Gtk2::Dialog("Map Generation Options", $this->[WINDOW],
@@ -319,7 +339,6 @@ sub _get_generate_opts {
     my $table = Gtk2::Table->new(scalar @{$options->[0]}*2, scalar @$options, FALSE);
 
     my $c_n = 0;
-    my $r_n = 0;
     my @req;
     for my $column (@$options) {
         my $y = 0;
@@ -333,6 +352,7 @@ sub _get_generate_opts {
             my $my_req = @req;
 
             my $entry;
+            my $z = 1;
             if( $item->{type} eq "text" ) {
                 $entry = new Gtk2::Entry;
                 $entry->set_text($i->{$item->{name}} || $item->{default})
@@ -352,16 +372,52 @@ sub _get_generate_opts {
 
                     $dialog->set_response_sensitive( ok => (@req == grep {$_} @req) );
                 });
+                 
+                $item->{extract} = sub { $entry->get_text };
 
-                $item->{extract}
+            } elsif( $item->{type} eq "choice" ) {
+                $entry = Gtk2::ComboBox->new_text;
+                my $d = $i->{$item->{name}} || $item->{default};
+                my $i = 0;
+                my $d_i;
+                for(@{$item->{choices}}) {
+                    $entry->append_text($_);
+                    $d_i = $i if $_ eq $d;
+                    $i++;
+                }
+                $entry->set_active($d_i) if defined $d_i;
+
+                $item->{extract} = sub { $entry->get_active_text };
+
+            } elsif( $item->{type} eq "choices" ) {
+                my $def = $i->{$item->{name}};
+                   $def = $item->{defaults} unless $def;
+                   $def = {map {($_=>1)} @$def};
+
+                my $slist = Gtk2::SimpleList->new( plugin_name_unseen => "text" );
+                   $slist->{data} = my $d = $item->{choices};
+                   $slist->select( grep {$def->{$d->[$_]}} 0 .. $#$d );
+                   $slist->get_selection->set_mode('multiple');
+                   $slist->set_headers_visible(FALSE);
+
+                use Data::Dump qw(dump);
+                warn dump($slist->{data});
+
+                $entry = Gtk2::ScrolledWindow->new;
+                $entry->set_policy ('automatic', 'automatic');
+                $entry->add($slist);
+
+                $z = (exists $item->{z} ? $item->{z} : 2);
+
+                $item->{extract} = sub { [map {$d->[$_]} $slist->get_selected_indices] };
             }
 
             $label->set_mnemonic_widget($entry);
-            $table->attach_defaults($label, $x, $x+1, $y, $y+1); $x ++;
-            $table->attach_defaults($entry, $x, $x+1, $y, $y+1); $y ++;
-
-            $item->{extract} = sub { $entry->get_text };
+            $table->attach_defaults($label, $x, $x+1, $y, $y+1);  $x ++;
+            $table->attach_defaults($entry, $x, $x+1, $y, $y+$z); $y += $z;
         }
+
+        $c_n ++;
     }
 
     $dialog->vbox->pack_start($table,0,0,4);
