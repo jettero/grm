@@ -1,3 +1,4 @@
+# vi:syntax=perl:
 
 package Games::RolePlay::MapGen::Editor;
 
@@ -283,7 +284,8 @@ sub _get_generate_opts {
     my $options = [[ # column 1
         { mnemonic => "_Tile Size: ",
           type     => "text",
-          fixes    => [sub { $_[0] =~ s/\s+//g }]
+          default  => 10, # NOTE: fixes and matches must exist and must be arrrefs
+          fixes    => [sub { $_[0] =~ s/\s+//g }],
           matches  => [qr/^\d+$/], }
     ]];
 
@@ -295,31 +297,44 @@ sub _get_generate_opts {
 
     my $table = Gtk2::Table->new(scalar @{$options[0]}*2, scalar @$options, FALSE);
 
-    for my $column (@$options) { for my $item (@$column) {
-        my $label = Gtk2::Label->new_with_mnemonic($item->{mnemonic});
-           $label->set_alignment(1,0.5);
+    my @loc = (0,0);
+    my @req;
+    for my $column (@$options) {
+        for my $item (@$column) {
+            my $label = Gtk2::Label->new_with_mnemonic($item->{mnemonic} || die "no mnemonic?");
+               $label->set_alignment(1, 0.5);
 
-        my $entry;
-        if( $item->{type} eq "text" ) {
-            $entry = new Gtk2::Entry;
+            my $my_req = @req;
+
+            my $entry;
+            if( $item->{type} eq "text" ) {
+                $entry = new Gtk2::Entry;
+                $entry->set_text($item->{default}) if exists $item->{default};
+                $entry->signal_connect(changed => sub {
+                    my $text = $entry->get_text;
+                    my $chg = 0;
+                    for my $fix (@{ $item->{fixes} }) {
+                        $chg ++ if $fix->($text);
+                    }
+                    $entry->set_text($text) if $chg;
+                    $req[$my_req] = 1;
+                    for my $match (@{ $item->{matches} }) {
+                        $req[$my_req] = 0 unless $text =~ $match;
+                    }
+
+                    $dialog->set_response_sensitive( ok => (@req == grep {$_} @req) );
+                });
+            }
+
+            $label->set_mnemonic_widget($entry);
+            $table->attach_defaults($label, $loc[0], $loc[0]+1, $loc[1], $loc[1]+1);
+            $table->attach_defaults($entry, $loc[0], $loc[0]+1, $loc[1], $loc[1]+1);
+
+            $loc[0] ++;
         }
 
-        
-      # $table->attach_defaults($label, 0, 1, 0,1);
-      # $table->attach_defaults($entry,1,2,0,1);
-    }}
-
-  # my $entry = Gtk2::Entry->new();
-  #    $entry->set_text(10);
-  #    $entry->signal_connect(changed => sub {
-  #        my $text = $entry->get_text;
-
-  #        $dialog->set_response_sensitive( ok => ($text =~ m/^\d+x\d+$/ ? TRUE : FALSE) );
-  #    });
-
-  # $label->set_mnemonic_widget($entry);
-
-  # $table->attach_defaults($entry,1,2,0,1);
+        $loc[1] ++;
+    }
 
     $dialog->vbox->pack_start($table,0,0,4);
     $dialog->show_all;
