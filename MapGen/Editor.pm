@@ -374,7 +374,6 @@ sub generate_form {
                 my @s = grep {$def->{$d->[$_]}} 0 .. $#$d;
                 my $slist = Gtk2::SimpleList->new( unseen_field_header => "text" );
                    $slist->get_selection->set_mode('multiple');
-                   $slist->set_headers_visible(FALSE);
                    $slist->set_data_array($d);
                    $slist->select( @s );
 
@@ -389,7 +388,9 @@ sub generate_form {
 
                 $z = (exists $item->{z} ? $item->{z} : 2);
 
-                $item->{extract} = sub {warn dump([$d, $slist->get_selected_indices]); [map {$d->[$_]} $slist->get_selected_indices] };
+                $item->{extract} = sub {
+                    warn dump([$d, [$slist->get_selected_indices], \@s]);
+                        [map {$d->[$_]} $slist->get_selected_indices] };
             }
 
             $label->set_mnemonic_widget($entry);
