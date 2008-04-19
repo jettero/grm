@@ -289,13 +289,13 @@ sub _get_generate_opts {
     my $vbox = $dialog->vbox;
     my $table = Gtk2::Table->new(1, 2, FALSE);
 
-    my $label = Gtk2::Label->new_with_mnemonic("_Value of entry: ");
+    my $label = Gtk2::Label->new_with_mnemonic("_Tile Size: ");
        $label->set_alignment(1,0.5);
 
     $table->attach_defaults($label, 0, 1, 0,1);
 
     my $entry = Gtk2::Entry->new();
-       $entry->set_text('5x5');
+       $entry->set_text(10);
        $entry->signal_connect(changed => sub {
            my $text = $entry->get_text;
 
