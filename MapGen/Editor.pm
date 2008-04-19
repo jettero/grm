@@ -11,6 +11,7 @@ use Gtk2::SimpleList;
 use Games::RolePlay::MapGen;
 use DB_File;
 use Storable qw(freeze thaw);
+use Data::Dump qw(dump);
 
 our $DEFAULT_GENERATOR         = 'Basic';
 our @GENERATORS                = (qw(Basic Blank OneBigRoom));
@@ -282,8 +283,7 @@ sub blank_map {
     $map;
 }
 # }}}
-# generate {{{
-
+# _get_generate_opts {{{
 sub _get_generate_opts {
     my $this = shift;
 
@@ -394,14 +394,18 @@ sub _get_generate_opts {
                    $def = $item->{defaults} unless $def;
                    $def = {map {($_=>1)} @$def};
 
+                my $d = $item->{choices};
+                my @s = grep {$def->{$d->[$_]}} 0 .. $#$d;
                 my $slist = Gtk2::SimpleList->new( plugin_name_unseen => "text" );
-                   $slist->{data} = my $d = $item->{choices};
-                   $slist->select( grep {$def->{$d->[$_]}} 0 .. $#$d );
                    $slist->get_selection->set_mode('multiple');
                    $slist->set_headers_visible(FALSE);
+                   $slist->set_data_array($d);
+                   $slist->select( @s );
 
-                use Data::Dump qw(dump);
-                warn dump($slist->{data});
+                # NOTE: $slist->{data} = $d -- doesn't work !!!! fuckers you
+                # have to use @{$slist->{data}} = @$d, so I chose to just use
+                # the set_data_array() why even bother trying to do the scope
+                # hack... pfft.
 
                 $entry = Gtk2::ScrolledWindow->new;
                 $entry->set_policy ('automatic', 'automatic');
@@ -436,22 +440,21 @@ sub _get_generate_opts {
     $dialog->destroy;
     return $o;
 }
-
+# }}}
+# generate {{{
 sub generate {
     my $this = shift;
 
     $this->[FNAME] = undef;
 
     my ($settings, $generator, @plugins) = $this->_get_generate_opts;
+    $generator = delete $settings->{generator};
+    @plugins   = @{ delete $settings->{generator_plugins} };
 
-    my $map = $this->[MAP] = new Games::RolePlay::MapGen({
-        tile_size    => 10,
-        cell_size    => "23x23",
-        bounding_box => "25x25",
-    });
-
-    $map->set_generator("Blank");
-    $map->generate; 
+    my $map = $this->[MAP] = new Games::RolePlay::MapGen($settings);
+       $map->set_generator($generator);
+       $map->add_generator_plugin( $_ ) for @plugins;
+       $map->generate; 
 
     $this->draw_map;
 
