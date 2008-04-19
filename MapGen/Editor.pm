@@ -281,12 +281,33 @@ sub blank_map {
 sub _get_generate_opts {
     my $this = shift;
 
+    my $i = $this->[SETTINGS]{GENERATE_OPTS};
+       $i = thaw $i if $i;
+       $i = {} unless $i;
+
     my $options = [[ # column 1
+
         { mnemonic => "_Tile Size: ",
           type     => "text",
+          name     => 'tile_size',
           default  => 10, # NOTE: fixes and matches must exist and must be arrrefs
           fixes    => [sub { $_[0] =~ s/\s+//g }],
-          matches  => [qr/^\d+$/], }
+          matches  => [qr/^\d+$/] },
+
+        { mnemonic => "_Cell Size: ",
+          type     => "text",
+          name     => 'cell_size',
+          default  => '23x23',
+          fixes    => [sub { $_[0] =~ s/\s+//g }],
+          matches  => [qr/^\d+x\d+$/] },
+
+        { mnemonic => "_Bounding Box: ",
+          type     => "text",
+          name     => 'bounding_box',
+          default  => '20x20',
+          fixes    => [sub { $_[0] =~ s/\s+//g }],
+          matches  => [qr/^\d+x\d+$/] },
+
     ]];
 
     my $dialog = new Gtk2::Dialog("Map Generation Options", $this->[WINDOW],
@@ -295,12 +316,17 @@ sub _get_generate_opts {
     $dialog->set_default_response('ok');
     $dialog->set_response_sensitive( ok => TRUE );
 
-    my $table = Gtk2::Table->new(scalar @{$options[0]}*2, scalar @$options, FALSE);
+    my $table = Gtk2::Table->new(scalar @{$options->[0]}*2, scalar @$options, FALSE);
 
-    my @loc = (0,0);
+    my $c_n = 0;
+    my $r_n = 0;
     my @req;
     for my $column (@$options) {
+        my $y = 0;
+
         for my $item (@$column) {
+            my $x = 2*$c_n;
+
             my $label = Gtk2::Label->new_with_mnemonic($item->{mnemonic} || die "no mnemonic?");
                $label->set_alignment(1, 0.5);
 
@@ -309,7 +335,9 @@ sub _get_generate_opts {
             my $entry;
             if( $item->{type} eq "text" ) {
                 $entry = new Gtk2::Entry;
-                $entry->set_text($item->{default}) if exists $item->{default};
+                $entry->set_text($i->{$item->{name}} || $item->{default})
+                    if exists $item->{default} or exists $i->{$item->{name}};
+
                 $entry->signal_connect(changed => sub {
                     my $text = $entry->get_text;
                     my $chg = 0;
@@ -324,25 +352,33 @@ sub _get_generate_opts {
 
                     $dialog->set_response_sensitive( ok => (@req == grep {$_} @req) );
                 });
+
+                $item->{extract}
             }
 
             $label->set_mnemonic_widget($entry);
-            $table->attach_defaults($label, $loc[0], $loc[0]+1, $loc[1], $loc[1]+1);
-            $table->attach_defaults($entry, $loc[0], $loc[0]+1, $loc[1], $loc[1]+1);
+            $table->attach_defaults($label, $x, $x+1, $y, $y+1); $x ++;
+            $table->attach_defaults($entry, $x, $x+1, $y, $y+1); $y ++;
 
-            $loc[0] ++;
+            $item->{extract} = sub { $entry->get_text };
         }
-
-        $loc[1] ++;
     }
 
     $dialog->vbox->pack_start($table,0,0,4);
     $dialog->show_all;
 
+    my $o = {};
     if( $dialog->run eq "ok" ) {
+        for my $c (@$options) {
+            for my $r (@$c) {
+                $o->{$r->{name}} = $r->{extract}->();
+            }
+        }
+        $this->[SETTINGS]{GENERATE_OPTS} = freeze $o;
     }
 
     $dialog->destroy;
+    return $o;
 }
 
 sub generate {
