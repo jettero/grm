@@ -333,9 +333,6 @@ sub _get_generate_opts {
     my $dialog = new Gtk2::Dialog("Map Generation Options", $this->[WINDOW],
         [], 'gtk-cancel' => "cancel", 'gtk-ok' => "ok");
 
-    $dialog->set_default_response('ok');
-    $dialog->set_response_sensitive( ok => TRUE );
-
     my $table = Gtk2::Table->new(scalar @{$options->[0]}*2, scalar @$options, FALSE);
 
     my $c_n = 0;
@@ -425,6 +422,8 @@ sub _get_generate_opts {
     }
 
     $dialog->vbox->pack_start($table,0,0,4);
+    $dialog->set_response_sensitive( ok => TRUE );
+    $dialog->set_default_response('ok');
     $dialog->show_all;
 
     my $o = {};
@@ -448,7 +447,7 @@ sub generate {
     $this->[FNAME] = undef;
 
     my ($settings, $generator, @plugins) = $this->_get_generate_opts;
-    $generator = delete $settings->{generator};
+    $generator = delete $settings->{generator} or return;
     @plugins   = @{ delete $settings->{generator_plugins} };
 
     my $map = $this->[MAP] = new Games::RolePlay::MapGen($settings);
