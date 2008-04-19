@@ -280,34 +280,48 @@ sub blank_map {
 sub _get_generate_opts {
     my $this = shift;
 
+    my $options = [[ # column 1
+        { mnemonic => "_Tile Size: ",
+          type     => "text",
+          fixes    => [sub { $_[0] =~ s/\s+//g }]
+          matches  => [qr/^\d+$/], }
+    ]];
+
     my $dialog = new Gtk2::Dialog("Map Generation Options", $this->[WINDOW],
         [], 'gtk-cancel' => "cancel", 'gtk-ok' => "ok");
 
     $dialog->set_default_response('ok');
     $dialog->set_response_sensitive( ok => TRUE );
 
-    my $vbox = $dialog->vbox;
-    my $table = Gtk2::Table->new(1, 2, FALSE);
+    my $table = Gtk2::Table->new(scalar @{$options[0]}*2, scalar @$options, FALSE);
 
-    my $label = Gtk2::Label->new_with_mnemonic("_Tile Size: ");
-       $label->set_alignment(1,0.5);
+    for my $column (@$options) { for my $item (@$column) {
+        my $label = Gtk2::Label->new_with_mnemonic($item->{mnemonic});
+           $label->set_alignment(1,0.5);
 
-    $table->attach_defaults($label, 0, 1, 0,1);
+        my $entry;
+        if( $item->{type} eq "text" ) {
+            $entry = new Gtk2::Entry;
+        }
 
-    my $entry = Gtk2::Entry->new();
-       $entry->set_text(10);
-       $entry->signal_connect(changed => sub {
-           my $text = $entry->get_text;
+        
+      # $table->attach_defaults($label, 0, 1, 0,1);
+      # $table->attach_defaults($entry,1,2,0,1);
+    }}
 
-           $dialog->set_response_sensitive( ok => ($text =~ m/^\d+x\d+$/ ? TRUE : FALSE) );
-       });
+  # my $entry = Gtk2::Entry->new();
+  #    $entry->set_text(10);
+  #    $entry->signal_connect(changed => sub {
+  #        my $text = $entry->get_text;
 
-    $label->set_mnemonic_widget($entry);
+  #        $dialog->set_response_sensitive( ok => ($text =~ m/^\d+x\d+$/ ? TRUE : FALSE) );
+  #    });
 
-    $table->attach_defaults($entry,1,2,0,1);
+  # $label->set_mnemonic_widget($entry);
 
-    $vbox->pack_start($table,0,0,4);
+  # $table->attach_defaults($entry,1,2,0,1);
 
+    $dialog->vbox->pack_start($table,0,0,4);
     $dialog->show_all;
 
     if( $dialog->run eq "ok" ) {
