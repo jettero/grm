@@ -432,18 +432,20 @@ sub make_form {
                     if( $ttype eq "choice" or $ttype eq "text") {
                         $that_e->[1]->signal_connect( changed => my $f = sub {
                             my $sensitive = ($d->{$k}->( $that_e->[0]{extract}->() ) ? FALSE : TRUE);
+                             
                             $this_e->[1]->set_sensitive($sensitive)
                         });
 
                         $f->();
 
-                  # } elsif( $that_e->[0] eq "choices" ) {
-                      # $that_e->signal_connect( changed => sub {
-                      #     $this_e->[1]->set_sensitive(
-                      #         $d->{$k}->( $item->{extract}->() ) ? TRUE : FALSE
-                      #     )
-                      # });
+                    } elsif( $that_e->[0] eq "choices" ) {
+                        $that_e->[1]->signal_connect( changed => my $f = sub {
+                            my $sensitive = ($d->{$k}->(@{ $that_e->[0]{extract}->() }) ? FALSE : TRUE);
+                             
+                            $this_e->[1]->set_sensitive($sensitive)
+                        });
 
+                        $f->();
                     }
                     
                     else { die "unhandled disabler: $that_e->[0]" }
@@ -506,7 +508,7 @@ sub get_generate_opts {
           fixes    => [sub { $_[0] =~ s/\s+//g }],
           matches  => [qr/^\d+$/] },
 
-        { mnemonic => "_Cell Size: ",
+        { mnemonic => "Ce_ll Size: ",
           type     => "text",
           name     => 'cell_size',
           default  => '23x23',
@@ -528,6 +530,22 @@ sub get_generate_opts {
           fixes    => [sub { $_[0] =~ s/\s+//g }],
           matches  => [qr/^(?:\d+|\d+d\d+|\d+d\d+[+-]\d+)$/] },
 
+        { mnemonic => "M_in Room Size: ",
+          type     => "text",
+          name     => 'min_room_size',
+          default  => '2x2',
+          disable  => { generator => sub { $_[0] ne "Basic" } },
+          fixes    => [sub { $_[0] =~ s/\s+//g }],
+          matches  => [qr/^\d+x\d+$/] },
+
+        { mnemonic => "M_ax Room Size: ",
+          type     => "text",
+          name     => 'max_room_size',
+          default  => '7x7',
+          disable  => { generator => sub { $_[0] ne "Basic" } },
+          fixes    => [sub { $_[0] =~ s/\s+//g }],
+          matches  => [qr/^\d+x\d+$/] },
+
     ], [ # column 2
 
         { mnemonic => "_Generator: ",
@@ -541,6 +559,38 @@ sub get_generate_opts {
           name     => 'generator_plugins',
           defaults => [@DEFAULT_GENERATOR_PLUGINS],
           choices  => [@GENERATOR_PLUGINS] },
+
+        { mnemonic => "_Sparseness: ",
+          type     => "text",
+          name     => 'sparseness',
+          default  => 10,
+          disable  => { generator => sub { not {Basic=>1, SparseAndLoops=>1}->{$_[0]} } },
+          fixes    => [sub { $_[0] =~ s/\s+//g }],
+          matches  => [qr/^(?:\d{1,2}|100)$/] },
+
+        { mnemonic => "Same _Way Percent:",
+          type     => "text",
+          name     => 'same_way_percent',
+          default  => 90,
+          disable  => { generator => sub { not {Basic=>1, Perfect=>1, SparseAndLoops=>1}->{$_[0]} } },
+          fixes    => [sub { $_[0] =~ s/\s+//g }],
+          matches  => [qr/^(?:\d{1,2}|100)$/] },
+
+        { mnemonic => "Sam_e Node Percent:",
+          type     => "text",
+          name     => 'same_node_percent',
+          default  => 30,
+          disable  => { generator => sub { not {Basic=>1, Perfect=>1, SparseAndLoops=>1}->{$_[0]} } },
+          fixes    => [sub { $_[0] =~ s/\s+//g }],
+          matches  => [qr/^(?:\d{1,2}|100)$/] },
+
+        { mnemonic => "Remove _Dead-End Percent:",
+          type     => "text",
+          name     => 'remove_deadend_percent',
+          default  => 60,
+          disable  => { generator => sub { not {Basic=>1, SparseAndLoops=>1}->{$_[0]} } },
+          fixes    => [sub { $_[0] =~ s/\s+//g }],
+          matches  => [qr/^(?:\d{1,2}|100)$/] },
 
     ]];
 
