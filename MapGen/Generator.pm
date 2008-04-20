@@ -103,7 +103,7 @@ sub doorgen      { my $this = shift; $_->doorgen(@_)      for @{ $this->{plugins
 sub encountergen { my $this = shift; $_->encountergen(@_) for @{ $this->{plugins}{encr} } }
 sub treasuregen  { my $this = shift; $_->treasuregen(@_)  for @{ $this->{plugins}{tres} } }
 sub post         { my $this = shift; $_->post(@_)         for @{ $this->{plugins}{post} } }
-sub pre          { my $this = shift; $_->pre(@_)          for @{ $this->{plugins}{pre} } }
+sub pre          { my $this = shift; $_->pre(@_)          for @{ $this->{plugins}{pre}  } }
 
 # add_plugin {{{
 sub add_plugin {
