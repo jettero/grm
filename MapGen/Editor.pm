@@ -340,6 +340,7 @@ sub make_form {
 
             my $label = Gtk2::Label->new_with_mnemonic($item->{mnemonic} || die "no mnemonic?");
                $label->set_alignment(1, 0.5);
+               $label->set_tooltip_text( $item->{desc} ) if exists $item->{desc};
 
             my $my_req = @req;
 
@@ -350,6 +351,7 @@ sub make_form {
                 $entry->set_text($i->{$item->{name}} || $item->{default})
                     if exists $item->{default} or exists $i->{$item->{name}};
 
+                $entry->set_tooltip_text( $item->{desc} ) if exists $item->{desc};
                 $entry->signal_connect(changed => sub {
                     my $text = $entry->get_text;
                     my $chg = 0;
@@ -503,43 +505,49 @@ sub get_generate_opts {
 
         { mnemonic => "_Tile Size: ",
           type     => "text",
+          desc     => "The size of each tile (in Feet or Units or whatever)";
           name     => 'tile_size',
           default  => 10, # NOTE: fixes and matches must exist and must be arrrefs
           fixes    => [sub { $_[0] =~ s/\s+//g }],
           matches  => [qr/^\d+$/] },
 
-        { mnemonic => "Ce_ll Size: ",
+        { mnemonic => "Cell Size: ",
           type     => "text",
+          desc     => "The size of each tile (in pixels)",
           name     => 'cell_size',
           default  => '23x23',
           fixes    => [sub { $_[0] =~ s/\s+//g }],
           matches  => [qr/^\d+x\d+$/] },
 
-        { mnemonic => "_Bounding Box: ",
+        { mnemonic => "Bounding Box: ",
           type     => "text",
+          desc     => "The size of the whole map (in tiles)",
           name     => 'bounding_box',
           default  => '20x20',
           fixes    => [sub { $_[0] =~ s/\s+//g }],
           matches  => [qr/^\d+x\d+$/] },
 
-        { mnemonic => "_Number of Rooms: ",
+        { mnemonic => "Number of Rooms: ",
           type     => "text",
+          desc     => "The number of generated rooms, either a number or a roll (e.g., 2, 2d4, 2d4+2)",
           name     => 'num_rooms',
           default  => '2d4',
           disable  => { generator => sub { $_[0] ne "Basic" } },
           fixes    => [sub { $_[0] =~ s/\s+//g }],
           matches  => [qr/^(?:\d+|\d+d\d+|\d+d\d+[+-]\d+)$/] },
 
-        { mnemonic => "M_in Room Size: ",
+        { mnemonic => "Min Room Size: ",
           type     => "text",
+          desc     => "The minimum size of generated rooms (in tiles)",
           name     => 'min_room_size',
           default  => '2x2',
           disable  => { generator => sub { $_[0] ne "Basic" } },
           fixes    => [sub { $_[0] =~ s/\s+//g }],
           matches  => [qr/^\d+x\d+$/] },
 
-        { mnemonic => "M_ax Room Size: ",
+        { mnemonic => "Max Room Size: ",
           type     => "text",
+          desc     => "The maximum size of generated rooms (in tiles)",
           name     => 'max_room_size',
           default  => '7x7',
           disable  => { generator => sub { $_[0] ne "Basic" } },
@@ -550,12 +558,14 @@ sub get_generate_opts {
 
         { mnemonic => "_Generator: ",
           type     => "choice",
+          desc     => "The generator used to create the map",
           name     => 'generator',
           default  => $DEFAULT_GENERATOR,
           choices  => [@GENERATORS] },
 
         { mnemonic => "Generator _Plugins: ",
           type     => "choices",
+          desc     => "The plugins you wish to use after the map is created",
           name     => 'generator_plugins',
           defaults => [@DEFAULT_GENERATOR_PLUGINS],
           choices  => [@GENERATOR_PLUGINS] },
@@ -568,7 +578,7 @@ sub get_generate_opts {
           fixes    => [sub { $_[0] =~ s/\s+//g }],
           matches  => [qr/^(?:\d{1,2}|100)$/] },
 
-        { mnemonic => "Same _Way Percent:",
+        { mnemonic => "Same Way Percent:",
           type     => "text",
           name     => 'same_way_percent',
           default  => 90,
@@ -576,7 +586,7 @@ sub get_generate_opts {
           fixes    => [sub { $_[0] =~ s/\s+//g }],
           matches  => [qr/^(?:\d{1,2}|100)$/] },
 
-        { mnemonic => "Sam_e Node Percent:",
+        { mnemonic => "Same Node Percent:",
           type     => "text",
           name     => 'same_node_percent',
           default  => 30,
@@ -584,7 +594,7 @@ sub get_generate_opts {
           fixes    => [sub { $_[0] =~ s/\s+//g }],
           matches  => [qr/^(?:\d{1,2}|100)$/] },
 
-        { mnemonic => "Remove _Dead-End Percent:",
+        { mnemonic => "Remove Dead-End Percent:",
           type     => "text",
           name     => 'remove_deadend_percent',
           default  => 60,
