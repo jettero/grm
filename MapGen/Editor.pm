@@ -320,13 +320,15 @@ sub blank_map {
     $map;
 }
 # }}}
-# generate_form {{{
-sub generate_form {
+# make_form {{{
+sub make_form {
     my $this = shift;
     my ($i, $options) = @_;
 
     my $dialog = new Gtk2::Dialog("Map Generation Options", $this->[WINDOW], [], 'gtk-cancel' => "cancel", 'gtk-ok' => "ok");
     my $table = Gtk2::Table->new(scalar @{$options->[0]}*2, scalar @$options, FALSE);
+
+    my $reref = {};
 
     my $c_n = 0;
     my @req;
@@ -362,8 +364,9 @@ sub generate_form {
 
                     $dialog->set_response_sensitive( ok => (@req == grep {$_} @req) );
                 });
-                 
+
                 $item->{extract} = sub { $entry->get_text };
+                $entry->signal_connect(changed => sub { warn "test!"; });
 
             } elsif( $item->{type} eq "choice" ) {
                 $entry = Gtk2::ComboBox->new_text;
@@ -378,6 +381,7 @@ sub generate_form {
                 $entry->set_active($d_i) if defined $d_i;
 
                 $item->{extract} = sub { $entry->get_active_text };
+                $entry->signal_connect(changed => sub { warn "test!"; });
 
             } elsif( $item->{type} eq "choices" ) {
                 my $def = $i->{$item->{name}};
@@ -404,7 +408,10 @@ sub generate_form {
                 $z = (exists $item->{z} ? $item->{z} : 2);
 
                 $item->{extract} = sub { [map {$d->[$_]} $slist->get_selected_indices] };
+                #$entry->signal_connect(changed => sub { warn "test!"; });
             }
+
+            $reref->{$item->{name}} = [ $item, $entry ];
 
             $label->set_mnemonic_widget($entry);
             $table->attach_defaults($label, $x, $x+1, $y, $y+1);  $x ++;
@@ -413,6 +420,36 @@ sub generate_form {
 
         $c_n ++;
     }
+
+    for my $column (@$options) {
+        for my $item (@$column) {
+            if( my $d = $item->{disable} ) {
+                my $this_e = $reref->{$item->{name}};
+                for my $k (keys %$d) {
+                    my $that_e = $reref->{$k};
+                    my $ttype  = $that_e->[0]{type};
+
+                    if( $ttype eq "choice" or $ttype eq "text") {
+                        $that_e->[1]->signal_connect( changed => my $f = sub {
+                            my $sensitive = ($d->{$k}->( $that_e->[0]{extract}->() ) ? FALSE : TRUE);
+                            $this_e->[1]->set_sensitive($sensitive)
+                        });
+
+                        $f->();
+
+                  # } elsif( $that_e->[0] eq "choices" ) {
+                      # $that_e->signal_connect( changed => sub {
+                      #     $this_e->[1]->set_sensitive(
+                      #         $d->{$k}->( $item->{extract}->() ) ? TRUE : FALSE
+                      #     )
+                      # });
+
+                    }
+                    
+                    else { die "unhandled disabler: $that_e->[0]" }
+                }
+            }
+    }}
 
     $dialog->vbox->pack_start($table,0,0,4);
     $dialog->set_response_sensitive( ok => TRUE );
@@ -482,6 +519,7 @@ sub get_generate_opts {
           type     => "text",
           name     => 'num_rooms',
           default  => '2d4',
+          disable  => { generator => sub { $_[0] ne "Basic" } },
           fixes    => [sub { $_[0] =~ s/\s+//g }],
           matches  => [qr/^(?:\d+|\d+d\d+|\d+d\d+[+-]\d+)$/] },
 
@@ -501,7 +539,9 @@ sub get_generate_opts {
 
     ]];
 
-    my ($result, $o) = $this->generate_form($i, $options);
+    $this->modify_generate_opts_form if $this->can("modify_generate_opts_form");
+
+    my ($result, $o) = $this->make_form($i, $options);
     if( $result eq "ok" ) {
         $this->[SETTINGS]{GENERATE_OPTS} = freeze $o;
     }
