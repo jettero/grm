@@ -60,6 +60,6 @@ This module generates an empty map.
 
 =head1 SEE ALSO
 
-Games::RolePlay::MapGen, Games::RolePlay::MapGen::Generator::Perfect, Games::RolePlay::MapGen::Generator::SparseAndLoops
+Games::RolePlay::MapGen
 
 =cut
