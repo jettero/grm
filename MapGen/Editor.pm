@@ -9,6 +9,8 @@ use Gtk2::Ex::Simple::Menu;
 use Gtk2::Ex::Dialogs::ErrorMsg;
 use Gtk2::SimpleList;
 use Games::RolePlay::MapGen;
+use User;
+use File::Spec;
 use DB_File;
 use Storable qw(freeze thaw);
 use Data::Dump qw(dump);
@@ -17,8 +19,7 @@ our $DEFAULT_GENERATOR         = 'Basic';
 our @GENERATORS                = (qw( Basic Blank OneBigRoom Perfect SparseAndLoops ));
 our @GENERATOR_PLUGINS         = (qw( BasicDoors FiveSplit ));
 our @DEFAULT_GENERATOR_PLUGINS = (qw( BasicDoors ));
-
-our @FILTERS = (qw( BasicDoors FiveSplit ClearDoors ));
+our @FILTERS                   = (qw( BasicDoors FiveSplit ClearDoors ));
 
 use constant {
     MAP      => 0,
@@ -36,8 +37,19 @@ sub new {
     my $class = shift;
     my $this  = bless [], $class;
 
-    warn "settings saved to 'stupid_name'"; sleep 1;
-    my %o; tie %o, DB_File => "/tmp/stupid_name" or die $!;
+    my $fname   = "GRM Editor";
+    unless( File::Spec->case_tolerant ) {
+        $fname = lc $fname;
+        $fname =~ s/ /_/g;
+        substr($fname,0,0) = ".";
+    }
+
+    my @homedir = User->Home;
+    push @homedir, "Application Data" if "@homedir" =~ m/Documents and Settings/i;
+
+    $fname = File::Spec->catfile(@homedir, $fname);
+
+    my %o; tie %o, DB_File => $fname or die $!;
 
     $this->[SETTINGS] = \%o;
 
@@ -465,6 +477,13 @@ sub get_generate_opts {
           default  => '20x20',
           fixes    => [sub { $_[0] =~ s/\s+//g }],
           matches  => [qr/^\d+x\d+$/] },
+
+        { mnemonic => "_Number of Rooms: ",
+          type     => "text",
+          name     => 'num_rooms',
+          default  => '2d4',
+          fixes    => [sub { $_[0] =~ s/\s+//g }],
+          matches  => [qr/^(?:\d+|\d+d\d+|\d+d\d+[+-]\d+)$/] },
 
     ], [ # column 2
 

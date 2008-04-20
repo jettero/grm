@@ -98,12 +98,12 @@ sub post_genmap  {
 # }}}
 
 # Meant to be overloaded elsewhere:
-sub trapgen      { my $this = shift; $_->trapgen(@_)      for @{ $this->{plugins}{trap} } }
-sub doorgen      { my $this = shift; $_->doorgen(@_)      for @{ $this->{plugins}{door} } }
-sub encountergen { my $this = shift; $_->encountergen(@_) for @{ $this->{plugins}{encr} } }
-sub treasuregen  { my $this = shift; $_->treasuregen(@_)  for @{ $this->{plugins}{tres} } }
-sub post         { my $this = shift; $_->post(@_)         for @{ $this->{plugins}{post} } }
-sub pre          { my $this = shift; $_->pre(@_)          for @{ $this->{plugins}{pre}  } }
+sub trapgen      { my $this = shift; $_->trapgen(@_)      while $_ = shift @{$this->{plugins}{trap}} }
+sub doorgen      { my $this = shift; $_->doorgen(@_)      while $_ = shift @{$this->{plugins}{door}} }
+sub encountergen { my $this = shift; $_->encountergen(@_) while $_ = shift @{$this->{plugins}{encr}} }
+sub treasuregen  { my $this = shift; $_->treasuregen(@_)  while $_ = shift @{$this->{plugins}{tres}} }
+sub post         { my $this = shift; $_->post(@_)         while $_ = shift @{$this->{plugins}{post}} }
+sub pre          { my $this = shift; $_->pre(@_)          while $_ = shift @{$this->{plugins}{pre} } }
 
 # add_plugin {{{
 sub add_plugin {
