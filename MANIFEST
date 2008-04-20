@@ -36,3 +36,5 @@ MapGen.pod
 t/08_interconnects_xml.t
 MapGen/Editor.pm
 MapGen/Generator/Blank.pm
+lgpl-2.1.txt.gz
+MapGen/GeneratorPlugin/ClearDoors.pm

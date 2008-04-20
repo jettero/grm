@@ -7,7 +7,7 @@ use AutoLoader;
 use Carp;
 use Data::Dumper; $Data::Dumper::Indent = 1; $Data::Dumper::SortKeys = 1;
 
-our $VERSION = "1.0.3";
+our $VERSION = "1.2.0";
 our $AUTOLOAD;
 
 our %opp  = (n=>"s", e=>"w", s=>"n", w=>"e");

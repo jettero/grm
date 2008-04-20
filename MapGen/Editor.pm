@@ -14,9 +14,11 @@ use Storable qw(freeze thaw);
 use Data::Dump qw(dump);
 
 our $DEFAULT_GENERATOR         = 'Basic';
-our @GENERATORS                = (qw(Basic Blank OneBigRoom));
-our @GENERATOR_PLUGINS         = (qw(BasicDoors FiveSplit));
-our @DEFAULT_GENERATOR_PLUGINS = (qw(BasicDoors));
+our @GENERATORS                = (qw( Basic Blank OneBigRoom Perfect SparseAndLoops ));
+our @GENERATOR_PLUGINS         = (qw( BasicDoors FiveSplit ));
+our @DEFAULT_GENERATOR_PLUGINS = (qw( BasicDoors ));
+
+our @FILTERS = (qw( BasicDoors FiveSplit ClearDoors ));
 
 use constant {
     MAP      => 0,
@@ -28,9 +30,6 @@ use constant {
 };
 
 1;
-
-# NOTE: much of this code is ripped from
-# http://perlmonks.org/?node_id=583578
 
 # new {{{
 sub new {
