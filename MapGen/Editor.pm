@@ -475,10 +475,15 @@ sub make_form {
     if( $r eq "ok" ) {
         for my $c (@$options) {
             for my $r (@$c) {
-                $o->{$r->{name}} = $r->{extract}->();
+                if( $reref->{$r->{name}}[1]->is_sensitive() ) {
+
+                    $o->{$r->{name}} = $r->{extract}->();
+                }
             }
         }
     }
+
+    warn dump($r, $o);
 
     $dialog->destroy;
     return ($r,$o);
