@@ -133,7 +133,7 @@ http://www.aarg.net/~minam/dungeon_design.html
 only one direction (in otherwords, if the cell is the end of a dead-end hallway), "erase" that cell
 by removing the corridor.
 
-3. Repeat step #2 sparseness times (ie, if sparseness is five, repeat step #6 five times).
+3. Repeat step #2 sparseness times (ie, if sparseness is five, repeat step #2 five times).
 
 4. Look at every cell in the maze grid. If the given cell is a dead-end cell
 (meaning that a corridor enters but does not exit the cell), it is a candidate

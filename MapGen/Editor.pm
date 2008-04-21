@@ -505,7 +505,7 @@ sub get_generate_opts {
 
         { mnemonic => "_Tile Size: ",
           type     => "text",
-          desc     => "The size of each tile (in Feet or Units or whatever)";
+          desc     => "The size of each tile (in Feet or Units or whatever)",
           name     => 'tile_size',
           default  => 10, # NOTE: fixes and matches must exist and must be arrrefs
           fixes    => [sub { $_[0] =~ s/\s+//g }],
@@ -513,7 +513,7 @@ sub get_generate_opts {
 
         { mnemonic => "Cell Size: ",
           type     => "text",
-          desc     => "The size of each tile (in pixels)",
+          desc     => "The size of each tile in the image (in pixels)",
           name     => 'cell_size',
           default  => '23x23',
           fixes    => [sub { $_[0] =~ s/\s+//g }],
@@ -558,20 +558,21 @@ sub get_generate_opts {
 
         { mnemonic => "_Generator: ",
           type     => "choice",
-          desc     => "The generator used to create the map",
+          desc     => "The generator used to create the map.",
           name     => 'generator',
           default  => $DEFAULT_GENERATOR,
           choices  => [@GENERATORS] },
 
-        { mnemonic => "Generator _Plugins: ",
+        { mnemonic => "Generator _Plugins: ", z=>3,
           type     => "choices",
-          desc     => "The plugins you wish to use after the map is created",
+          desc     => "The plugins you wish to use after the map is created.",
           name     => 'generator_plugins',
           defaults => [@DEFAULT_GENERATOR_PLUGINS],
           choices  => [@GENERATOR_PLUGINS] },
 
         { mnemonic => "_Sparseness: ",
           type     => "text",
+          desc     => "The number of times to repeat the remove-dead-end-tile step in James Buck's generator algorithm.",
           name     => 'sparseness',
           default  => 10,
           disable  => { generator => sub { not {Basic=>1, SparseAndLoops=>1}->{$_[0]} } },
@@ -580,6 +581,7 @@ sub get_generate_opts {
 
         { mnemonic => "Same Way Percent:",
           type     => "text",
+          desc     => "While digging out the perfect maze, this is the percent chance of digging in the same direction as last time each time we visit the node.",
           name     => 'same_way_percent',
           default  => 90,
           disable  => { generator => sub { not {Basic=>1, Perfect=>1, SparseAndLoops=>1}->{$_[0]} } },
@@ -588,6 +590,7 @@ sub get_generate_opts {
 
         { mnemonic => "Same Node Percent:",
           type     => "text",
+          desc     => "While digging out the perfect maze, this is the percent chance of restarting the digging in the same place on each iteration.",
           name     => 'same_node_percent',
           default  => 30,
           disable  => { generator => sub { not {Basic=>1, Perfect=>1, SparseAndLoops=>1}->{$_[0]} } },
@@ -596,6 +599,7 @@ sub get_generate_opts {
 
         { mnemonic => "Remove Dead-End Percent:",
           type     => "text",
+          desc     => "Like sparseness but tries harder to remove dead-end corridors completely.",
           name     => 'remove_deadend_percent',
           default  => 60,
           disable  => { generator => sub { not {Basic=>1, SparseAndLoops=>1}->{$_[0]} } },
