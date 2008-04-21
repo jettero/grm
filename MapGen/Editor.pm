@@ -381,9 +381,22 @@ sub make_form {
                     $i++;
                 }
                 $entry->set_active($d_i) if defined $d_i;
+                $entry->set_tooltip_text( $item->{desc} ) if exists $item->{desc};
 
                 $item->{extract} = sub { $entry->get_active_text };
                 $entry->signal_connect(changed => sub { warn "test!"; });
+                if( exists $item->{descs} and exists $item->{desc} ) {
+                    $entry->signal_connect(changed => my $si = sub {
+                        if( exists $item->{descs}{ my $at = $entry->get_active_text } ) {
+                            $entry->set_tooltip_text( "$at - $item->{descs}{$at}" );
+
+                        } else {
+                            $entry->set_tooltip_text( $item->{desc} );
+                        }
+                    });
+
+                    $si->();
+                }
 
             } elsif( $item->{type} eq "choices" ) {
                 my $def = $i->{$item->{name}};
@@ -559,6 +572,13 @@ sub get_generate_opts {
         { mnemonic => "_Generator: ",
           type     => "choice",
           desc     => "The generator used to create the map.",
+          descs    => {
+              Basic          => 'The basic generator uses perfect/sparseandloops to make a map and then drops rooms onto the result.',
+              Perfect        => 'The perfect maze generator James Buck designed.',
+              SparseAndLoops => "Pretty much, this is same map generator on James Buck's site.",
+              Blank          => "Generates a boring blank map according to your selected bounding box.",
+              OneBigRoom     => "Generates a boring giant room the size of your bounding box.",
+          },
           name     => 'generator',
           default  => $DEFAULT_GENERATOR,
           choices  => [@GENERATORS] },
@@ -566,6 +586,10 @@ sub get_generate_opts {
         { mnemonic => "Generator _Plugins: ", z=>3,
           type     => "choices",
           desc     => "The plugins you wish to use after the map is created.",
+          descs    => {
+              BasicDoors => 'Adds doors using various strategies.',
+              FiveSplit  => 'Divides map tiles with tiles larger than 5 units into tiles precisely 5 units square.  E.g., if the tile size is set to 10, this will double the bounding box size of your map.',
+          },
           name     => 'generator_plugins',
           defaults => [@DEFAULT_GENERATOR_PLUGINS],
           choices  => [@GENERATOR_PLUGINS] },
