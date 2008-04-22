@@ -7,6 +7,7 @@ use Glib qw(TRUE FALSE);
 use Gtk2 -init; # -init tells import to ->init() your app
 use Gtk2::Ex::Simple::Menu;
 use Gtk2::Ex::Dialogs::ErrorMsg;
+use Gtk2::Ex::Dialogs::Question;
 use Gtk2::SimpleList;
 use Games::RolePlay::MapGen;
 use User;
@@ -656,19 +657,24 @@ sub generate {
     @plugins   = @{ delete $settings->{generator_plugins} };
 
     my $map;
-    eval {
-        $map = $this->[MAP] = new Games::RolePlay::MapGen($settings);
-        $map->set_generator($generator);
-        $map->add_generator_plugin( $_ ) for @plugins;
-        $map->generate; 
-    };
+    REDO: {
+        eval {
+            $map = $this->[MAP] = new Games::RolePlay::MapGen($settings);
+            $map->set_generator($generator);
+            $map->add_generator_plugin( $_ ) for @plugins;
+            $map->generate; 
+        };
 
-    if( $@ ) {
-        $this->error($@);
-        return $this->blank_map;
+        if( $@ ) {
+            $this->error($@);
+            return $this->blank_map;
+        }
+
+        $this->draw_map;
+        Gtk2->main_iteration while Gtk2->events_pending;
+        Gtk2->main_iteration while Gtk2->events_pending;
+        redo REDO if ask Gtk2::Ex::Dialogs::Question(text=>"Re-generate?", default_yes=>TRUE, parent_window=>$this->[WINDOW]);
     }
-
-    $this->draw_map;
     $map;
 }
 # }}}
