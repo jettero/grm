@@ -141,7 +141,7 @@ sub DESTROY {}
 sub new {
     my $class = shift;
     my @opts  = @_;
-    my $opts  = ( (@opts == 1 and ref($opts[0]) eq "HASH") ? $opts[0] : {@opts} );
+    my $opts  = ( (@opts == 1 and ref($opts[0]) eq "HASH") ? {%{$opts[0]}} : {@opts} );
     my $this  = bless $opts, $class;
 
     if( my $e = $this->_check_opts ) { croak $e }
