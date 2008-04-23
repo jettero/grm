@@ -159,6 +159,7 @@ sub new {
     my $scwin = Gtk2::ScrolledWindow->new;
     my $vp    = Gtk2::Viewport->new (undef,undef);
 
+    $scwin->set_policy('automatic', 'automatic');
     $scwin->add($vp);
     $vp->add($marea);
     $vbox->pack_start($scwin,1,1,0);
@@ -350,11 +351,11 @@ sub make_form {
 
             my $my_req = @req;
 
-            my $entry;
+            my ($entry, $attach);
             my $z = 1;
             my $IT = $item->{type};
             if( $IT eq "text" ) {
-                $entry = new Gtk2::Entry;
+                $attach = $entry = new Gtk2::Entry;
                 $entry->set_text(exists $i->{$item->{name}} ? $i->{$item->{name}} : $item->{default})
                     if exists $item->{default} or exists $i->{$item->{name}};
 
@@ -378,7 +379,7 @@ sub make_form {
               # $entry->signal_connect(changed => sub { warn "test!"; }); # [WORKS FINE]
 
             } elsif( $IT eq "choice" ) {
-                $entry = Gtk2::ComboBox->new_text;
+                $attach = $entry = Gtk2::ComboBox->new_text;
                 my $d = $i->{$item->{name}} || $item->{default};
                 my $i = 0;
                 my $d_i;
@@ -413,28 +414,32 @@ sub make_form {
 
                 my $d = $item->{choices};
                 my @s = grep {$def->{$d->[$_]}} 0 .. $#$d;
-                my $slist = Gtk2::SimpleList->new( plugin_name_unseen => "text" );
-                   $slist->set_headers_visible(FALSE);
-                   $slist->set_data_array($d);
-                   $slist->get_selection->set_mode('multiple');
-                   $slist->select( @s );
 
-                # NOTE: $slist->{data} = $d -- doesn't work !!!! fuckers you
-                # have to use @{$slist->{data}} = @$d, so I chose to just use
+                $entry = Gtk2::SimpleList->new( plugin_name_unseen => "text" );
+                $entry->set_headers_visible(FALSE);
+                $entry->set_data_array($d);
+                $entry->get_selection->set_mode('multiple');
+                $entry->select( @s );
+
+                # NOTE: $entry->{data} = $d -- doesn't work !!!! fuckers you
+                # have to use @{$entry->{data}} = @$d, so I chose to just use
                 # the set_data_array() why even bother trying to do the scope
                 # hack... pfft.
 
-                $entry = Gtk2::ScrolledWindow->new;
-                $entry->set_policy ('automatic', 'automatic');
-                $entry->add($slist);
+                $attach = Gtk2::ScrolledWindow->new;
+
+                my $vp  = Gtk2::Viewport->new;
+                $attach->set_policy('automatic', 'automatic');
+                $attach->add($vp);
+                $vp->add($entry);
 
                 $z = (exists $item->{z} ? $item->{z} : 2);
 
-                $item->{extract} = sub { [map {$d->[$_]} $slist->get_selected_indices] };
-              # $entry->signal_connect(changed => sub { warn "test!"; }); # [DOESN'T WORK]
+                $item->{extract} = sub { [map {$d->[$_]} $entry->get_selected_indices] };
+                $entry->get_selection->signal_connect(changed => sub { warn "test!"; }); # [WORKS FINE]
 
             } elsif( $IT eq "bool" ) {
-                $entry = new Gtk2::CheckButton;
+                $attach = $entry = new Gtk2::CheckButton;
                 $entry->set_active(exists $i->{$item->{name}} ? $i->{$item->{name}} : $item->{default})
                     if exists $item->{default} or exists $i->{$item->{name}};
 
@@ -448,8 +453,8 @@ sub make_form {
             $reref->{$item->{name}} = [ $item, $entry ];
 
             $label->set_mnemonic_widget($entry);
-            $table->attach_defaults($label, $x, $x+1, $y, $y+1);  $x ++;
-            $table->attach_defaults($entry, $x, $x+1, $y, $y+$z); $y += $z;
+            $table->attach_defaults($label,  $x, $x+1, $y, $y+1);  $x ++;
+            $table->attach_defaults($attach, $x, $x+1, $y, $y+$z); $y += $z;
         }
 
         $c_n ++;
