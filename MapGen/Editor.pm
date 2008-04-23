@@ -352,9 +352,10 @@ sub make_form {
 
             my $entry;
             my $z = 1;
-            if( $item->{type} eq "text" ) {
+            my $IT = $item->{type};
+            if( $IT eq "text" ) {
                 $entry = new Gtk2::Entry;
-                $entry->set_text($i->{$item->{name}} || $item->{default})
+                $entry->set_text(exists $i->{$item->{name}} ? $i->{$item->{name}} : $item->{default})
                     if exists $item->{default} or exists $i->{$item->{name}};
 
                 $entry->set_tooltip_text( $item->{desc} ) if exists $item->{desc};
@@ -376,7 +377,7 @@ sub make_form {
                 $item->{extract} = sub { $entry->get_text };
               # $entry->signal_connect(changed => sub { warn "test!"; }); # [WORKS FINE]
 
-            } elsif( $item->{type} eq "choice" ) {
+            } elsif( $IT eq "choice" ) {
                 $entry = Gtk2::ComboBox->new_text;
                 my $d = $i->{$item->{name}} || $item->{default};
                 my $i = 0;
@@ -405,7 +406,7 @@ sub make_form {
                     $si->();
                 }
 
-            } elsif( $item->{type} eq "choices" ) {
+            } elsif( $IT eq "choices" ) {
                 my $def = $i->{$item->{name}};
                    $def = $item->{defaults} unless $def;
                    $def = {map {($_=>1)} @$def};
@@ -431,7 +432,18 @@ sub make_form {
 
                 $item->{extract} = sub { [map {$d->[$_]} $slist->get_selected_indices] };
               # $entry->signal_connect(changed => sub { warn "test!"; }); # [DOESN'T WORK]
+
+            } elsif( $IT eq "bool" ) {
+                $entry = new Gtk2::CheckButton;
+                $entry->set_active(exists $i->{$item->{name}} ? $i->{$item->{name}} : $item->{default})
+                    if exists $item->{default} or exists $i->{$item->{name}};
+
+                $entry->set_tooltip_text( $item->{desc} ) if exists $item->{desc};
+                $item->{extract} = sub { $entry->get_active ? 1:0 };
+              # $entry->signal_connect(toggled => sub { warn "test!"; }); # [WORKS FINE]
             }
+
+            else { die "unknown form type: $item->{type}" }
 
             $reref->{$item->{name}} = [ $item, $entry ];
 
@@ -732,12 +744,13 @@ sub preferences {
         { mnemonic => "Remember Size: ",
           type     => "bool",
           desc     => "Remember the Size of your window from the last run?",
-          name     => 'LOAD_LAST',
+          name     => 'REMEMBER_SP',
           default  => 1 },
     ]];
 
     my ($result, $o) = $this->make_form($i, $options);
     return unless $result eq "ok";
+    $this->[SETTINGS]{$_} = $o->{$_} for keys %$o;
 }
 # }}}
 
