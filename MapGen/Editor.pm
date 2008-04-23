@@ -52,6 +52,8 @@ sub new {
 
     my %o; tie %o, DB_File => $fname or die $!;
 
+    $o{REMEMBER_SP} = 1 unless defined $o{REMEMBER_SP};
+
     $this->[SETTINGS] = \%o;
 
     my $vbox = new Gtk2::VBox;
@@ -110,9 +112,12 @@ sub new {
         _Edit => {
             item_type => '<Branch>',
             children => [
-                '_Render Settings'=> {
+                '_Redraw' => {
+                    callback    => sub { $this->draw_map },
+                    accelerator => '<ctrl>R',
+                },
+                'Render _Settings'=> {
                     callback    => sub { $this->render_settings },
-                    accelerator => '<ctrl>P',
                 },
                 Separator => {
                     item_type => '<Separator>',
@@ -369,7 +374,7 @@ sub make_form {
                 });
 
                 $item->{extract} = sub { $entry->get_text };
-                $entry->signal_connect(changed => sub { warn "test!"; });
+              # $entry->signal_connect(changed => sub { warn "test!"; }); # [WORKS FINE]
 
             } elsif( $item->{type} eq "choice" ) {
                 $entry = Gtk2::ComboBox->new_text;
@@ -385,7 +390,8 @@ sub make_form {
                 $entry->set_tooltip_text( $item->{desc} ) if exists $item->{desc};
 
                 $item->{extract} = sub { $entry->get_active_text };
-                $entry->signal_connect(changed => sub { warn "test!"; });
+              # $entry->signal_connect(changed => sub { warn "test!"; }); # [WORKS FINE]
+
                 if( exists $item->{descs} and exists $item->{desc} ) {
                     $entry->signal_connect(changed => my $si = sub {
                         if( exists $item->{descs}{ my $at = $entry->get_active_text } ) {
@@ -424,7 +430,7 @@ sub make_form {
                 $z = (exists $item->{z} ? $item->{z} : 2);
 
                 $item->{extract} = sub { [map {$d->[$_]} $slist->get_selected_indices] };
-                #$entry->signal_connect(changed => sub { warn "test!"; });
+              # $entry->signal_connect(changed => sub { warn "test!"; }); # [DOESN'T WORK]
             }
 
             $reref->{$item->{name}} = [ $item, $entry ];
@@ -637,7 +643,8 @@ sub get_generate_opts {
 
     my ($result, $o) = $this->make_form($i, $options);
     if( $result eq "ok" ) {
-        $this->[SETTINGS]{GENERATE_OPTS} = freeze $o;
+        $i->{$_} = $o->{$_} for keys %$o;
+        $this->[SETTINGS]{GENERATE_OPTS} = freeze $i;
     }
 
     return ($result, $o);
@@ -676,6 +683,61 @@ sub generate {
         redo REDO if ask Gtk2::Ex::Dialogs::Question(text=>"Re-generate?", default_yes=>TRUE, parent_window=>$this->[WINDOW]);
     }
     $map;
+}
+# }}}
+# render_settings {{{
+sub render_settings {
+    my $this = shift;
+
+    my $options = [[
+        { mnemonic => "Cell Size: ",
+          type     => "text",
+          desc     => "The size of each tile in the image (in pixels)",
+          name     => 'cell_size',
+          default  => '23x23',
+          fixes    => [sub { $_[0] =~ s/\s+//g }],
+          matches  => [qr/^\d+x\d+$/] },
+    ]];
+
+    my $i = $this->[SETTINGS]{GENERATE_OPTS};
+       $i = thaw $i if $i;
+       $i = {} unless $i;
+
+    my ($result, $o) = $this->make_form($i, $options);
+    return unless $result eq "ok";
+
+    if($i->{cell_size} ne $o->{cell_size}) {
+        $this->[MAP]{$_} = $i->{$_} = $o->{$_} for keys %$o;
+        $this->[SETTINGS]{GENERATE_OPTS} = freeze $i;
+        $this->draw_map;
+    }
+}
+# }}}
+# preferences {{{
+sub preferences {
+    my $this = shift;
+
+    my $i = {
+        REMEMBER_SP => $this->[SETTINGS]{REMEMBER_SP},
+        LOAD_LAST   => $this->[SETTINGS]{LOAD_LAST},
+    };
+
+    my $options = [[
+        { mnemonic => "Load Last: ",
+          type     => "bool",
+          desc     => "Re-load the last map when the GRM Editor opens?",
+          name     => 'LOAD_LAST',
+          default  => 0, },
+
+        { mnemonic => "Remember Size: ",
+          type     => "bool",
+          desc     => "Remember the Size of your window from the last run?",
+          name     => 'LOAD_LAST',
+          default  => 1 },
+    ]];
+
+    my ($result, $o) = $this->make_form($i, $options);
+    return unless $result eq "ok";
 }
 # }}}
 
@@ -721,7 +783,7 @@ sub quit {
 sub run {
     my $this = shift;
 
-    if( my $sp = $this->[SETTINGS]{MAIN_SIZE_POS} ) {
+    if( $this->[SETTINGS]{REMEMBER_SP} and my $sp = $this->[SETTINGS]{MAIN_SIZE_POS} ) {
         my ($w,$h,$x,$y) = @{thaw $sp};
 
       # warn "setting window params: ($w,$h,$x,$y)";
