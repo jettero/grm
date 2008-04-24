@@ -436,7 +436,7 @@ sub make_form {
                 $z = (exists $item->{z} ? $item->{z} : 2);
 
                 $item->{extract} = sub { [map {$d->[$_]} $entry->get_selected_indices] };
-                $entry->get_selection->signal_connect(changed => sub { warn "test!"; }); # [WORKS FINE]
+              # $entry->get_selection->signal_connect(changed => sub { warn "test!"; }); # [WORKS FINE]
 
             } elsif( $IT eq "bool" ) {
                 $attach = $entry = new Gtk2::CheckButton;
@@ -464,11 +464,18 @@ sub make_form {
         for my $item (@$column) {
             if( my $d = $item->{disable} ) {
                 my $this_e = $reref->{$item->{name}};
+                my $this_type = $this_e->[0]{type};
+
+                unless( $this_type eq "choice" or $this_type eq "text" ) {
+                    warn "not prepared to deal with TreeViews in the disable code (yet) ... skipping";
+                    next
+                }
+
                 for my $k (keys %$d) {
                     my $that_e = $reref->{$k};
-                    my $ttype  = $that_e->[0]{type};
+                    my $that_type = $that_e->[0]{type};
 
-                    if( $ttype eq "choice" or $ttype eq "text") {
+                    if( $that_type eq "choice" or $that_type eq "text") {
                         $that_e->[1]->signal_connect( changed => my $f = sub {
                             my $sensitive = ($d->{$k}->( $that_e->[0]{extract}->() ) ? FALSE : TRUE);
                              
@@ -476,18 +483,9 @@ sub make_form {
                         });
 
                         $f->();
-
-                    } elsif( $that_e->[0] eq "choices" ) {
-                        $that_e->[1]->signal_connect( changed => my $f = sub {
-                            my $sensitive = ($d->{$k}->(@{ $that_e->[0]{extract}->() }) ? FALSE : TRUE);
-                             
-                            $this_e->[1]->set_sensitive($sensitive)
-                        });
-
-                        $f->();
                     }
                     
-                    else { die "unhandled disabler: $that_e->[0]" }
+                    else { die "unhandled disabler: $k/$that_type" }
                 }
             }
     }}
@@ -615,6 +613,7 @@ sub get_generate_opts {
               FiveSplit  => 'Divides map tiles with tiles larger than 5 units into tiles precisely 5 units square.  E.g., if the tile size is set to 10, this will double the bounding box size of your map.',
           },
           name     => 'generator_plugins',
+          disable  => { FiveSplit => {tile_size => sub { ($_[0]/5) !~ m/\./ }} },
           defaults => [@DEFAULT_GENERATOR_PLUGINS],
           choices  => [@GENERATOR_PLUGINS] },
 
