@@ -99,14 +99,10 @@ sub new {
                     item_type => '<Branch>',
                     children => [
                         "_Image..." => {
-                            item_type   => '<StockItem>',
                             callback    => sub { $this->save_image_as },
-                          # extra_data  => 'gtk-save-as',
                         },
                         "_Text File..." => {
-                            item_type   => '<StockItem>',
                             callback    => sub { $this->save_text_as },
-                          # extra_data  => 'gtk-save-as',
                         },
                     ],
                 },
@@ -148,11 +144,6 @@ sub new {
         _Help => {
             item_type => '<LastBranch>',
             children => [
-              # _Help => {
-              #     item_type    => '<StockItem>',
-              #     accelerator  => '<ctrl>H',
-              #     extra_data   => 'gtk-help',
-              # },
                 _About => {
                     item_type => '<StockItem>',
                     callback  => sub { $this->about },
@@ -552,12 +543,12 @@ sub get_generate_opts {
                     my $cs = [ split "x", $cell_size->() ];
                     my $fs = grep {$_ eq "FiveSplit"} @{ $five_split->() };
 
-                    warn dump({
-                        ts => $ts,
-                        cs => $cs,
-                        fs => $fs,
-                        vp => $vp_dim,
-                    });
+                  # warn dump({
+                  #     ts => $ts,
+                  #     cs => $cs,
+                  #     fs => $fs,
+                  #     vp => $vp_dim,
+                  # });
 
                     my $m = ( $fs ? $ts/5 : 1 );
                     my $x = int( $vp_dim->[0] / ($cs->[0]*$m) );
