@@ -29,8 +29,9 @@ use constant {
     WINDOW   => 1,
     SETTINGS => 2,
     MENU     => 3,
-    MAREA    => 4,
-    FNAME    => 5,
+    FNAME    => 4,
+    MAREA    => 5,
+    VP_DIM   => 6,
 };
 
 1;
@@ -171,7 +172,11 @@ sub new {
 
     my $marea = $this->[MAREA] = new Gtk2::Image;
     my $scwin = Gtk2::ScrolledWindow->new;
-    my $vp    = Gtk2::Viewport->new (undef,undef);
+    my $vp    = Gtk2::Viewport->new(undef,undef);
+
+    # This is so we can later determin the size of the viewport.
+    $this->[VP_DIM] = my $dim = [];
+    $vp->signal_connect( 'size-allocate' => sub { my $r = $_[1]; $dim->[0] = $r->width; $dim->[1] = $r->height; 0} );
 
     $scwin->set_policy('automatic', 'automatic');
     $scwin->add($vp);
@@ -533,7 +538,39 @@ sub get_generate_opts {
 
     $this->modify_generate_opts_form if $this->can("modify_generate_opts_form");
 
-    my ($result, $o) = $this->make_form($this->[WINDOW], $i, $options, [['Defaults', $default_restore_defaults, 'Restore default options']]);
+    my $extra_buttons = [
+        ['Defaults', $default_restore_defaults, 'Restore default options'],
+        ['Auto BB',  sub {
+                my ($button, $reref) = @_;
+                my $tile_size  = $reref->{tile_size}[0]{extract} or warn "no code ref?";
+                my $cell_size  = $reref->{cell_size}[0]{extract} or warn "no code ref?";
+                my $five_split = $reref->{generator_plugins}[0]{extract} or warn "no code ref?";
+                my $vp_dim     = $this->[VP_DIM];
+
+                $button->signal_connect( clicked => sub {
+                    my $ts = $tile_size->();
+                    my $cs = [ split "x", $cell_size->() ];
+                    my $fs = grep {$_ eq "FiveSplit"} @{ $five_split->() };
+
+                    warn dump({
+                        ts => $ts,
+                        cs => $cs,
+                        fs => $fs,
+                        vp => $vp_dim,
+                    });
+
+                    my $m = ( $fs ? $ts/5 : 1 );
+                    my $x = int( $vp_dim->[0] / ($cs->[0]*$m) );
+                    my $y = int( $vp_dim->[1] / ($cs->[1]*$m) );
+
+                    $reref->{bounding_box}[1]->set_text( join("x", $x, $y) );
+                });
+            },
+            'Generate a bounding box that will fit in the current window without scrolling.'
+        ],
+    ];
+
+    my ($result, $o) = $this->make_form($this->[WINDOW], $i, $options, $extra_buttons);
     if( $result eq "ok" ) {
         $i->{$_} = $o->{$_} for keys %$o;
         $this->[SETTINGS]{GENERATE_OPTS} = freeze $i;
