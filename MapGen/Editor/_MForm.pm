@@ -1,5 +1,12 @@
 # vi:syntax=perl:
 
+# NOTE: I'm intending to one day split this module out into something like
+# Gtk2::Ex::SimpleOnePageForm It's not finished-enough to release that way, so
+# I'm just storing it here until I get further with it.  If you'd like to use
+# this elsewhere, lemme know and I'll finish it.
+#
+# -Paul
+
 package Games::RolePlay::MapGen::Editor::_MForm;
 
 use strict;
