@@ -9,7 +9,8 @@
 #
 
 Gtk2->import('-init');
-stock_browser->do;
+my $win = stock_browser->do;
+   $win->signal_connect( delete_event => sub { Gtk2->main_quit } );
 Gtk2->main;
 
 package stock_browser;
