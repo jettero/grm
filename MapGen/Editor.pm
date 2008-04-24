@@ -94,8 +94,20 @@ sub new {
                     accelerator => '<ctrl>S',
                     extra_data  => 'gtk-save-as',
                 },
-                Separator => {
-                    item_type => '<Separator>',
+                '_Export' => {
+                    item_type => '<Branch>',
+                    children => [
+                        "_Image..." => {
+                            item_type   => '<StockItem>',
+                            callback    => sub { $this->save_image_as },
+                          # extra_data  => 'gtk-save-as',
+                        },
+                        "_Text File..." => {
+                            item_type   => '<StockItem>',
+                            callback    => sub { $this->save_text_as },
+                          # extra_data  => 'gtk-save-as',
+                        },
+                    ],
                 },
                 _Close => {
                     item_type   => '<StockItem>',
@@ -234,7 +246,10 @@ sub save_file_as {
             $this->[WINDOW], 'save', 'gtk-cancel' => 'cancel', 'gtk-ok' => 'ok');
 
     if ('ok' eq $file_chooser->run) {
-        $this->[FNAME] = $file_chooser->get_filename;
+        my $fname = $file_chooser->get_filename;
+           $fname .= ".xml" unless $fname =~ m/\.xml\z/i;
+
+        $this->[FNAME] = $fname;
 
         # TODO: in order for this to work right, I think we need a custom signal
         # so we can return to gtk (letting the destroy happen) and come back to
@@ -244,6 +259,66 @@ sub save_file_as {
         Gtk2->main_iteration while Gtk2->events_pending;
         Gtk2->main_iteration while Gtk2->events_pending;
         $this->save_file;
+
+        return;
+    }
+
+    $file_chooser->destroy;
+}
+# }}}
+# save_image_as {{{
+sub save_image_as {
+    my $this = shift;
+
+    my $file_chooser =
+        Gtk2::FileChooserDialog->new ('Save a Map Image',
+            $this->[WINDOW], 'save', 'gtk-cancel' => 'cancel', 'gtk-ok' => 'ok');
+
+    if ('ok' eq $file_chooser->run) {
+        my $fname = $file_chooser->get_filename;
+           $fname .= ".png" unless $fname =~ m/\.png\z/i;
+
+        $file_chooser->destroy;
+        Gtk2->main_iteration while Gtk2->events_pending;
+        Gtk2->main_iteration while Gtk2->events_pending;
+
+        my $map = $this->[MAP];
+        eval {
+            $map->set_exporter( "BasicImage" );
+            $map->export( $fname );
+        };
+
+        $this->error($@) if $@;
+
+        return;
+    }
+
+    $file_chooser->destroy;
+}
+# }}}
+# save_text_as {{{
+sub save_text_as {
+    my $this = shift;
+
+    my $file_chooser =
+        Gtk2::FileChooserDialog->new ('Save a Map Image',
+            $this->[WINDOW], 'save', 'gtk-cancel' => 'cancel', 'gtk-ok' => 'ok');
+
+    if ('ok' eq $file_chooser->run) {
+        my $fname = $file_chooser->get_filename;
+           $fname .= ".txt" unless $fname =~ m/\.txt\z/i;
+
+        $file_chooser->destroy;
+        Gtk2->main_iteration while Gtk2->events_pending;
+        Gtk2->main_iteration while Gtk2->events_pending;
+
+        my $map = $this->[MAP];
+        eval {
+            $map->set_exporter( "Text" );
+            $map->export( $fname );
+        };
+
+        $this->error($@) if $@;
 
         return;
     }
