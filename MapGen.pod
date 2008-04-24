@@ -196,7 +196,7 @@ Really, without his work, I never would have written this module!
 
 =head1 COPYRIGHT
 
-Copyright (c) 2008 Paul Miller -- LGPL [attached]
+Copyright (c) 2008 Paul Miller -- LGPL [Software::License::LGPL_2_1]
 
 =head1 SEE ALSO
 
