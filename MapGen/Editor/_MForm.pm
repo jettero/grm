@@ -257,7 +257,7 @@ sub make_form {
         }
     }
 
-    warn dump($r, $o);
+    ## DEBUG ## warn dump($r, $o);
 
     $dialog->destroy;
     return ($r,$o);
