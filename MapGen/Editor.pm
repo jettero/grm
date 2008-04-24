@@ -330,7 +330,7 @@ sub blank_map {
 # make_form {{{
 sub make_form {
     my $this = shift;
-    my ($i, $options) = @_;
+    my ($i, $options, $extra_buttons) = @_;
 
     my $dialog = new Gtk2::Dialog("Map Generation Options", $this->[WINDOW], [], 'gtk-cancel' => "cancel", 'gtk-ok' => "ok");
     my $table = Gtk2::Table->new(scalar @{$options->[0]}*2, scalar @$options, FALSE);
@@ -351,22 +351,22 @@ sub make_form {
 
             my $my_req = @req;
 
-            my ($entry, $attach);
+            my ($widget, $attach);
             my $z = 1;
             my $IT = $item->{type};
             if( $IT eq "text" ) {
-                $attach = $entry = new Gtk2::Entry;
-                $entry->set_text(exists $i->{$item->{name}} ? $i->{$item->{name}} : $item->{default})
+                $attach = $widget = new Gtk2::Entry;
+                $widget->set_text(exists $i->{$item->{name}} ? $i->{$item->{name}} : $item->{default})
                     if exists $item->{default} or exists $i->{$item->{name}};
 
-                $entry->set_tooltip_text( $item->{desc} ) if exists $item->{desc};
-                $entry->signal_connect(changed => sub {
-                    my $text = $entry->get_text;
+                $widget->set_tooltip_text( $item->{desc} ) if exists $item->{desc};
+                $widget->signal_connect(changed => sub {
+                    my $text = $widget->get_text;
                     my $chg = 0;
                     for my $fix (@{ $item->{fixes} }) {
                         $chg ++ if $fix->($text);
                     }
-                    $entry->set_text($text) if $chg;
+                    $widget->set_text($text) if $chg;
                     $req[$my_req] = 1;
                     for my $match (@{ $item->{matches} }) {
                         $req[$my_req] = 0 unless $text =~ $match;
@@ -375,32 +375,32 @@ sub make_form {
                     $dialog->set_response_sensitive( ok => (@req == grep {$_} @req) );
                 });
 
-                $item->{extract} = sub { $entry->get_text };
-              # $entry->signal_connect(changed => sub { warn "test!"; }); # [WORKS FINE]
+                $item->{extract} = sub { $widget->get_text };
+              # $widget->signal_connect(changed => sub { warn "test!"; }); # [WORKS FINE]
 
             } elsif( $IT eq "choice" ) {
-                $attach = $entry = Gtk2::ComboBox->new_text;
+                $attach = $widget = Gtk2::ComboBox->new_text;
                 my $d = $i->{$item->{name}} || $item->{default};
                 my $i = 0;
                 my $d_i;
                 for(@{$item->{choices}}) {
-                    $entry->append_text($_);
+                    $widget->append_text($_);
                     $d_i = $i if $_ eq $d;
                     $i++;
                 }
-                $entry->set_active($d_i) if defined $d_i;
-                $entry->set_tooltip_text( $item->{desc} ) if exists $item->{desc};
+                $widget->set_active($d_i) if defined $d_i;
+                $widget->set_tooltip_text( $item->{desc} ) if exists $item->{desc};
 
-                $item->{extract} = sub { $entry->get_active_text };
-              # $entry->signal_connect(changed => sub { warn "test!"; }); # [WORKS FINE]
+                $item->{extract} = sub { $widget->get_active_text };
+              # $widget->signal_connect(changed => sub { warn "test!"; }); # [WORKS FINE]
 
                 if( exists $item->{descs} and exists $item->{desc} ) {
-                    $entry->signal_connect(changed => my $si = sub {
-                        if( exists $item->{descs}{ my $at = $entry->get_active_text } ) {
-                            $entry->set_tooltip_text( "$at - $item->{descs}{$at}" );
+                    $widget->signal_connect(changed => my $si = sub {
+                        if( exists $item->{descs}{ my $at = $widget->get_active_text } ) {
+                            $widget->set_tooltip_text( "$at - $item->{descs}{$at}" );
 
                         } else {
-                            $entry->set_tooltip_text( $item->{desc} );
+                            $widget->set_tooltip_text( $item->{desc} );
                         }
                     });
 
@@ -415,14 +415,14 @@ sub make_form {
                 my $d = $item->{choices};
                 my @s = grep {$def->{$d->[$_]}} 0 .. $#$d;
 
-                $entry = Gtk2::SimpleList->new( plugin_name_unseen => "text" );
-                $entry->set_headers_visible(FALSE);
-                $entry->set_data_array($d);
-                $entry->get_selection->set_mode('multiple');
-                $entry->select( @s );
+                $widget = Gtk2::SimpleList->new( plugin_name_unseen => "text" );
+                $widget->set_headers_visible(FALSE);
+                $widget->set_data_array($d);
+                $widget->get_selection->set_mode('multiple');
+                $widget->select( @s );
 
-                # NOTE: $entry->{data} = $d -- doesn't work !!!! fuckers you
-                # have to use @{$entry->{data}} = @$d, so I chose to just use
+                # NOTE: $widget->{data} = $d -- doesn't work !!!! fuckers you
+                # have to use @{$widget->{data}} = @$d, so I chose to just use
                 # the set_data_array() why even bother trying to do the scope
                 # hack... pfft.
 
@@ -431,28 +431,28 @@ sub make_form {
                 my $vp  = Gtk2::Viewport->new;
                 $attach->set_policy('automatic', 'automatic');
                 $attach->add($vp);
-                $vp->add($entry);
+                $vp->add($widget);
 
                 $z = (exists $item->{z} ? $item->{z} : 2);
 
-                $item->{extract} = sub { [map {$d->[$_]} $entry->get_selected_indices] };
-              # $entry->get_selection->signal_connect(changed => sub { warn "test!"; }); # [WORKS FINE]
+                $item->{extract} = sub { [map {$d->[$_]} $widget->get_selected_indices] };
+              # $widget->get_selection->signal_connect(changed => sub { warn "test!"; }); # [WORKS FINE]
 
             } elsif( $IT eq "bool" ) {
-                $attach = $entry = new Gtk2::CheckButton;
-                $entry->set_active(exists $i->{$item->{name}} ? $i->{$item->{name}} : $item->{default})
+                $attach = $widget = new Gtk2::CheckButton;
+                $widget->set_active(exists $i->{$item->{name}} ? $i->{$item->{name}} : $item->{default})
                     if exists $item->{default} or exists $i->{$item->{name}};
 
-                $entry->set_tooltip_text( $item->{desc} ) if exists $item->{desc};
-                $item->{extract} = sub { $entry->get_active ? 1:0 };
-              # $entry->signal_connect(toggled => sub { warn "test!"; }); # [WORKS FINE]
+                $widget->set_tooltip_text( $item->{desc} ) if exists $item->{desc};
+                $item->{extract} = sub { $widget->get_active ? 1:0 };
+              # $widget->signal_connect(toggled => sub { warn "test!"; }); # [WORKS FINE]
             }
 
             else { die "unknown form type: $item->{type}" }
 
-            $reref->{$item->{name}} = [ $item, $entry ];
+            $reref->{$item->{name}} = [ $item, $widget ];
 
-            $label->set_mnemonic_widget($entry);
+            $label->set_mnemonic_widget($widget);
             $table->attach_defaults($label,  $x, $x+1, $y, $y+1);  $x ++;
             $table->attach_defaults($attach, $x, $x+1, $y, $y+$z); $y += $z;
         }
@@ -490,22 +490,38 @@ sub make_form {
             }
     }}
 
+    if( ref $extra_buttons ) {
+        for my $eba (@$extra_buttons) {
+            my $aa = $dialog->action_area;
+            my $button = new Gtk2::Button($eba->[0]);
+               $button->set_tooltip_text($eba->[2]) if defined $eba->[2];
+
+            $aa->add( $button );
+            $aa->set_child_secondary( $button, TRUE );
+
+            if( ref (my $cb = $eba->[1]) eq "CODE" ) {
+                $cb->( $button, $reref );
+            }
+        }
+    }
+
     $dialog->vbox->pack_start($table,0,0,4);
     $dialog->set_response_sensitive( ok => TRUE );
     $dialog->show_all;
 
     my ($ok_button) = grep {$_->can("get_label") and $_->get_label =~ m/ok/} $dialog->action_area->get_children;
+
+    # This is better than nothing if we can't find the ok button with the grep...
+    # It makes it so OK is selected when we tab to the action area.
+    # (We're likely to always find the ok button, but for edification purposes,
+    #  this is what we'd do if we didn't...)
+    # Second thought, let's just set this anyway...
+    $dialog->set_default_response('ok');
+
     if( $ok_button )  {
         # set_default_response() doesn't seem to be enough oomph...
         # It sets the ok button default, but lets the first entry in the Table get the actual focus
         $ok_button->grab_focus;
-
-    } else {
-        # This is better than nothing if we can't find the ok button with the grep...
-        # It makes it so OK is selected when we tab to the action area.
-        # (We're likely to always find the ok button, but for edification purposes,
-        #  this is what we'd do if we didn't...)
-        $dialog->set_default_response('ok');
     }
 
     my $o = {};
@@ -513,10 +529,10 @@ sub make_form {
 
     if( $r eq "ok" ) {
         for my $c (@$options) {
-            for my $r (@$c) {
-                if( $reref->{$r->{name}}[1]->is_sensitive() ) {
+            for my $e (@$c) {
+                if( $reref->{$e->{name}}[1]->is_sensitive() ) {
 
-                    $o->{$r->{name}} = $r->{extract}->();
+                    $o->{$e->{name}} = $e->{extract}->();
                 }
             }
         }
@@ -657,7 +673,37 @@ sub get_generate_opts {
 
     $this->modify_generate_opts_form if $this->can("modify_generate_opts_form");
 
-    my ($result, $o) = $this->make_form($i, $options);
+    my $reset = sub {
+        my ($button, $reref) = @_;
+
+        $button->signal_connect( clicked => sub {
+            for my $k (keys %$reref) {
+                my ($item, $widget) = @{ $reref->{$k} };
+
+                next unless exists $item->{default} or exists $item->{defaults};
+
+                my $type = $item->{type};
+                if( $type eq "choice" or $type eq "bool" ) {
+                    my ($d_i) = grep {$item->{choices}[$_] eq $item->{default}} 0 .. $#{ $item->{choices} };
+                    $widget->set_active( $d_i );
+
+                } elsif( $type eq "text" ) {
+                    $widget->set_text( $item->{default} );
+
+                } elsif( $type eq "choices" ) {
+                    my $def = {map {($_=>1)} @{ $item->{defaults} }};
+                    my $d = $item->{choices};
+                    my @s = grep {$def->{$d->[$_]}} 0 .. $#$d;
+
+                    $widget->get_selection->unselect_all;
+                    $widget->select( @s );
+
+                } else { die "no handler for default of type $type" }
+            }
+        });
+    };
+
+    my ($result, $o) = $this->make_form($i, $options, [['Defaults', $reset, 'Restore default options']]);
     if( $result eq "ok" ) {
         $i->{$_} = $o->{$_} for keys %$o;
         $this->[SETTINGS]{GENERATE_OPTS} = freeze $i;
@@ -670,11 +716,11 @@ sub get_generate_opts {
 sub generate {
     my $this = shift;
 
-    $this->[FNAME] = undef;
-
     my ($result, $settings, $generator, @plugins) = $this->get_generate_opts;
 
     return unless $result eq "ok";
+
+    $this->[FNAME] = undef;
 
     $generator = delete $settings->{generator};
     @plugins   = @{ delete $settings->{generator_plugins} };
