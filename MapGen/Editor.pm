@@ -15,6 +15,7 @@ use File::Spec;
 use DB_File;
 use Storable qw(freeze thaw);
 use Data::Dump qw(dump);
+use POSIX qw(ceil);
 
 use Games::RolePlay::MapGen::Editor::_MForm qw(make_form $default_restore_defaults);;
 
@@ -160,17 +161,24 @@ sub new {
 
     my $marea = $this->[MAREA] = new Gtk2::Image;
     my $scwin = Gtk2::ScrolledWindow->new;
-    my $vp    = Gtk2::Alignment->new(0.5,0.5,0,0);
+    my $vp    = Gtk2::Viewport->new(undef,undef);
+    my $al    = Gtk2::Alignment->new(0.5,0.5,0,0);
     my $eb    = Gtk2::EventBox->new;
 
     # This is so we can later determin the size of the viewport.
     $this->[VP_DIM] = my $dim = [];
-    $vp->signal_connect( 'size-allocate' => sub { my $r = $_[1]; $dim->[0] = $r->width; $dim->[1] = $r->height; 0; });
+    $vp->signal_connect( 'size-allocate' => sub {
+        my $r = $_[1]; $dim->[0] = $r->width; $dim->[1] = $r->height;
+        warn "vp_dim:[@$dim]";
+        0;
+    });
 
     my $sb = $this->[STAT] = new Gtk2::Statusbar;
     my $co = new Gtk2::Label;
 
-    my $s_co = $this->[S_CO] = sub { $co->set_text(@_==2 ? sprintf('(%d,%d)', @_) : "") };
+    $sb->pack_end($co,0,0,0);
+
+    my $s_co = $this->[S_CO] = sub { $co->set_text(@_==2 ? sprintf('tile: [%d,%d]', @_) : "") };
 
     our @o_lt;
     $eb->add_events([qw(pointer-motion-mask pointer-motion-hint-mask)]);
@@ -189,11 +197,10 @@ sub new {
 
     $scwin->set_policy('automatic', 'automatic');
     $scwin->add($vp);
-    $vp->add($eb);
+    $al->add($eb);
+    $vp->add($al);
     $eb->add($marea);
     $vbox->pack_start($scwin,1,1,0);
-
-    $sb->pack_start($co,0,0,0);
     $vbox->pack_end($sb,0,0,0);
 
     $this->read_file($ARGV[0]) if $ARGV[0] and -f $ARGV[0];
