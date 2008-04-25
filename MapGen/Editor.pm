@@ -165,37 +165,33 @@ sub new {
 
     # This is so we can later determin the size of the viewport.
     $this->[VP_DIM] = my $dim = [];
-    $vp->signal_connect( 'size-allocate' => sub {
-        my $r = $_[1]; $dim->[0] = $r->width; $dim->[1] = $r->height;
-        warn dump($dim);
-        0
-    });
+    $vp->signal_connect( 'size-allocate' => sub { my $r = $_[1]; $dim->[0] = $r->width; $dim->[1] = $r->height; 0; });
 
-    my $s_co = $this->[S_CO];
+    my $sb = $this->[STAT] = new Gtk2::Statusbar;
+    my $co = new Gtk2::Label;
+
+    my $s_co = $this->[S_CO] = sub { $co->set_text(@_==2 ? sprintf('(%d,%d)', @_) : "") };
+
+    our @o_lt;
     $eb->add_events([qw(pointer-motion-mask pointer-motion-hint-mask)]);
     $eb->signal_connect( 'motion-notify-event' => my $su = sub {
-        my ($w, $em) = @_;
-        my ($x, $y) = ($em->x, $em->y);
-        my @padd    = $marea->get_padding;
-        warn dump({
-            xy=>[$x,$y],
-            pd=>\@padd,
-        });
-      # #$s_co->(1,1);
+        my ($x, $y) = ($_[1]->x, $_[1]->y);
+        my @cs = split 'x', $this->[MAP]{cell_size};
+        my @lt = (int($x/$cs[0]), int($y/$cs[1]));
+
+        if( $lt[0] != $o_lt[0] or $lt[1] != $o_lt[1] ) {
+            $s_co->(@o_lt = @lt);
+        }
+
         0;
     });
-  # $su->();
+    $s_co->(@o_lt = (0,0));
 
     $scwin->set_policy('automatic', 'automatic');
     $scwin->add($vp);
     $vp->add($eb);
     $eb->add($marea);
     $vbox->pack_start($scwin,1,1,0);
-
-    my $sb = $this->[STAT] = new Gtk2::Statusbar;
-    my $co = new Gtk2::Label;
-
-    $this->[S_CO] = sub { $co->set_text(@_==2 ? sprintf('(%d,%d)', @_) : "") };
 
     $sb->pack_start($co,0,0,0);
     $vbox->pack_end($sb,0,0,0);
