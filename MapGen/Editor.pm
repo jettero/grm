@@ -24,14 +24,11 @@ our @GENERATOR_PLUGINS         = (qw( BasicDoors FiveSplit ));
 our @DEFAULT_GENERATOR_PLUGINS = (qw( BasicDoors ));
 our @FILTERS                   = (qw( BasicDoors FiveSplit ClearDoors ));
 
+use vars qw($x); # like our, but at compile time so these constants work
 use constant {
-    MAP      => 0,
-    WINDOW   => 1,
-    SETTINGS => 2,
-    MENU     => 3,
-    FNAME    => 4,
-    MAREA    => 5,
-    VP_DIM   => 6,
+    MAP   => $x++, WINDOW => $x++, SETTINGS => $x++, MENU   => $x++,
+    FNAME => $x++, MAREA  => $x++, MPBUF    => $x++, VP_DIM => $x++,
+    STAT  => $x++, S_CO   => $x++,
 };
 
 1;
@@ -62,8 +59,8 @@ sub new {
     my $vbox = new Gtk2::VBox;
     my $window = $this->[WINDOW] = new Gtk2::Window("toplevel");
        $window->signal_connect( delete_event => sub { $this->quit } );
-       $window->set_size_request(200,200); # TODO: should be persistant
-       $window->set_position('center');    # TODO: should be persistant
+       $window->set_size_request(200,200);
+       $window->set_position('center');
        $window->add($vbox);
        $window->set_title("GRM Editor");
 
@@ -163,16 +160,45 @@ sub new {
 
     my $marea = $this->[MAREA] = new Gtk2::Image;
     my $scwin = Gtk2::ScrolledWindow->new;
-    my $vp    = Gtk2::Viewport->new(undef,undef);
+    my $vp    = Gtk2::Alignment->new(0.5,0.5,0,0);
+    my $eb    = Gtk2::EventBox->new;
 
     # This is so we can later determin the size of the viewport.
     $this->[VP_DIM] = my $dim = [];
-    $vp->signal_connect( 'size-allocate' => sub { my $r = $_[1]; $dim->[0] = $r->width; $dim->[1] = $r->height; 0} );
+    $vp->signal_connect( 'size-allocate' => sub {
+        my $r = $_[1]; $dim->[0] = $r->width; $dim->[1] = $r->height;
+        warn dump($dim);
+        0
+    });
+
+    my $s_co = $this->[S_CO];
+    $eb->add_events([qw(pointer-motion-mask pointer-motion-hint-mask)]);
+    $eb->signal_connect( 'motion-notify-event' => my $su = sub {
+        my ($w, $em) = @_;
+        my ($x, $y) = ($em->x, $em->y);
+        my @padd    = $marea->get_padding;
+        warn dump({
+            xy=>[$x,$y],
+            pd=>\@padd,
+        });
+      # #$s_co->(1,1);
+        0;
+    });
+  # $su->();
 
     $scwin->set_policy('automatic', 'automatic');
     $scwin->add($vp);
-    $vp->add($marea);
+    $vp->add($eb);
+    $eb->add($marea);
     $vbox->pack_start($scwin,1,1,0);
+
+    my $sb = $this->[STAT] = new Gtk2::Statusbar;
+    my $co = new Gtk2::Label;
+
+    $this->[S_CO] = sub { $co->set_text(@_==2 ? sprintf('(%d,%d)', @_) : "") };
+
+    $sb->pack_start($co,0,0,0);
+    $vbox->pack_end($sb,0,0,0);
 
     $this->read_file($ARGV[0]) if $ARGV[0] and -f $ARGV[0];
     $this->draw_map;
@@ -202,10 +228,6 @@ sub open_file {
 
     if( $file_chooser->run eq 'ok' ) {
         my $filename = $file_chooser->get_filename;
-
-        # TODO: in order for this to work right, I think we need a custom signal
-        # so we can return to gtk (letting the destroy happen) and come back to
-        # draw the dialog and load the file... moan
 
         $file_chooser->destroy;
         $this->read_file($filename);
@@ -247,9 +269,6 @@ sub save_file_as {
 
         $this->[FNAME] = $fname;
 
-        # TODO: in order for this to work right, I think we need a custom signal
-        # so we can return to gtk (letting the destroy happen) and come back to
-        # draw the dialog and load the file... moan
 
         $file_chooser->destroy;
         Gtk2->main_iteration while Gtk2->events_pending;
@@ -370,11 +389,16 @@ sub draw_map {
     $map->set_exporter( "BasicImage" );
     my $image = $map->export( -retonly );
 
-    my $loader = Gtk2::Gdk::PixbufLoader->new;
+    my $loader = $this->[MPBUF] = Gtk2::Gdk::PixbufLoader->new;
        $loader->write($image->png);
        $loader->close;
 
     $this->[MAREA]->set_from_pixbuf($loader->get_pixbuf)
+}
+# }}}
+# redraw_map {{{
+sub redraw_map {
+    $_[0][MAREA]->set_from_pixbuf($_[0][MPBUF]);
 }
 # }}}
 # blank_map {{{
@@ -714,7 +738,7 @@ sub run {
       # warn "setting window params: ($w,$h,$x,$y)";
 
         $this->[WINDOW]->resize( $w,$h );
-      # $this->[WINDOW]->set_position( $x,$y ); # TODO: this takes single scalars like "center" ... lame
+      # $this->[WINDOW]->set_position( $x,$y ); # TODO: this takes single scalars like "center" ... do we really want this anyway?
     }
 
     $this->[WINDOW]->show_all;
