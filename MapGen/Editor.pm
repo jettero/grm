@@ -174,11 +174,8 @@ sub new {
     });
 
     my $sb = $this->[STAT] = new Gtk2::Statusbar;
-    my $co = new Gtk2::Label;
-
-    $sb->pack_end($co,0,0,0);
-
-    my $s_co = $this->[S_CO] = sub { $co->set_text(@_==2 ? sprintf('tile: [%d,%d]', @_) : "") };
+    my $cid = 1; $sb->push($cid, sprintf('tile: [%d,%d]', 0,0));
+    my $s_co = $this->[S_CO] = sub { $sb->push($cid, (@_==2 ? sprintf('tile: [%d,%d]', @_) : "")) };
 
     our @o_lt;
     $eb->add_events([qw(pointer-motion-mask pointer-motion-hint-mask)]);
