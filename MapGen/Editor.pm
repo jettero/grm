@@ -28,8 +28,9 @@ our @FILTERS                   = (qw( BasicDoors FiveSplit ClearDoors ));
 use vars qw($x); # like our, but at compile time so these constants work
 use constant {
     MAP   => $x++, WINDOW => $x++, SETTINGS => $x++, MENU   => $x++,
-    FNAME => $x++, MAREA  => $x++, MPBUF    => $x++, VP_DIM => $x++,
-    STAT  => $x++, S_CO   => $x++, O_LT     => $x++,
+    FNAME => $x++, MAREA  => $x++, VP_DIM   => $x++, STAT   => $x++,
+    MPBUF => $x++, MPMAP  => $x++, MPGC     => $x++,
+    S_CO  => $x++, O_LT   => $x++,
 };
 
 1;
@@ -377,16 +378,35 @@ sub draw_map {
     $map->set_exporter( "BasicImage" );
     my $image = $map->export( -retonly );
 
-    my $loader = $this->[MPBUF] = Gtk2::Gdk::PixbufLoader->new;
+    my $loader = Gtk2::Gdk::PixbufLoader->new;
        $loader->write($image->png);
        $loader->close;
 
-    $this->[MAREA]->set_from_pixbuf($loader->get_pixbuf)
+    $this->[MPBUF] = $loader->get_pixbuf;
+    $this->draw_map_w_cursor;
 }
 # }}}
-# redraw_map {{{
-sub redraw_map {
-    $_[0][MAREA]->set_from_pixbuf($_[0][MPBUF]);
+# draw_map_w_cursor {{{
+sub draw_map_w_cursor {
+    my $this = shift;
+    my $pm = $this->[MPMAP];
+    my $gc = $this->[MPGC];
+
+    unless( $pm ) {
+        $this->[MPMAP] = $pm = [ $this->[MPBUF]->render_pixmap_and_mask(0) ];
+        $this->[MPGC]  = $gc = Gtk2::Gdk::GC->new($pm->[0]);
+    }
+
+    if( my @o = (@{ $this->[O_LT] }) ) {
+        my @cs = split 'x', $this->[MAP]{cell_size};
+        my @ul = ($cs[0]*$o[0]+1, $cs[1]*$o[1]+1);
+
+      # $drawable->draw_rectangle ($gc, $filled, $x, $y, $width, $height)
+        $pm->[0]->draw_rectangle($gc, 1, @ul, $cs[0]-1, $cs[1]-1);
+        $this->[MPMAP] = undef;
+    }
+
+    $this->[MAREA]->set_from_pixmap(@$pm);
 }
 # }}}
 # blank_map {{{
@@ -755,6 +775,8 @@ sub marea_motion_notify_event {
         $lt[1] = $bb[1]-1 if $lt[1]>=$bb[1];
 
         $s_co->(@$o_lt = @lt);
+
+        $this->draw_map_w_cursor;
     }
 }
 # }}}
