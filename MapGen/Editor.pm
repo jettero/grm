@@ -29,7 +29,7 @@ use vars qw($x); # like our, but at compile time so these constants work
 use constant {
     MAP   => $x++, WINDOW => $x++, SETTINGS => $x++, MENU   => $x++,
     FNAME => $x++, MAREA  => $x++, MPBUF    => $x++, VP_DIM => $x++,
-    STAT  => $x++, S_CO   => $x++,
+    STAT  => $x++, S_CO   => $x++, O_LT     => $x++,
 };
 
 1;
@@ -167,30 +167,18 @@ sub new {
 
     # This is so we can later determin the size of the viewport.
     $this->[VP_DIM] = my $dim = [];
-    $vp->signal_connect( 'size-allocate' => sub {
-        my $r = $_[1]; $dim->[0] = $r->width; $dim->[1] = $r->height;
-      # warn "vp_dim:[@$dim]";
-        0;
-    });
+    $vp->signal_connect( 'size-allocate' => sub { my $r = $_[1]; $dim->[0] = $r->width; $dim->[1] = $r->height; 0; });
 
     my $sb = $this->[STAT] = new Gtk2::Statusbar;
     my $cid = 1; $sb->push($cid, sprintf('tile: [%d,%d]', 0,0));
     my $s_co = $this->[S_CO] = sub { $sb->push($cid, (@_==2 ? sprintf('tile: [%d,%d]', @_) : "")) };
+       $s_co->();
 
-    our @o_lt;
-    $eb->add_events([qw(pointer-motion-mask pointer-motion-hint-mask)]);
-    $eb->signal_connect( 'motion-notify-event' => my $su = sub {
-        my ($x, $y) = ($_[1]->x, $_[1]->y);
-        my @cs = split 'x', $this->[MAP]{cell_size};
-        my @lt = (int($x/$cs[0]), int($y/$cs[1]));
+    $this->[O_LT]=[];
 
-        if( $lt[0] != $o_lt[0] or $lt[1] != $o_lt[1] ) {
-            $s_co->(@o_lt = @lt);
-        }
-
-        0;
-    });
-    $s_co->(@o_lt = (0,0));
+    $eb->add_events([qw(leave-notify-mask pointer-motion-mask pointer-motion-hint-mask)]);
+    $eb->signal_connect( motion_notify_event => sub { $this->marea_motion_notify_event($s_co, @_); 0; });
+    $eb->signal_connect(  leave_notify_event => sub { @{$this->[O_LT]} = (); $s_co->() });
 
     $scwin->set_policy('automatic', 'automatic');
     $scwin->add($vp);
@@ -748,5 +736,25 @@ sub run {
     }
 
     Gtk2->main;
+}
+# }}}
+ 
+# marea_motion_notify_event {{{
+sub marea_motion_notify_event {
+    my ($this,$s_co,undef,$em) = @_;
+
+    my ($x, $y) = ($em->x, $em->y);
+    my @cs = split 'x', $this->[MAP]{cell_size};
+    my @lt = (int($x/$cs[0]), int($y/$cs[1]));
+
+    my $o_lt = $this->[O_LT];
+    if( @$o_lt!=2 or ($lt[0] != $o_lt->[0] or $lt[1] != $o_lt->[1]) ) {
+        my @bb = split 'x', $this->[MAP]{bounding_box};
+
+        $lt[0] = $bb[0]-1 if $lt[0]>=$bb[0];
+        $lt[1] = $bb[1]-1 if $lt[1]>=$bb[1];
+
+        $s_co->(@$o_lt = @lt);
+    }
 }
 # }}}
