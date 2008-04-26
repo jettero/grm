@@ -29,8 +29,8 @@ use vars qw($x); # like our, but at compile time so these constants work
 use constant {
     MAP   => $x++, WINDOW => $x++, SETTINGS => $x++, MENU   => $x++,
     FNAME => $x++, MAREA  => $x++, VP_DIM   => $x++, STAT   => $x++,
-    MPBUF => $x++, MPMAP  => $x++, MPGC     => $x++,
     S_CO  => $x++, O_LT   => $x++,
+    MP    => $x++,
 };
 
 1;
@@ -382,28 +382,31 @@ sub draw_map {
        $loader->write($image->png);
        $loader->close;
 
-    $this->[MPBUF] = $loader->get_pixbuf;
+    $this->[MP] = [$loader->get_pixbuf];
     $this->draw_map_w_cursor;
 }
 # }}}
 # draw_map_w_cursor {{{
 sub draw_map_w_cursor {
     my $this = shift;
-    my $pm = $this->[MPMAP];
-    my $gc = $this->[MPGC];
+    my $mp   = $this->[MP];
+    my ($pb, $pm) = @$mp;
 
     unless( $pm ) {
-        $this->[MPMAP] = $pm = [ $this->[MPBUF]->render_pixmap_and_mask(0) ];
-        $this->[MPGC]  = $gc = Gtk2::Gdk::GC->new($pm->[0]);
+        push @$mp, $pm = [ $pb->render_pixmap_and_mask(0) ];
     }
 
     if( my @o = (@{ $this->[O_LT] }) ) {
         my @cs = split 'x', $this->[MAP]{cell_size};
         my @ul = ($cs[0]*$o[0]+1, $cs[1]*$o[1]+1);
+        my $cc = Gtk2::Gdk::Color->new( map {65535*($_/0xff)} (0x0, 0xaa, 0x00) );
+        my $gc = Gtk2::Gdk::GC->new($pm->[0]);
 
-      # $drawable->draw_rectangle ($gc, $filled, $x, $y, $width, $height)
+        $gc->get_colormap->alloc_color($cc, 0, 0);
+        $gc->set_foreground($cc);
+
         $pm->[0]->draw_rectangle($gc, 1, @ul, $cs[0]-1, $cs[1]-1);
-        $this->[MPMAP] = undef;
+        $this->[MP] = [$pb];
     }
 
     $this->[MAREA]->set_from_pixmap(@$pm);
