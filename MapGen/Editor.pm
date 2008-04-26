@@ -179,7 +179,7 @@ sub new {
 
     $eb->add_events([qw(leave-notify-mask pointer-motion-mask pointer-motion-hint-mask)]);
     $eb->signal_connect( motion_notify_event => sub { $this->marea_motion_notify_event($s_co, @_); 0; });
-    $eb->signal_connect(  leave_notify_event => sub { @{$this->[O_LT]} = (); $s_co->() });
+    $eb->signal_connect(  leave_notify_event => sub { @{$this->[O_LT]} = (); $s_co->(); $this->draw_map_w_cursor; });
 
     $scwin->set_policy('automatic', 'automatic');
     $scwin->add($vp);
@@ -382,7 +382,7 @@ sub draw_map {
        $loader->write($image->png);
        $loader->close;
 
-    $this->[MP] = [$loader->get_pixbuf];
+    $this->[MP] = [undef, $loader->get_pixbuf, split('x', $this->[MAP]{cell_size})];
     $this->draw_map_w_cursor;
 }
 # }}}
@@ -390,28 +390,49 @@ sub draw_map {
 sub draw_map_w_cursor {
     my $this = shift;
     my $mp   = $this->[MP];
-    my ($pb, $pm) = @$mp;
+    my ($pm, $pb, ($cx,$cy) ) = @$mp;
 
     unless( $pm ) {
-        push @$mp, $pm = [ $pb->render_pixmap_and_mask(0) ];
+        $mp->[0] = $pm = [ $pb->render_pixmap_and_mask(0) ];
     }
 
     if( my @o = (@{ $this->[O_LT] }) ) {
-        my @cs = split 'x', $this->[MAP]{cell_size};
-        my @ul = ($cs[0]*$o[0]+1, $cs[1]*$o[1]+1);
+        my @ul = ($cx*$o[0]+1, $cy*$o[1]+1);
         my $cc = Gtk2::Gdk::Color->new( map {65535*($_/0xff)} (0x0, 0xaa, 0x00) );
         my $gc = Gtk2::Gdk::GC->new($pm->[0]);
 
         $gc->get_colormap->alloc_color($cc, 0, 0);
         $gc->set_foreground($cc);
 
-        $pm->[0]->draw_rectangle($gc, 1, @ul, $cs[0]-1, $cs[1]-1);
-        $this->[MP] = [$pb];
+        $pm->[0]->draw_rectangle($gc, 1, @ul, $cx-1, $cy-1);
+        $this->[MP][0] = undef;
     }
 
     $this->[MAREA]->set_from_pixmap(@$pm);
 }
 # }}}
+# marea_motion_notify_event {{{
+sub marea_motion_notify_event {
+    my ($this,$s_co,undef,$em) = @_;
+
+    my ($x, $y) = ($em->x, $em->y);
+    my @cs = split 'x', $this->[MAP]{cell_size};
+    my @lt = (int($x/$cs[0]), int($y/$cs[1]));
+
+    my $o_lt = $this->[O_LT];
+    if( @$o_lt!=2 or ($lt[0] != $o_lt->[0] or $lt[1] != $o_lt->[1]) ) {
+        my @bb = split 'x', $this->[MAP]{bounding_box};
+
+        $lt[0] = $bb[0]-1 if $lt[0]>=$bb[0];
+        $lt[1] = $bb[1]-1 if $lt[1]>=$bb[1];
+
+        $s_co->(@$o_lt = @lt);
+
+        $this->draw_map_w_cursor;
+    }
+}
+# }}}
+
 # blank_map {{{
 sub blank_map {
     my $this = shift;
@@ -759,27 +780,5 @@ sub run {
     }
 
     Gtk2->main;
-}
-# }}}
- 
-# marea_motion_notify_event {{{
-sub marea_motion_notify_event {
-    my ($this,$s_co,undef,$em) = @_;
-
-    my ($x, $y) = ($em->x, $em->y);
-    my @cs = split 'x', $this->[MAP]{cell_size};
-    my @lt = (int($x/$cs[0]), int($y/$cs[1]));
-
-    my $o_lt = $this->[O_LT];
-    if( @$o_lt!=2 or ($lt[0] != $o_lt->[0] or $lt[1] != $o_lt->[1]) ) {
-        my @bb = split 'x', $this->[MAP]{bounding_box};
-
-        $lt[0] = $bb[0]-1 if $lt[0]>=$bb[0];
-        $lt[1] = $bb[1]-1 if $lt[1]>=$bb[1];
-
-        $s_co->(@$o_lt = @lt);
-
-        $this->draw_map_w_cursor;
-    }
 }
 # }}}
