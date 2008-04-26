@@ -169,7 +169,7 @@ sub new {
     $this->[VP_DIM] = my $dim = [];
     $vp->signal_connect( 'size-allocate' => sub {
         my $r = $_[1]; $dim->[0] = $r->width; $dim->[1] = $r->height;
-        warn "vp_dim:[@$dim]";
+      # warn "vp_dim:[@$dim]";
         0;
     });
 
