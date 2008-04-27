@@ -91,7 +91,6 @@ sub new {
                 'Save As...' => {
                     item_type   => '<StockItem>',
                     callback    => sub { $this->save_file_as },
-                    accelerator => '<ctrl>S',
                     extra_data  => 'gtk-save-as',
                 },
                 '_Export' => {
@@ -235,13 +234,15 @@ sub save_file {
         return;
     }
 
+    my $file   = $this->[FNAME];
+    my $pulser = $this->pulser( "Saving $file ...", "File I/O", 175 );
     my $map = $this->[MAP];
     eval {
         $map->set_exporter( "XML" );
-        $map->export( $this->[FNAME] );
+        $map->export( fname => $this->[FNAME], t_cb => $pulser );
     };
-
     $this->error($@) if $@;
+    $pulser->('destroy');
 }
 # }}}
 # save_file_as {{{
@@ -260,8 +261,6 @@ sub save_file_as {
 
 
         $file_chooser->destroy;
-        Gtk2->main_iteration while Gtk2->events_pending;
-        Gtk2->main_iteration while Gtk2->events_pending;
         $this->save_file;
 
         return;
@@ -283,16 +282,15 @@ sub save_image_as {
            $fname .= ".png" unless $fname =~ m/\.png\z/i;
 
         $file_chooser->destroy;
-        Gtk2->main_iteration while Gtk2->events_pending;
-        Gtk2->main_iteration while Gtk2->events_pending;
 
+        my $pulser = $this->pulser( "Saving $fname ...", "File I/O", 150 );
         my $map = $this->[MAP];
         eval {
             $map->set_exporter( "BasicImage" );
-            $map->export( $fname );
+            $map->export( fname => $fname, t_cb => $pulser );
         };
-
         $this->error($@) if $@;
+        $pulser->('destroy');
 
         return;
     }
@@ -313,16 +311,15 @@ sub save_text_as {
            $fname .= ".txt" unless $fname =~ m/\.txt\z/i;
 
         $file_chooser->destroy;
-        Gtk2->main_iteration while Gtk2->events_pending;
-        Gtk2->main_iteration while Gtk2->events_pending;
 
+        my $pulser = $this->pulser( "Saving $fname ...", "File I/O", 75 );
         my $map = $this->[MAP];
         eval {
             $map->set_exporter( "Text" );
             $map->export( $fname );
         };
-
         $this->error($@) if $@;
+        $pulser->('destroy');
 
         return;
     }
@@ -349,6 +346,7 @@ sub pulser {
     my $this = shift;
     my $op1  = shift || "Doing something";
     my $op2  = shift || "Something";
+    my $cnt  = shift || 25;
 
     my $dialog = new Gtk2::Dialog;
     my $label  = new Gtk2::Label($op1);
@@ -368,7 +366,7 @@ sub pulser {
 
     my $x = 0;
     return sub {
-        if( ++$x >= 25 ) {
+        if( ++$x >= $cnt ) {
             Gtk2->main_iteration while Gtk2->events_pending;
             $prog->pulse;
             Gtk2->main_iteration while Gtk2->events_pending;
@@ -660,17 +658,20 @@ sub generate {
 
     my $map;
     REDO: {
+        my $pulser = $this->pulser( "Generating Map...", "Generating", 150 );
         eval {
             $map = $this->[MAP] = new Games::RolePlay::MapGen($settings);
             $map->set_generator($generator);
             $map->add_generator_plugin( $_ ) for @plugins;
-            $map->generate; 
+            $map->generate( t_cb => $pulser ); 
         };
 
         if( $@ ) {
             $this->error($@);
             return $this->blank_map;
         }
+
+        $pulser->('destroy');
 
         $this->draw_map;
         Gtk2->main_iteration while Gtk2->events_pending;
