@@ -382,12 +382,13 @@ sub draw_map {
        $loader->write($image->png);
        $loader->close;
 
-    my @cs = map {$_-2} split('x', $this->[MAP]{cell_size});
-    my $gd = new GD::Image(@cs);
-    my $gr = $gd->colorAllocate(0x00, 0xbb, 0x00);
+    my @cs = split('x', $this->[MAP]{cell_size});
+    my $gd = new GD::Image(map {$_-1} @cs);
+    my $g1 = $gd->colorAllocate(0x00, 0xff, 0x00);
+    my $g2 = $gd->colorAllocate(0x00, 0xbb, 0x00);
     my @wh = $gd->getBounds;
 
-    $gd->filledRectangle( 0,0 => @cs, $gr );
+    $gd->filledRectangle( 1,1 => (map {$_-3} @cs), $g2 );
 
     my $cursor = Gtk2::Gdk::PixbufLoader->new;
        $cursor->write($gd->png);
@@ -407,7 +408,7 @@ sub draw_map_w_cursor {
         my @ul = ($cx*$o[0]+1, $cy*$o[1]+1);
 
         $pb = $pb->copy;
-        $cb->composite( $pb, @ul, $dw,$dh, 0,0, 0,0, 'bilinear', 100 );
+        $cb->composite( $pb, @ul, $dw,$dh, 0,0, 1,1, 'bilinear', 127 );
 
         # $src->composite ($dest,
         #   $dest_x, $dest_y,           were to drop
@@ -418,8 +419,7 @@ sub draw_map_w_cursor {
         #
         #   ***  GdkInterpType:
         #   nearest / GDK_INTERP_NEAREST, tiles / GDK_INTERP_TILES, bilinear /
-        #   GDK_INTERP_BILINEAR, hyper / GDK_INTERP_HYPER at
-        #   blib/lib/Games/RolePlay/MapGen/Editor.pm line 410.
+        #   GDK_INTERP_BILINEAR, hyper / GDK_INTERP_HYPER
     }
 
     $this->[MAREA]->set_from_pixbuf($pb);
