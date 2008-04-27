@@ -384,11 +384,11 @@ sub draw_map {
 
     my @cs = split('x', $this->[MAP]{cell_size});
     my $gd = new GD::Image(map {$_-1} @cs);
-    my $g1 = $gd->colorAllocate(0x00, 0xff, 0x00);
-    my $g2 = $gd->colorAllocate(0x00, 0xbb, 0x00);
+    my $g1 = $gd->colorAllocateAlpha(0x00, 0xbb, 0x00, 0.5*127);
+    my $g2 = $gd->colorAllocateAlpha(0x00, 0xff, 0x00, 0.7*127);
     my @wh = $gd->getBounds;
 
-    $gd->filledRectangle( 1,1 => (map {$_-3} @cs), $g2 );
+    $gd->filledRectangle( 2,2 => (map {$_-4} @cs), $g2 );
 
     my $cursor = Gtk2::Gdk::PixbufLoader->new;
        $cursor->write($gd->png);
@@ -407,19 +407,12 @@ sub draw_map_w_cursor {
         my ($cb, ($cx,$cy), ($dw,$dh) ) = @{$this->[MP]}[1 .. $#{$this->[MP]}];
         my @ul = ($cx*$o[0]+1, $cy*$o[1]+1);
 
-        $pb = $pb->copy;
-        $cb->composite( $pb, @ul, $dw,$dh, 0,0, 1,1, 'bilinear', 127 );
+        my @pm = $pb->render_pixmap_and_mask(0);
 
-        # $src->composite ($dest,
-        #   $dest_x, $dest_y,           were to drop
-        #   $dest_width, $dest_height,  size of the drop
-        #   $offset_x, $offset_y,       move it after the drop?
-        #   $scale_x, $scale_y,         resize it by this amount
-        #   $interp_type, $overall_alpha)
-        #
-        #   ***  GdkInterpType:
-        #   nearest / GDK_INTERP_NEAREST, tiles / GDK_INTERP_TILES, bilinear /
-        #   GDK_INTERP_BILINEAR, hyper / GDK_INTERP_HYPER
+        $cb->render_to_drawable_alpha($pm[0], 0,0, @ul, $dw,$dh, full=>255, max=>0,0);
+
+        $this->[MAREA]->set_from_pixmap(@pm);
+        return;
     }
 
     $this->[MAREA]->set_from_pixbuf($pb);
