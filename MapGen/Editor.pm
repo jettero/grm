@@ -382,33 +382,47 @@ sub draw_map {
        $loader->write($image->png);
        $loader->close;
 
-    $this->[MP] = [undef, $loader->get_pixbuf, split('x', $this->[MAP]{cell_size})];
+    my @cs = map {$_-2} split('x', $this->[MAP]{cell_size});
+    my $gd = new GD::Image(@cs);
+    my $gr = $gd->colorAllocate(0x00, 0xbb, 0x00);
+    my @wh = $gd->getBounds;
+
+    $gd->filledRectangle( 0,0 => @cs, $gr );
+
+    my $cursor = Gtk2::Gdk::PixbufLoader->new;
+       $cursor->write($gd->png);
+       $cursor->close;
+
+    $this->[MP] = [ $loader->get_pixbuf, $cursor->get_pixbuf, @cs, @wh ];
     $this->draw_map_w_cursor;
 }
 # }}}
 # draw_map_w_cursor {{{
 sub draw_map_w_cursor {
     my $this = shift;
-    my $mp   = $this->[MP];
-    my ($pm, $pb, ($cx,$cy) ) = @$mp;
-
-    unless( $pm ) {
-        $mp->[0] = $pm = [ $pb->render_pixmap_and_mask(0) ];
-    }
+    my $pb = $this->[MP][0];
 
     if( my @o = (@{ $this->[O_LT] }) ) {
+        my ($cb, ($cx,$cy), ($dw,$dh) ) = @{$this->[MP]}[1 .. $#{$this->[MP]}];
         my @ul = ($cx*$o[0]+1, $cy*$o[1]+1);
-        my $cc = Gtk2::Gdk::Color->new( map {65535*($_/0xff)} (0x0, 0xaa, 0x00) );
-        my $gc = Gtk2::Gdk::GC->new($pm->[0]);
 
-        $gc->get_colormap->alloc_color($cc, 0, 0);
-        $gc->set_foreground($cc);
+        $pb = $pb->copy;
+        $cb->composite( $pb, @ul, $dw,$dh, 0,0, 0,0, 'bilinear', 100 );
 
-        $pm->[0]->draw_rectangle($gc, 1, @ul, $cx-1, $cy-1);
-        $this->[MP][0] = undef;
+        # $src->composite ($dest,
+        #   $dest_x, $dest_y,           were to drop
+        #   $dest_width, $dest_height,  size of the drop
+        #   $offset_x, $offset_y,       move it after the drop?
+        #   $scale_x, $scale_y,         resize it by this amount
+        #   $interp_type, $overall_alpha)
+        #
+        #   ***  GdkInterpType:
+        #   nearest / GDK_INTERP_NEAREST, tiles / GDK_INTERP_TILES, bilinear /
+        #   GDK_INTERP_BILINEAR, hyper / GDK_INTERP_HYPER at
+        #   blib/lib/Games/RolePlay/MapGen/Editor.pm line 410.
     }
 
-    $this->[MAREA]->set_from_pixmap(@$pm);
+    $this->[MAREA]->set_from_pixbuf($pb);
 }
 # }}}
 # marea_motion_notify_event {{{
