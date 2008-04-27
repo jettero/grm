@@ -352,10 +352,14 @@ sub read_file {
     Gtk2->main_iteration while Gtk2->events_pending;
 
     eval {
-        $this->[MAP] = Games::RolePlay::MapGen->import_xml( $file, r_cb => sub {
-            Gtk2->main_iteration while Gtk2->events_pending;
-            $prog->pulse;
-            Gtk2->main_iteration while Gtk2->events_pending;
+        my $x = 0;
+        $this->[MAP] = Games::RolePlay::MapGen->import_xml( $file, t_cb => sub {
+            if( ++$x >= 25 ) {
+                Gtk2->main_iteration while Gtk2->events_pending;
+                $prog->pulse;
+                Gtk2->main_iteration while Gtk2->events_pending;
+                $x = 0;
+            }
         });
     };
 

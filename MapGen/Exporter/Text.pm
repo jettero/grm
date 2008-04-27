@@ -98,6 +98,8 @@ sub genmap {
         for my $j (0 .. $jend) {
             my $tile = $m->[$i][$j];
 
+            $opts->{t_cb}->() if exists $opts->{t_cb};
+
             if( my $type = $tile->{type} ) {
                 $map .= " " . $this->_show_by_od($tile, "n");
                 $map .= " " if $j == $jend;

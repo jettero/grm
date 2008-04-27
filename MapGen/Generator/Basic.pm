@@ -127,6 +127,8 @@ sub drop_rooms {
         my @possible_locs = (); # [ $j, $i, $score ]
         my $lowest_score  = undef;
 
+        $opts->{t_cb}->() if exists $opts->{t_cb};
+
         for my $i (0 .. $#$map - $size[1]) {
            my $jend = $#{ $map->[$i] };
 

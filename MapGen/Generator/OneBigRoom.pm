@@ -18,6 +18,8 @@ sub create_tiles {
         my $a = [];
 
         for my $j (0 .. $opts->{x_size}-1) {
+            $opts->{t_cb}->() if exists $opts->{t_cb};
+
             push @$a, &_tile(x=>$j, y=>$i);
         }
 
@@ -46,6 +48,8 @@ sub genmap {
     for my $y ( 0 .. $ymax ) {
         for my $x ( 0 .. $xmax ) {
             my $tile = $map[$y][$x];
+
+            $opts->{t_cb}->() if exists $opts->{t_cb};
 
             $tile->{type}  = "room";
             $tile->{group} = $group;

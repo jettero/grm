@@ -19,6 +19,8 @@ sub create_tiles {
         my $a = [];
 
         for my $j (0 .. $opts->{x_size}-1) {
+            $opts->{t_cb}->() if exists $opts->{t_cb};
+
             push @$a, &_tile(x=>$j, y=>$i);
         }
 
@@ -49,6 +51,8 @@ sub generate_perfect_maze {
         my $nex = $cur->{nb}{$dir};
 
         my $show = sub { my $n = shift; sprintf '(%2d, %2d)', $n->{x}, $n->{y} };
+
+        $opts->{t_cb}->() if exists $opts->{t_cb};
 
         # printf DEBUG '@visited=%3d; $cur=%s; $nex=%s;%s', int @visited, $show->($cur), $show->($nex);
 

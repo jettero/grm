@@ -78,6 +78,8 @@ sub sparsify {
                    $tile->{od}{e} ? $map->[$tile->{y}][$tile->{x}+1] :
                                     $map->[$tile->{y}][$tile->{x}-1] );
 
+        $opts->{t_cb}->() if exists $opts->{t_cb};
+
         $tile->{od} = {n=>0, s=>0, e=>0, w=>0};
         delete $tile->{type};
 

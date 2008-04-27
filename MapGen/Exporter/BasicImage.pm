@@ -119,6 +119,8 @@ sub genmap {
             my $ns_b = int( sqrt( $ns_l ** 2 - $ns_h ** 2 ) );
             my $ew_b = int( sqrt( $ew_l ** 2 - $ew_h ** 2 ) );
 
+            $opts->{t_cb}->() if exists $opts->{t_cb};
+
             $gd->line( $xp, $yp => $Xp, $yp, $wall_color );
             $gd->line( $xp, $Yp => $Xp, $Yp, $wall_color );
             $gd->line( $Xp, $yp => $Xp, $Yp, $wall_color );

@@ -102,6 +102,8 @@ sub genmap {
         for my $j (0 .. $jend) {
             my $tile = $opts->{_the_map}[$i][$j];
 
+            $opts->{t_cb}->() if exists $opts->{t_cb};
+
             if( my $t = $tile->{type} ) {
                 my $closures = [];
                 my $h = $ah->(

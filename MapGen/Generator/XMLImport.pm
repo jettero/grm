@@ -44,7 +44,6 @@ sub genmap {
 
     my $maprows = $xp->find('/MapGen/map/row');
     for my $row ($maprows->get_nodelist) {
-        $opts->{r_cb}->() if exists $opts->{r_cb};
 
         my $a = []; push @$map, $a;
         my $y_pos = $xp->findvalue( '@ypos' => $row )->value;
@@ -53,6 +52,8 @@ sub genmap {
         for my $tile ($mapcols->get_nodelist) {
             my $x_pos = $xp->findvalue( '@xpos' => $tile )->value;
             my $type  = $xp->findvalue( '@type' => $tile )->value;
+
+            $opts->{t_cb}->() if exists $opts->{t_cb};
 
             my $t = &_tile( x=>$x_pos, y=>$y_pos );
 
