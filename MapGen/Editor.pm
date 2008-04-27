@@ -335,11 +335,26 @@ sub read_file {
     my $this = shift;
     my $file = shift;
 
+    my $pulser = $this->pulser( "Reading $file ...", "File I/O" );
+    eval { $this->[MAP] = Games::RolePlay::MapGen->import_xml( $file, t_cb => $pulser ) };
+    $this->error($@) if $@;
+    $pulser->('destroy');
+
+    $this->[FNAME] = $file;
+    $this->draw_map;
+}
+# }}}
+# pulser {{{
+sub pulser {
+    my $this = shift;
+    my $op1  = shift || "Doing something";
+    my $op2  = shift || "Something";
+
     my $dialog = new Gtk2::Dialog;
-    my $label  = new Gtk2::Label("Reading $file ...");
+    my $label  = new Gtk2::Label($op1);
     my $prog   = new Gtk2::ProgressBar;
 
-    $dialog->set_title("File I/O");
+    $dialog->set_title($op2);
     $dialog->vbox->pack_start( $label, TRUE, TRUE, 0 );
     $dialog->vbox->pack_start( $prog, TRUE, TRUE, 0 );
     $dialog->show_all;
@@ -351,24 +366,17 @@ sub read_file {
     Gtk2->main_iteration while Gtk2->events_pending;
     Gtk2->main_iteration while Gtk2->events_pending;
 
-    eval {
-        my $x = 0;
-        $this->[MAP] = Games::RolePlay::MapGen->import_xml( $file, t_cb => sub {
-            if( ++$x >= 25 ) {
-                Gtk2->main_iteration while Gtk2->events_pending;
-                $prog->pulse;
-                Gtk2->main_iteration while Gtk2->events_pending;
-                $x = 0;
-            }
-        });
+    my $x = 0;
+    return sub {
+        if( ++$x >= 25 ) {
+            Gtk2->main_iteration while Gtk2->events_pending;
+            $prog->pulse;
+            Gtk2->main_iteration while Gtk2->events_pending;
+            $x = 0;
+        }
+
+        $dialog->destroy if @_ and $_[0] eq "destroy";
     };
-
-    $this->error($@) if $@;
-
-    $this->[FNAME] = $file;
-    $this->draw_map;
-
-    $dialog->destroy;
 }
 # }}}
 
