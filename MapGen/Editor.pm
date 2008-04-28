@@ -29,7 +29,7 @@ use vars qw($x); # like our, but at compile time so these constants work
 use constant {
     MAP   => $x++, WINDOW => $x++, SETTINGS => $x++, MENU   => $x++,
     FNAME => $x++, MAREA  => $x++, VP_DIM   => $x++, STAT   => $x++,
-    MP    => $x++, O_LT   => $x++,
+    MP    => $x++, O_LT   => $x++, O_DR     => $x++, S_ARG  => $x++,
 };
 
 1;
@@ -171,21 +171,22 @@ sub new {
     my $sb = $this->[STAT] = new Gtk2::Statusbar; $sb->push(1,'');
 
     my $s_up = sub {
-        my $tile  = shift; my $type = pop @$tile;
+        $sb->pop(1); return unless @_;
+
+        my $tile  = shift; my $type = pop @$tile if @$tile == 3;
         my $group = shift;
         my $door  = shift;
         my $txt   = '';
 
         if( $tile ) {
             $txt .= "tile: " . ($type ? "$type " : ''). sprintf('[%d,%d]', @$tile);
-            $txt .= " \x{2014} group: @$group" if $group;
             $txt .= ":$door->[0] (@{$door->[1]})" if $door;
+            $txt .= " \x{2014} group: @$group" if $group;
 
         } else {
             $tile = $group = $door = undef;
         }
 
-        $sb->pop(1);
         $sb->push(1, $txt);
     };
 
@@ -450,10 +451,14 @@ sub marea_motion_notify_event {
     my ($this,$s_up,undef,$em) = @_;
 
     my ($x, $y) = ($em->x, $em->y);
-    my @cs = split 'x', $this->[MAP]{cell_size};
-    my @lt = (int($x/$cs[0]), int($y/$cs[1]));
+    my @cs      = split 'x', $this->[MAP]{cell_size};
+    my @lt      = (int($x/$cs[0]), int($y/$cs[1]));
+    my $tile    = $this->[MAP]{_the_map}[ $lt[1] ][ $lt[0] ];
 
-    my $o_lt = $this->[O_LT];
+    my $go = 0;
+
+    my $o_lt  = $this->[O_LT];
+    my $s_arg = $this->[S_ARG];
     if( @$o_lt!=2 or ($lt[0] != $o_lt->[0] or $lt[1] != $o_lt->[1]) ) {
         my @bb = split 'x', $this->[MAP]{bounding_box};
 
@@ -462,16 +467,75 @@ sub marea_motion_notify_event {
 
         @$o_lt = @lt;
 
-        my $tile  = $this->[MAP]{_the_map}[ $lt[1] ][ $lt[0] ];
         my @s_arg = ([@lt, $tile->{type}]);
+           $s_arg = $this->[S_ARG] = \@s_arg;
+                    $this->[O_DR]  = undef;
 
         if( my $g = $tile->{group} ) {
-            $s_arg[1] = [$g->name, $g->desc];
+            $s_arg->[1] = [$g->name, $g->desc];
         }
 
-        $this->draw_map_w_cursor;
-        $s_up->(@s_arg);
+        $go = 1;
     }
+    
+    my $d_x1 = abs( $cs[0]*($lt[0]+0) - $x ) <= 4;
+    my $d_x2 = abs( $cs[0]*($lt[0]+1) - $x ) <= 4;
+    my $d_y1 = abs( $cs[1]*($lt[1]+0) - $y ) <= 4;
+    my $d_y2 = abs( $cs[1]*($lt[1]+1) - $y ) <= 4;
+
+    my $X = ($d_x1 or $d_x2);
+    my $Y = ($d_y1 or $d_y2);
+
+    warn join(",", map {$_?1:0} ($X,$Y));
+
+    my $dr;
+    my $o_dr = $this->[O_DR];
+    if( $X and not $Y ) {
+        if( $d_x1 ) {
+            goto SKIP_DR if $o_dr and $o_dr->[0] eq "w";
+            $this->[O_DR] = $dr = [w => $this->_od_desc($tile->{od}{w})];
+
+        } else {
+            goto SKIP_DR if $o_dr and $o_dr->[0] eq "e";
+            $this->[O_DR] = $dr = [e => $this->_od_desc($tile->{od}{e})];
+        }
+
+    } elsif( $Y and not $X ) {
+        if( $d_y1 ) {
+            goto SKIP_DR if $o_dr and $o_dr->[0] eq "n";
+            $this->[O_DR] = $dr = [n => $this->_od_desc($tile->{od}{n})];
+
+        } else {
+            goto SKIP_DR if $o_dr and $o_dr->[0] eq "s";
+            $this->[O_DR] = $dr = [s => $this->_od_desc($tile->{od}{s})];
+        }
+    }
+
+    if( $dr ) {
+        $go = 1;
+        $s_arg->[2] = $dr;
+
+    } elsif( $o_dr ) {
+        $go = 1;
+        $s_arg->[2] = undef;
+    }
+
+    SKIP_DR:
+
+    if( $go ) {
+        $this->draw_map_w_cursor;
+        $s_up->(@$s_arg);
+    }
+}
+sub _od_desc {
+    my $that = $_[1];
+
+    if( ref $that ) {
+        return [ grep {$that->{$_}} qw(locked stuck secret) ];
+    }
+
+    return ['opening'] if $that;
+    return ['wall'];
 }
 # }}}
 
