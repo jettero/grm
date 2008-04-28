@@ -29,8 +29,7 @@ use vars qw($x); # like our, but at compile time so these constants work
 use constant {
     MAP   => $x++, WINDOW => $x++, SETTINGS => $x++, MENU   => $x++,
     FNAME => $x++, MAREA  => $x++, VP_DIM   => $x++, STAT   => $x++,
-    S_CO  => $x++, O_LT   => $x++,
-    MP    => $x++,
+    MP    => $x++, O_LT   => $x++,
 };
 
 1;
@@ -169,16 +168,32 @@ sub new {
     $this->[VP_DIM] = my $dim = [];
     $vp->signal_connect( 'size-allocate' => sub { my $r = $_[1]; $dim->[0] = $r->width; $dim->[1] = $r->height; 0; });
 
-    my $sb = $this->[STAT] = new Gtk2::Statusbar;
-    my $cid = 1; $sb->push($cid, sprintf('tile: [%d,%d]', 0,0));
-    my $s_co = $this->[S_CO] = sub { $sb->push($cid, (@_==2 ? sprintf('tile: [%d,%d]', @_) : "")) };
-       $s_co->();
+    my $sb = $this->[STAT] = new Gtk2::Statusbar; $sb->push(1,'');
+
+    my $s_up = sub {
+        my $tile  = shift; my $type = pop @$tile;
+        my $group = shift;
+        my $door  = shift;
+        my $txt   = '';
+
+        if( $tile ) {
+            $txt .= "tile: " . ($type ? "$type " : ''). sprintf('[%d,%d]', @$tile);
+            $txt .= " \x{2014} group: @$group" if $group;
+            $txt .= ":$door->[0] (@{$door->[1]})" if $door;
+
+        } else {
+            $tile = $group = $door = undef;
+        }
+
+        $sb->pop(1);
+        $sb->push(1, $txt);
+    };
 
     $this->[O_LT]=[];
 
     $eb->add_events([qw(leave-notify-mask pointer-motion-mask pointer-motion-hint-mask)]);
-    $eb->signal_connect( motion_notify_event => sub { $this->marea_motion_notify_event($s_co, @_); 0; });
-    $eb->signal_connect(  leave_notify_event => sub { @{$this->[O_LT]} = (); $s_co->(); $this->draw_map_w_cursor; });
+    $eb->signal_connect( motion_notify_event => sub { $this->marea_motion_notify_event($s_up, @_); 0; });
+    $eb->signal_connect(  leave_notify_event => sub { @{$this->[O_LT]} = (); $s_up->(); $this->draw_map_w_cursor; });
 
     $scwin->set_policy('automatic', 'automatic');
     $scwin->add($vp);
@@ -432,7 +447,7 @@ sub draw_map_w_cursor {
 # }}}
 # marea_motion_notify_event {{{
 sub marea_motion_notify_event {
-    my ($this,$s_co,undef,$em) = @_;
+    my ($this,$s_up,undef,$em) = @_;
 
     my ($x, $y) = ($em->x, $em->y);
     my @cs = split 'x', $this->[MAP]{cell_size};
@@ -445,9 +460,17 @@ sub marea_motion_notify_event {
         $lt[0] = $bb[0]-1 if $lt[0]>=$bb[0];
         $lt[1] = $bb[1]-1 if $lt[1]>=$bb[1];
 
-        $s_co->(@$o_lt = @lt);
+        @$o_lt = @lt;
+
+        my $tile  = $this->[MAP]{_the_map}[ $lt[1] ][ $lt[0] ];
+        my @s_arg = ([@lt, $tile->{type}]);
+
+        if( my $g = $tile->{group} ) {
+            $s_arg[1] = [$g->name, $g->desc];
+        }
 
         $this->draw_map_w_cursor;
+        $s_up->(@s_arg);
     }
 }
 # }}}
