@@ -446,12 +446,18 @@ sub draw_map_w_cursor {
             $gc->get_colormap->alloc_color($cc, 0, 0);
             $gc->set_foreground($cc);
 
-            my $d  = $s2->[0]; warn "d=$d";
+            my $d  = $s2->[0];
             if( $d eq 'n' ) {
                 $pm[0]->draw_rectangle($gc, 1, $ul[0]+4,$ul[1]-2, $cx-9, 3);
 
             } elsif( $d eq 's' ) {
                 $pm[0]->draw_rectangle($gc, 1, $ul[0]+4,$ul[1]+$cy-2, $cx-9, 3);
+
+            } elsif( $d eq 'w' ) {
+                $pm[0]->draw_rectangle($gc, 1, $ul[0]-2,$ul[1]+4, 3, $cy-9);
+
+            } elsif( $d eq 'e' ) {
+                $pm[0]->draw_rectangle($gc, 1, $ul[0]+$cx-2,$ul[1]+4, 3, $cy-9);
             }
         }
 
