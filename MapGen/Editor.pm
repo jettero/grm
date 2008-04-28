@@ -469,7 +469,8 @@ sub marea_motion_notify_event {
 
         my @s_arg = ([@lt, $tile->{type}]);
            $s_arg = $this->[S_ARG] = \@s_arg;
-                    $this->[O_DR]  = undef;
+
+        $this->[O_DR] = $s_arg->[2] = undef;
 
         if( my $g = $tile->{group} ) {
             $s_arg->[1] = [$g->name, $g->desc];
@@ -478,20 +479,18 @@ sub marea_motion_notify_event {
         $go = 1;
     }
     
-    my $d_x1 = abs( $cs[0]*($lt[0]+0) - $x ) <= 4;
-    my $d_x2 = abs( $cs[0]*($lt[0]+1) - $x ) <= 4;
-    my $d_y1 = abs( $cs[1]*($lt[1]+0) - $y ) <= 4;
-    my $d_y2 = abs( $cs[1]*($lt[1]+1) - $y ) <= 4;
+    my $d_x1 = ($x - $cs[0]*$lt[0]);
+    my $d_x2 = ($cs[0]*($lt[0]+1) - $x);
+    my $d_y1 = ($y - $cs[1]*$lt[1]);
+    my $d_y2 = ($cs[1]*($lt[1]+1) - $y);
 
-    my $X = ($d_x1 or $d_x2);
-    my $Y = ($d_y1 or $d_y2);
-
-    warn join(",", map {$_?1:0} ($X,$Y));
+    my $X = ((my $x1 = $d_x1<=2) or (my $x2 = $d_x2<=2));
+    my $Y = ((my $y1 = $d_y1<=2) or (my $y2 = $d_y2<=2));
 
     my $dr;
     my $o_dr = $this->[O_DR];
     if( $X and not $Y ) {
-        if( $d_x1 ) {
+        if( $x1 ) {
             goto SKIP_DR if $o_dr and $o_dr->[0] eq "w";
             $this->[O_DR] = $dr = [w => $this->_od_desc($tile->{od}{w})];
 
@@ -501,7 +500,7 @@ sub marea_motion_notify_event {
         }
 
     } elsif( $Y and not $X ) {
-        if( $d_y1 ) {
+        if( $y1 ) {
             goto SKIP_DR if $o_dr and $o_dr->[0] eq "n";
             $this->[O_DR] = $dr = [n => $this->_od_desc($tile->{od}{n})];
 
@@ -517,7 +516,7 @@ sub marea_motion_notify_event {
 
     } elsif( $o_dr ) {
         $go = 1;
-        $s_arg->[2] = undef;
+        $this->[O_DR] = $s_arg->[2] = undef;
     }
 
     SKIP_DR:
@@ -527,11 +526,16 @@ sub marea_motion_notify_event {
         $s_up->(@$s_arg);
     }
 }
+
 sub _od_desc {
     my $that = $_[1];
 
     if( ref $that ) {
-        return [ grep {$that->{$_}} qw(locked stuck secret) ];
+        my $r = [ grep {$that->{$_}} qw(locked stuck secret) ];
+        push @$r, "ordinary" unless @$r;
+        push @$r, "door";
+
+        return $r;
     }
 
     return ['opening'] if $that;
