@@ -439,6 +439,22 @@ sub draw_map_w_cursor {
 
         $cb->render_to_drawable_alpha($pm[0], 0,0, @ul, $dw,$dh, full=>255, max=>0,0);
 
+        if( my $s2 = @{$this->[S_ARG]}[2] ) {
+            my $cc = Gtk2::Gdk::Color->new( map {65535*($_/0xff)} (0x00, 0xff, 0x00) );
+            my $gc = Gtk2::Gdk::GC->new($pm[0]);
+
+            $gc->get_colormap->alloc_color($cc, 0, 0);
+            $gc->set_foreground($cc);
+
+            my $d  = $s2->[0]; warn "d=$d";
+            if( $d eq 'n' ) {
+                $pm[0]->draw_rectangle($gc, 1, $ul[0]+4,$ul[1]-2, $cx-9, 3);
+
+            } elsif( $d eq 's' ) {
+                $pm[0]->draw_rectangle($gc, 1, $ul[0]+4,$ul[1]+$cy-2, $cx-9, 3);
+            }
+        }
+
         $this->[MAREA]->set_from_pixmap(@pm);
         return;
     }
