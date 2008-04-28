@@ -201,7 +201,7 @@ sub add_rectangle {
     my $cloc = [0,0]; 
        $cloc = [ int($sloc->[0]/$nloc),  int($sloc->[1]/$nloc) ] if $nloc > 0;
 
-    my $extent = [ $Mloc->[0]-$mloc->[0], $Mloc->[1]-$mloc->[1] ];
+    my $extent = [ $Mloc->[0]-$mloc->[0]+1, $Mloc->[1]-$mloc->[1]+1 ];
 
     $this->{loc_size} = "($cloc->[0], $cloc->[1]) $extent->[0]x$extent->[1]";
     $this->{extents}  = [ @$mloc, @$Mloc ];
