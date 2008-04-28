@@ -74,9 +74,11 @@ sub make_form {
             my $z = 1;
             my $IT = $item->{type};
             if( $IT eq "text" ) {
+                my $d = exists $i->{$item->{name}} ? $i->{$item->{name}} : $item->{default};
+                   $d = $item->{trevnoc}->($d) if ref $d and exists $item->{trevnoc};
+
                 $attach = $widget = new Gtk2::Entry;
-                $widget->set_text(exists $i->{$item->{name}} ? $i->{$item->{name}} : $item->{default})
-                    if exists $item->{default} or exists $i->{$item->{name}};
+                $widget->set_text($d);
 
                 $widget->set_tooltip_text( $item->{desc} ) if exists $item->{desc};
                 $widget->signal_connect(changed => sub {
@@ -88,18 +90,35 @@ sub make_form {
                     $widget->set_text($text) if $chg;
                     $req[$my_req] = 1;
                     for my $match (@{ $item->{matches} }) {
-                        $req[$my_req] = 0 unless $text =~ $match;
+                        my $r = ref $match;
+                        if( $r eq "CODE" ) {
+                            $req[$my_req] = 0 unless $match->($text);
+
+                        } elsif( $r eq "Regexp" ) {
+                            $req[$my_req] = 0 unless $text =~ $match;
+
+                        } else {
+                            warn "bad match element for $item->{name}: $match";
+                        }
                     }
 
                     $dialog->set_response_sensitive( ok => (@req == grep {$_} @req) );
                 });
 
-                $item->{extract} = sub { $widget->get_text };
+                if( $item->{convert} ) {
+                    $item->{extract} = sub { $item->{convert}->( $widget->get_text ) };
+
+                } else {
+                    $item->{extract} = sub { $widget->get_text };
+                }
+
               # $widget->signal_connect(changed => sub { warn "test!"; }); # [WORKS FINE]
 
             } elsif( $IT eq "choice" ) {
                 $attach = $widget = Gtk2::ComboBox->new_text;
                 my $d = $i->{$item->{name}} || $item->{default};
+                   $d = $item->{trevnoc}->($d) if ref $d and exists $item->{trevnoc};
+
                 my $i = 0;
                 my $d_i;
                 for(@{$item->{choices}}) {
@@ -110,7 +129,13 @@ sub make_form {
                 $widget->set_active($d_i) if defined $d_i;
                 $widget->set_tooltip_text( $item->{desc} ) if exists $item->{desc};
 
-                $item->{extract} = sub { $widget->get_active_text };
+                if( $item->{convert} ) {
+                    $item->{extract} = sub { $this->{convert}->( $widget->get_active_text ) };
+
+                } else {
+                    $item->{extract} = sub { $widget->get_active_text };
+                }
+
               # $widget->signal_connect(changed => sub { warn "test!"; }); # [WORKS FINE]
 
                 if( exists $item->{descs} and exists $item->{desc} ) {
@@ -128,6 +153,7 @@ sub make_form {
 
             } elsif( $IT eq "choices" ) {
                 my $def = $i->{$item->{name}};
+                   $def = $item->{trevnoc}->($def) if ref $def and exists $item->{trevnoc};
                    $def = $item->{defaults} unless $def;
                    $def = {map {($_=>1)} @$def};
 
@@ -154,7 +180,13 @@ sub make_form {
 
                 $z = (exists $item->{z} ? $item->{z} : 2);
 
-                $item->{extract} = sub { [map {$d->[$_]} $widget->get_selected_indices] };
+                if( $item->{convert} ) {
+                    $item->{extract} = sub { $this->{convert}->( [map {$d->[$_]} $widget->get_selected_indices] ) };
+
+                } else {
+                    $item->{extract} = sub { [map {$d->[$_]} $widget->get_selected_indices] };
+                }
+
               # $widget->get_selection->signal_connect(changed => sub { warn "test!"; }); # [WORKS FINE]
 
             } elsif( $IT eq "bool" ) {
@@ -196,6 +228,15 @@ sub make_form {
 
                     if( $that_type eq "choice" or $that_type eq "text") {
                         $that_e->[1]->signal_connect( changed => my $f = sub {
+                            my $sensitive = ($d->{$k}->( $that_e->[0]{extract}->() ) ? FALSE : TRUE);
+                             
+                            $this_e->[1]->set_sensitive($sensitive)
+                        });
+
+                        $f->();
+
+                    } elsif( $that_type eq "choices" ) {
+                        $that_e->[1]->get_selection->signal_connect( changed => my $f = sub {
                             my $sensitive = ($d->{$k}->( $that_e->[0]{extract}->() ) ? FALSE : TRUE);
                              
                             $this_e->[1]->set_sensitive($sensitive)

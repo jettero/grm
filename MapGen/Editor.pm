@@ -373,7 +373,9 @@ sub pulser {
             $x = 0;
         }
 
-        $dialog->destroy if @_ and $_[0] eq "destroy";
+        if( @_ and $_[0] eq "destroy" ) {
+            $dialog->destroy;
+        }
     };
 }
 # }}}
@@ -534,6 +536,17 @@ sub get_generate_opts {
           fixes    => [sub { $_[0] =~ s/\s+//g }],
           matches  => [qr/^\d+x\d+$/] },
 
+        { mnemonic => "Open Room-Corridor: ",
+          type     => "text",
+          desc     => "The %-chance of a door, secret, suck or locked, as a four touple (e.g. 95,2,25,50 is a 95% chance of a door, and only 2% that it's secret if there is one); between a room tile and a corridor tile where there is an opening.",
+          name     => 'open_room_corridor_door_percent',
+          default  => '95, 2, 25, 50',
+          disable  => { generator_plugins => sub { (grep {$_ eq "BasicDoors"} @{$_[0]}) ? 0:1 } },
+          convert  => sub { my @a = split m/\D+/, $_[0]; { door=>$a[0], secret=>$a[1], stuck=>$a[2], locked=>$a[3] } },
+          trevnoc  => sub { join(", ", @{$_[0]}{qw( door secret stuck locked )}) },
+          matches  => [sub { (grep {$_ >= 0 and $_ <= 100} $_[0] =~ m/^(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)$/) == 4 }],
+          fixes    => [sub { $_[0] =~ s/[^\d,\s]+//g }], }
+
     ], [ # column 2
 
         { mnemonic => "_Generator: ",
@@ -660,18 +673,17 @@ sub generate {
     REDO: {
         my $pulser = $this->pulser( "Generating Map...", "Generating", 150 );
         eval {
-            $map = $this->[MAP] = new Games::RolePlay::MapGen($settings);
+            $map = $this->[MAP] = new Games::RolePlay::MapGen;
             $map->set_generator($generator);
             $map->add_generator_plugin( $_ ) for @plugins;
-            $map->generate( t_cb => $pulser ); 
+            $map->generate( %$settings, t_cb => $pulser ); 
         };
 
+        $pulser->('destroy');
         if( $@ ) {
             $this->error($@);
             return $this->blank_map;
         }
-
-        $pulser->('destroy');
 
         $this->draw_map;
         Gtk2->main_iteration while Gtk2->events_pending;
