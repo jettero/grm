@@ -600,7 +600,7 @@ sub get_generate_opts {
 
         { mnemonic => "_Tile Size: ",
           type     => "text",
-          desc     => "The size of each tile (in Feet or Units or whatever)",
+          desc     => "The size of each tile (in Square Feet or Square Units or whatever)",
           name     => 'tile_size',
           default  => 10, # NOTE: fixes and matches must exist and must be arrrefs
           fixes    => [sub { $_[0] =~ s/\s+//g }],
@@ -714,7 +714,7 @@ sub get_generate_opts {
           desc     => "The plugins you wish to use after the map is created.",
           descs    => {
               BasicDoors => 'Adds doors using various strategies.',
-              FiveSplit  => 'Divides map tiles with tiles larger than 5 units into tiles precisely 5 units square.  E.g., if the tile size is set to 10, this will double the bounding box size of your map.',
+              FiveSplit  => 'Divides map tiles with tiles larger than 5 units square into tiles precisely 5 units square.  E.g., if the tile size is set to 10, this will double the bounding box size of your map, but your hallways will be two tiles wide.',
           },
           name     => 'generator_plugins',
           disable  => { FiveSplit => {tile_size => sub { ($_[0]/5) !~ m/\./ }} },

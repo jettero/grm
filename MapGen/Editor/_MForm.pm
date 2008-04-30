@@ -171,6 +171,27 @@ sub make_form {
                 # the set_data_array() why even bother trying to do the scope
                 # hack... pfft.
 
+                $widget->set_has_tooltip(TRUE);
+                $widget->signal_connect (query_tooltip => sub {
+                    my ($widget, $x, $y, $keyboard_mode, $tooltip) = @_;
+
+                    # First, find out where the pointer is:
+                    my $path = $widget->get_path_at_pos($x, $y);
+
+                    # If we're not pointed at a row, then return FALSE to say
+                    # "don't show a tip".
+                    return FALSE unless $path;
+
+                    # Otherwise, ask the TreeView to set up the tip's area according
+                    # to the row's rectangle.
+                    $widget->set_tooltip_row($tooltip, $path);
+
+                    $tooltip->set_text($item->{descs}{$d->[($path->get_indices)[0]]});
+
+                    # Return true to say "show the tip".
+                    return TRUE;
+                });
+
                 $attach = Gtk2::ScrolledWindow->new;
 
                 my $vp  = Gtk2::Viewport->new;
