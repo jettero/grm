@@ -592,24 +592,26 @@ sub right_click_map {
         } else {
             @a = @o;
         }
+
+    } else {
+        return FALSE;
     }
 
     $this->_build_rccm unless $this->[RCCM];
 
     my @menus = @{ $this->[RCCM] };
+    my $menu  = $menu[@a==3 ? 1:0];
 
-  # $menu->popup(
-  #         undef, # parent menu shell
-  #         undef, # parent menu item
-  #         undef, # menu pos func
-  #         undef, # data
-  #         $event->button,
-  #         $event->time
-  # );
+    $menu->popup(
+            undef, # parent menu shell
+            undef, # parent menu item
+            undef, # menu pos func
+            undef, # data
+            $event->button,
+            $event->time
+    );
 
-
-    $this->error("woot: " . $event->button . " " . $event->time . " [@a]");
-    FALSE;
+    return TRUE;
 }
 # }}}
 
