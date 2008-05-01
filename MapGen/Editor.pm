@@ -30,6 +30,7 @@ use constant {
     MAP   => $x++, WINDOW => $x++, SETTINGS => $x++, MENU   => $x++,
     FNAME => $x++, MAREA  => $x++, VP_DIM   => $x++, STAT   => $x++,
     MP    => $x++, O_LT   => $x++, O_DR     => $x++, S_ARG  => $x++,
+    RCCM  => $x++,
 };
 
 1;
@@ -163,6 +164,12 @@ sub new {
     my $vp    = Gtk2::Viewport->new(undef,undef);
     my $al    = Gtk2::Alignment->new(0.5,0.5,0,0);
     my $eb    = Gtk2::EventBox->new;
+
+    $eb->signal_connect ('button-press-event' => sub {
+        my ($widget, $event) = @_;
+        return FALSE unless $event->button == 3;
+        return $this->right_click_map($event);
+    });
 
     # This is so we can later determin the size of the viewport.
     $this->[VP_DIM] = my $dim = [];
@@ -562,6 +569,33 @@ sub _od_desc {
 
     return ['opening'] if $that;
     return ['wall'];
+}
+# }}}
+# right_click_map {{{
+sub right_click_map {
+    my ($this, $event) = @_;
+
+    my @a;
+    if( my @o = (@{ $this->[O_LT] }) ) {
+        if( my $s2 = @{$this->[S_ARG]}[2] ) {
+            @a = (@o, $s2->[0]);
+
+        } else {
+            @a = @o;
+        }
+    }
+
+    $menu->popup(
+            undef, # parent menu shell
+            undef, # parent menu item
+            undef, # menu pos func
+            undef, # data
+            $event->button,
+            $event->time
+    );
+
+    $this->error("woot: " . $event->button . " " . $event->time . " [@a]");
+    FALSE;
 }
 # }}}
 
