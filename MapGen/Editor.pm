@@ -17,7 +17,7 @@ use Storable qw(freeze thaw);
 use Data::Dump qw(dump);
 use POSIX qw(ceil);
 
-use Games::RolePlay::MapGen::Editor::_MForm qw(make_form $default_restore_defaults);;
+use Games::RolePlay::MapGen::Editor::_MForm qw(make_form $default_restore_defaults);
 
 our $DEFAULT_GENERATOR         = 'Basic';
 our @GENERATORS                = (qw( Basic Blank OneBigRoom Perfect SparseAndLoops ));
@@ -572,6 +572,15 @@ sub _od_desc {
 }
 # }}}
 # right_click_map {{{
+sub _build_rccm {
+    my $this = shift;
+
+    $this->[RCCM] = [
+        Gtk2::Menu->new, # tile menu
+        Gtk2::Menu->new, # closure menu
+    ];
+}
+
 sub right_click_map {
     my ($this, $event) = @_;
 
@@ -585,14 +594,19 @@ sub right_click_map {
         }
     }
 
-    $menu->popup(
-            undef, # parent menu shell
-            undef, # parent menu item
-            undef, # menu pos func
-            undef, # data
-            $event->button,
-            $event->time
-    );
+    $this->_build_rccm unless $this->[RCCM];
+
+    my @menus = @{ $this->[RCCM] };
+
+  # $menu->popup(
+  #         undef, # parent menu shell
+  #         undef, # parent menu item
+  #         undef, # menu pos func
+  #         undef, # data
+  #         $event->button,
+  #         $event->time
+  # );
+
 
     $this->error("woot: " . $event->button . " " . $event->time . " [@a]");
     FALSE;
