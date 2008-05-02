@@ -203,6 +203,11 @@ sub new {
     $eb->signal_connect( motion_notify_event => sub { $this->marea_motion_notify_event($s_up, @_); 0; });
     $eb->signal_connect(  leave_notify_event => sub { @{$this->[O_LT]} = (); $s_up->(); $this->draw_map_w_cursor; });
 
+ # NOTE these don't work ....
+ #  $eb->signal_connect(          drag_begin => sub { warn 'db: ' . dump(@_) });
+ #  $eb->signal_connect(         drag_motion => sub { warn 'dm: ' . dump(@_) });
+ #  $eb->signal_connect(            drag_end => sub { warn 'de: ' . dump(@_) });
+
     $scwin->set_policy('automatic', 'automatic');
     $scwin->add($vp);
     $al->add($eb);
@@ -956,13 +961,14 @@ sub render_settings {
     my ($result, $o) = $this->make_form($this->[WINDOW], $i, $options);
     return unless $result eq "ok";
 
+    if($o->{cell_size} ne $i->{cell_size}) {
+        $i->{cell_size} = $o->{cell_size};
+        $this->[SETTINGS]{GENERATE_OPTS} = freeze $i;
+    }
+
     if($o->{cell_size} ne $this->[MAP]{cell_size}) {
         $this->[MAP]{$_} = $i->{$_} = $o->{$_} for keys %$o;
         $this->draw_map;
-    }
-
-    if($o->{cell_size} ne $i->{cell_size}) {
-        $this->[SETTINGS]{GENERATE_OPTS} = freeze $i;
     }
 }
 # }}}
