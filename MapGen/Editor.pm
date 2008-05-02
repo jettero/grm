@@ -920,10 +920,13 @@ sub render_settings {
     my ($result, $o) = $this->make_form($this->[WINDOW], $i, $options);
     return unless $result eq "ok";
 
-    if($i->{cell_size} ne $o->{cell_size}) {
+    if($o->{cell_size} ne $this->[MAP]{cell_size}) {
         $this->[MAP]{$_} = $i->{$_} = $o->{$_} for keys %$o;
-        $this->[SETTINGS]{GENERATE_OPTS} = freeze $i;
         $this->draw_map;
+    }
+
+    if($o->{cell_size} ne $i->{cell_size}) {
+        $this->[SETTINGS]{GENERATE_OPTS} = freeze $i;
     }
 }
 # }}}
