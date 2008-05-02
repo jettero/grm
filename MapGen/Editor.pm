@@ -572,23 +572,36 @@ sub _od_desc {
 }
 # }}}
 # right_click_map {{{
+sub _build_context_menu {
+    my $this = shift;
+    my $menu = new Gtk2::Menu->new;
+
+    @_ = @{$_[0]} if ref $_[0];
+
+    # NOTE: this should become a module like _MForm
+
+    while( my($name, $opts) = splice @_, 0, 2 ) {
+        my $item = Gtk2::MenuItem->new_with_mnemonic($name);
+
+        $item->set_active( $item->{active}->() )           if exists $item->{active};
+        $item->set_signal( activate => $item->{activate} ) if exists $item->{activate};
+
+        $menu->append( $item );
+    }
+
+    $menu->show_all;
+    $menu;
+}
+
 sub _build_rccm {
     my $this = shift;
 
-    $this->[RCCM] = [
-        Gtk2::Menu->new, # tile menu
-        Gtk2::Menu->new, # closure menu
-    ];
-
-    $this->[RCCM][0]->append( my $t_a = Gtk2::MenuItem->new("tile blah ...") ); $t_a->signal_connect( activate => sub { print "blah...\n" });
-    $this->[RCCM][0]->append( my $t_b = Gtk2::MenuItem->new("tile blah ...") ); $t_b->signal_connect( activate => sub { print "blah...\n" });
-    $this->[RCCM][0]->append( my $t_c = Gtk2::MenuItem->new("tile blah ...") ); $t_c->signal_connect( activate => sub { print "blah...\n" });
-
-    $this->[RCCM][1]->append( my $c_a = Gtk2::MenuItem->new("closure blah ...") ); $c_a->signal_connect( activate => sub { print "blah...\n" });
-    $this->[RCCM][1]->append( my $c_b = Gtk2::MenuItem->new("closure blah ...") ); $c_b->signal_connect( activate => sub { print "blah...\n" });
-    $this->[RCCM][1]->append( my $c_c = Gtk2::MenuItem->new("closure blah ...") ); $c_c->signal_connect( activate => sub { print "blah...\n" });
-
-    $_->show_all for @{ $this->[RCCM] };
+    $this->[RCCM][0] = $this->_build_context_menu(
+        'convert to _wall tile' => {
+        },
+        'convert to _corridor tile' => {
+        },
+    );
 }
 
 sub right_click_map {
