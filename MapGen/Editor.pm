@@ -580,26 +580,42 @@ sub _build_context_menu {
 
     # NOTE: this should become a module like _MForm
 
+    my @a;
     while( my($name, $opts) = splice @_, 0, 2 ) {
         my $item = Gtk2::MenuItem->new_with_mnemonic($name);
 
-        $item->set_active( $item->{active}->() )           if exists $item->{active};
-        $item->set_signal( activate => $item->{activate} ) if exists $item->{activate};
-
+        push @a, sub { $item->set_sensitive(not $opts->{disable}->(@_)) } if $opts->{disable};
+        $item->set_signal( activate => $opts->{activate} ) if exists $opts->{activate};
         $menu->append( $item );
     }
 
+    $menu->{_a} = \@a;
     $menu->show_all;
     $menu;
 }
 
 sub _build_rccm {
     my $this = shift;
+    my $map  = $this->[MAP]{_the_map};
 
     $this->[RCCM][0] = $this->_build_context_menu(
         'convert to _wall tile' => {
+            disable => sub { 
+                my $tile = $map->[ $_[1] ][ $_[0] ];
+
+                return TRUE unless $tile->{type};
+                return TRUE if $tile->{group};
+                return FALSE;
+            },
         },
         'convert to _corridor tile' => {
+            disable => sub { 
+                my $tile = $map->[ $_[1] ][ $_[0] ];
+
+                return TRUE if $tile->{type};
+                return TRUE if $tile->{group};
+                return FALSE;
+            },
         },
     );
 }
@@ -624,6 +640,8 @@ sub right_click_map {
 
     my @menus = @{ $this->[RCCM] };
     my $menu  = $menus[@a==3 ? 1:0];
+
+    $_->(@a) for @{$menu->{_a}};
 
     $menu->popup(
             undef, # parent menu shell
