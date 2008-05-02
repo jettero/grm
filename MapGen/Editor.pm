@@ -579,6 +579,16 @@ sub _build_rccm {
         Gtk2::Menu->new, # tile menu
         Gtk2::Menu->new, # closure menu
     ];
+
+    $this->[RCCM][0]->append( my $t_a = Gtk2::MenuItem->new("tile blah ...") ); $t_a->signal_connect( activate => sub { print "blah...\n" });
+    $this->[RCCM][0]->append( my $t_b = Gtk2::MenuItem->new("tile blah ...") ); $t_b->signal_connect( activate => sub { print "blah...\n" });
+    $this->[RCCM][0]->append( my $t_c = Gtk2::MenuItem->new("tile blah ...") ); $t_c->signal_connect( activate => sub { print "blah...\n" });
+
+    $this->[RCCM][1]->append( my $c_a = Gtk2::MenuItem->new("closure blah ...") ); $c_a->signal_connect( activate => sub { print "blah...\n" });
+    $this->[RCCM][1]->append( my $c_b = Gtk2::MenuItem->new("closure blah ...") ); $c_b->signal_connect( activate => sub { print "blah...\n" });
+    $this->[RCCM][1]->append( my $c_c = Gtk2::MenuItem->new("closure blah ...") ); $c_c->signal_connect( activate => sub { print "blah...\n" });
+
+    $_->show_all for @{ $this->[RCCM] };
 }
 
 sub right_click_map {
@@ -600,7 +610,7 @@ sub right_click_map {
     $this->_build_rccm unless $this->[RCCM];
 
     my @menus = @{ $this->[RCCM] };
-    my $menu  = $menu[@a==3 ? 1:0];
+    my $menu  = $menus[@a==3 ? 1:0];
 
     $menu->popup(
             undef, # parent menu shell
