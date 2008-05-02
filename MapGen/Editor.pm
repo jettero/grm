@@ -203,10 +203,10 @@ sub new {
     $eb->signal_connect( motion_notify_event => sub { $this->marea_motion_notify_event($s_up, @_); 0; });
     $eb->signal_connect(  leave_notify_event => sub { @{$this->[O_LT]} = (); $s_up->(); $this->draw_map_w_cursor; });
 
- # NOTE these don't work ....
- #  $eb->signal_connect(          drag_begin => sub { warn 'db: ' . dump(@_) });
- #  $eb->signal_connect(         drag_motion => sub { warn 'dm: ' . dump(@_) });
- #  $eb->signal_connect(            drag_end => sub { warn 'de: ' . dump(@_) });
+    # boolean = button-press-event (Gtk2::Widget, Gtk2::Gdk::Event)
+    # boolean = button-release-event (Gtk2::Widget, Gtk2::Gdk::Event) 
+    $eb->signal_connect( button_press_event   => sub { warn "press" }   );
+    $eb->signal_connect( button_release_event => sub { warn "release" } );
 
     $scwin->set_policy('automatic', 'automatic');
     $scwin->add($vp);
