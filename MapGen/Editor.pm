@@ -477,7 +477,12 @@ sub draw_map_w_cursor {
 # }}}
 # marea_motion_notify_event {{{
 sub marea_motion_notify_event {
-    my ($this,$s_up,undef,$em) = @_;
+    my ($this,$s_up,$eb,$em) = @_;
+
+  # NOTE: this definitely works, but it's probably smarter to use the click and drag events 
+  # my $dev = $em->device;
+  # my $mod = $em->state;
+  # warn "button-1 ..." if $mod * 'button1-mask'; # Overload Magic apparently, see Glib under flags
 
     my ($x, $y) = ($em->x, $em->y);
     my @cs      = split 'x', $this->[MAP]{cell_size};
