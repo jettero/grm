@@ -27,10 +27,10 @@ our @FILTERS                   = (qw( BasicDoors FiveSplit ClearDoors ));
 
 use vars qw($x); # like our, but at compile time so these constants work
 use constant {
-    MAP   => $x++, WINDOW => $x++, SETTINGS => $x++, MENU   => $x++,
-    FNAME => $x++, MAREA  => $x++, VP_DIM   => $x++, STAT   => $x++,
-    MP    => $x++, O_LT   => $x++, O_DR     => $x++, S_ARG  => $x++,
-    RCCM  => $x++,
+    MAP   => $x++, WINDOW => $x++, SETTINGS  => $x++, MENU   => $x++,
+    FNAME => $x++, MAREA  => $x++, VP_DIM    => $x++, STAT   => $x++,
+    MP    => $x++, O_LT   => $x++, O_DR      => $x++, S_ARG  => $x++,
+    RCCM  => $x++, SEL_S  => $x++, SELECTION => $x++, 
 };
 
 1;
@@ -205,8 +205,8 @@ sub new {
 
     # boolean = button-press-event (Gtk2::Widget, Gtk2::Gdk::Event)
     # boolean = button-release-event (Gtk2::Widget, Gtk2::Gdk::Event) 
-    $eb->signal_connect( button_press_event   => sub { warn "press" }   );
-    $eb->signal_connect( button_release_event => sub { warn "release" } );
+    $eb->signal_connect( button_press_event   => sub { $this->marea_button_press_event(@_) } );
+    $eb->signal_connect( button_release_event => sub { $this->marea_button_release_event(@_) } );
 
     $scwin->set_policy('automatic', 'automatic');
     $scwin->add($vp);
@@ -480,6 +480,24 @@ sub draw_map_w_cursor {
     $this->[MAREA]->set_from_pixbuf($pb);
 }
 # }}}
+# marea_button_press_event {{{
+sub marea_button_press_event {
+    my ($this, $ebox, $ebut) = @_;
+
+    warn 'here1';
+
+    $this->[SEL_S] = [@{ $this->[O_LT] }];
+}
+# }}}
+# marea_button_release_event {{{
+sub marea_button_release_event {
+    my ($this, $ebox, $ebut) = @_;
+
+    warn 'here2';
+
+    $this->[SEL_S] = undef;
+}
+# }}}
 # marea_motion_notify_event {{{
 sub marea_motion_notify_event {
     my ($this,$s_up,$eb,$em) = @_;
@@ -500,6 +518,8 @@ sub marea_motion_notify_event {
     my $s_arg = $this->[S_ARG];
     if( @$o_lt!=2 or ($lt[0] != $o_lt->[0] or $lt[1] != $o_lt->[1]) ) {
         my @bb = split 'x', $this->[MAP]{bounding_box};
+
+        warn "we're selecting something" if $this->[SEL_S];
 
         $lt[0] = $bb[0]-1 if $lt[0]>=$bb[0];
         $lt[1] = $bb[1]-1 if $lt[1]>=$bb[1];
