@@ -30,7 +30,7 @@ use constant {
     MAP   => $x++, WINDOW => $x++, SETTINGS  => $x++, MENU   => $x++,
     FNAME => $x++, MAREA  => $x++, VP_DIM    => $x++, STAT   => $x++,
     MP    => $x++, O_LT   => $x++, O_DR      => $x++, S_ARG  => $x++,
-    RCCM  => $x++, SEL_S  => $x++, SELECTION => $x++, 
+    RCCM  => $x++, SEL_S  => $x++, SELECTION => $x++, SEL_E  => $x++,
 };
 
 1;
@@ -451,11 +451,12 @@ sub draw_map_w_cursor {
 
         $cb->render_to_drawable_alpha($pm[0], 0,0, @ul, $dw,$dh, full=>255, max=>0,0);
 
+        my ($gc, $cm);
         if( my $s2 = @{$this->[S_ARG]}[2] ) {
             my $cc = Gtk2::Gdk::Color->new( map {65535*($_/0xff)} (0x00, 0xff, 0x00) );
-            my $gc = Gtk2::Gdk::GC->new($pm[0]);
 
-            $gc->get_colormap->alloc_color($cc, 0, 0);
+            $gc = Gtk2::Gdk::GC->new($pm[0]);
+            ($cm = $gc->get_colormap)->alloc_color($cc, 0, 0);
             $gc->set_foreground($cc);
 
             my $d  = $s2->[0];
@@ -470,6 +471,31 @@ sub draw_map_w_cursor {
 
             } elsif( $d eq 'e' ) {
                 $pm[0]->draw_rectangle($gc, 1, $ul[0]+$cx-2,$ul[1]+4, 3, $cy-9);
+            }
+
+        }
+
+        if( my $sel = $this->[SELECTION] ) {
+            my $sc = Gtk2::Gdk::Color->new( map {65535*($_/0xff)} (0x00, 0xff, 0x00) );
+            unless( $gc and $cm ) {
+                $gc = Gtk2::Gdk::GC->new($pm[0]);
+                ($cm = $gc->get_colormap);
+            }
+
+            for my $s (@$sel) {
+                # NOTE: when we have more than one selection area, we'll
+                # probably want to prevent drawing the overlapping part of the
+                # rectangles.
+
+                $cm->alloc_color($sc, 0, 0);
+                $gc->set_foreground($sc);
+
+                my @s = ($cx*$s->[0], $cy*$s->[1]);
+                my @e = ($cx*(1+$s->[2]-$s->[0]),$cy*(1+$s->[3]-$s->[1]));
+
+                # NOTE: @s and @e have to be sorted because negative width and height doesn't work.
+
+                $pm[0]->draw_rectangle($gc, 0, @s, @e);
             }
         }
 
@@ -491,13 +517,24 @@ sub marea_button_press_event {
 sub marea_button_release_event {
     my ($this, $ebox, $ebut) = @_;
 
-    $this->[SEL_S] = undef;
+    delete $this->[SELECTION] unless $this->[SEL_E];
+    delete $this->[SEL_S];
+    delete $this->[SEL_E];
 }
 # }}}
 # marea_selection_handler {{{
 sub marea_selection_handler {
     my ($this, $o_lt, $lt) = @_;
     my $s_sel = $this->[SEL_S];
+
+    $this->[SEL_E] = $lt;
+
+    # 1. if we're holding control, we should subtract rectangles
+    # 2. if we're hodling shift, we should add rectangles
+    # 3. for now, you can only select one rectangle, we will nontheless
+    #    prepare for more than one rectangle by storing a list of lists
+
+    $this->[SELECTION] = [[ @$s_sel, @$lt ]];
 }
 # }}}
 # marea_motion_notify_event {{{
