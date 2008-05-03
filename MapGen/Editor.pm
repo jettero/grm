@@ -484,8 +484,6 @@ sub draw_map_w_cursor {
 sub marea_button_press_event {
     my ($this, $ebox, $ebut) = @_;
 
-    warn 'here1';
-
     $this->[SEL_S] = [@{ $this->[O_LT] }];
 }
 # }}}
@@ -493,9 +491,13 @@ sub marea_button_press_event {
 sub marea_button_release_event {
     my ($this, $ebox, $ebut) = @_;
 
-    warn 'here2';
-
     $this->[SEL_S] = undef;
+}
+# }}}
+# marea_selection_handler {{{
+sub marea_selection_handler {
+    my ($this, $o_lt, $lt) = @_;
+    my $s_sel = $this->[SEL_S];
 }
 # }}}
 # marea_motion_notify_event {{{
@@ -519,7 +521,7 @@ sub marea_motion_notify_event {
     if( @$o_lt!=2 or ($lt[0] != $o_lt->[0] or $lt[1] != $o_lt->[1]) ) {
         my @bb = split 'x', $this->[MAP]{bounding_box};
 
-        warn "we're selecting something" if $this->[SEL_S];
+        $this->marea_selection_handler([@$o_lt], [@lt]) if $this->[SEL_S];
 
         $lt[0] = $bb[0]-1 if $lt[0]>=$bb[0];
         $lt[1] = $bb[1]-1 if $lt[1]>=$bb[1];
