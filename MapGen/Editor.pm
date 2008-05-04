@@ -122,7 +122,7 @@ sub new {
             item_type => '<Branch>',
             children => [
                 '_Redraw' => {
-                    callback    => sub { $this->draw_map },
+                    callback    => sub { $this->draw_map_w_cursor },
                     accelerator => '<ctrl>R',
                 },
                 'Render _Settings'=> {
@@ -493,8 +493,6 @@ sub draw_map_w_cursor {
                 my @s = ($cx*$s->[0], $cy*$s->[1]);
                 my @e = ($cx*(1+$s->[2]-$s->[0]),$cy*(1+$s->[3]-$s->[1]));
 
-                # NOTE: @s and @e have to be sorted because negative width and height doesn't work.
-
                 $pm[0]->draw_rectangle($gc, 0, @s, @e);
             }
         }
@@ -534,7 +532,12 @@ sub marea_selection_handler {
     # 3. for now, you can only select one rectangle, we will nontheless
     #    prepare for more than one rectangle by storing a list of lists
 
-    $this->[SELECTION] = [[ @$s_sel, @$lt ]];
+    my $a = [@$s_sel, @$lt];
+
+    ($a->[0],$a->[2]) = ($a->[2],$a->[0]) if $a->[2] < $a->[0];
+    ($a->[1],$a->[3]) = ($a->[3],$a->[1]) if $a->[3] < $a->[1];
+
+    $this->[SELECTION] = [$a];
 }
 # }}}
 # marea_motion_notify_event {{{
@@ -691,6 +694,10 @@ sub _build_rccm {
 
 sub right_click_map {
     my ($this, $event) = @_;
+    my $device = $event->device;
+    my @list   = $device->keys;
+
+    die "list=@list";
 
     my @a;
     if( my @o = (@{ $this->[O_LT] }) ) {
