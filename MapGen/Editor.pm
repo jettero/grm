@@ -31,7 +31,7 @@ use constant {
     FNAME => $x++, MAREA  => $x++, VP_DIM    => $x++, STAT   => $x++,
     MP    => $x++, O_LT   => $x++, O_DR      => $x++, S_ARG  => $x++,
     RCCM  => $x++, SEL_S  => $x++, SELECTION => $x++, SEL_E  => $x++,
-    SHST  => $x++,
+    SEL_W => $x++,
 };
 
 1;
@@ -522,9 +522,74 @@ sub marea_button_press_event {
 sub marea_button_release_event {
     my ($this, $ebox, $ebut) = @_;
 
-    delete $this->[SELECTION] unless $this->[SEL_E];
+    unless( $this->[SEL_E] ) {
+        my @state = $ebut->device->get_state( $this->[MAREA]->get_parent_window );
+        my $shift = $state[0] * 'shift-mask'; # see Glib under flgas for reasons this makes sense
+        if( $shift ) {
+            # NOTE: pretend we just selected this one tile with motion, so it adds to the current selection:
+            $this->marea_selection_handler( $this->[O_LT], $this->[O_LT], $ebut );
+
+        } else {
+            $this->draw_map_w_cursor if delete $this->[SELECTION];
+        }
+    }
+
     delete $this->[SEL_S];
     delete $this->[SEL_E];
+    delete $this->[SEL_W];
+
+    if( my $s = $this->[SELECTION] ) {
+        # NOTE: combine any rectangles that are combinable
+
+        POINTLESS: {
+            for my $j (0 .. $#$s) { my $l = $s->[$j];
+            for my $i (0 .. $#$s) { my $r = $s->[$i];
+                next if $i == $j;
+
+                if( $r->[0]>=$l->[0] and $r->[2]<=$l->[2] ) {
+                if( $r->[1]>=$l->[1] and $r->[3]<=$l->[3] ) {
+                    splice @$s, $i, 1;
+                    redo POINTLESS;
+                }}
+            }}
+        }
+
+        CONTIGUOUS: {
+            for my $j (0 .. $#$s) { my $l = $s->[$j];
+            for my $i (0 .. $#$s) { my $r = $s->[$i];
+                next if $i == $j;
+
+                if( $r->[0]==$l->[0] and $r->[2]==$l->[2] ) {
+                    my ($max_min, $min_max) = $l->[1]<$r->[1] ? ($l->[3],$r->[1]) : ($r->[3],$l->[1]);
+
+                    if( $max_min >= $min_max-1 ) {
+                        my $min = $r->[1]; $min = $l->[1] if $l->[1] < $min;
+                        my $max = $r->[3]; $max = $l->[3] if $l->[3] > $max;
+
+                        splice @$s, $i, 1, [ $l->[0], $min, $l->[2], $max ];
+                        splice @$s, $j, 1;
+
+                        goto CONTIGUOUS;
+                    }
+                }
+
+                if( $r->[1]==$l->[1] and $r->[3]==$l->[3] ) {
+                    my ($max_min, $min_max) = $l->[0]<$r->[0] ? ($l->[2],$r->[0]) : ($r->[2],$l->[0]);
+
+                    if( $max_min >= $min_max-1 ) {
+                        my $min = $r->[0]; $min = $l->[0] if $l->[0] < $min;
+                        my $max = $r->[2]; $max = $l->[2] if $l->[2] > $max;
+
+                        splice @$s, $i, 1, [ $min, $l->[1], $max, $l->[3] ];
+                        splice @$s, $j, 1;
+
+                        goto CONTIGUOUS;
+                    }
+                }
+
+            }}
+        }
+    }
 }
 # }}}
 # marea_selection_handler {{{
@@ -543,25 +608,21 @@ sub marea_selection_handler {
     #    prepare for more than one rectangle by storing a list of lists
 
     my $a = [@$s_sel, @$lt];
+    my $w = $this->[SEL_W];
+    $this->[SEL_W] = $a;
 
     ($a->[0],$a->[2]) = ($a->[2],$a->[0]) if $a->[2] < $a->[0];
     ($a->[1],$a->[3]) = ($a->[3],$a->[1]) if $a->[3] < $a->[1];
 
-    if( $shift ) {
-        my $s = $this->[SELECTION];
+    if( $shift and (my $s = $this->[SELECTION]) ) {
+        # NOTE: we don't combine any selections that form contiguous
+        # rectangles here since at least one could change shape, destroying
+        # the reasons for combining them.  We do it in the button release
+        # instead.
 
-        for my $i (reverse 0 .. $#$s) {
-            my $l = $s->[$i];
-
-            if( $l->[0]>=$a->[0] and $l->[2]<=$a->[2] ) {
-            if( $l->[1]>=$a->[1] and $l->[3]<=$a->[3] ) {
-                warn "splice out $i";
-                splice @$s, $i, 1;
-            }}
-        }
-
+        # If we're already working on a selection, take it back off the stack:
+        pop @$s if $w and $w == $s->[-1];
         push @$s, $a;
-        warn "recs: " . int @$s;
 
     } else {
         $this->[SELECTION] = [$a];
