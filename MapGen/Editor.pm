@@ -728,7 +728,7 @@ sub _od_desc {
 }
 # }}}
 # right_click_map {{{
-#
+
 # _build_context_menu {{{
 sub _build_context_menu {
     my $this = shift;
@@ -760,19 +760,23 @@ sub _build_rccm {
     $this->[RCCM][0] = $this->_build_context_menu(
         'convert to _wall tile' => {
             disable => sub { 
-                my $tile = $map->[ $_[1] ][ $_[0] ];
+                for my $t ( @_ ) {
+                    my $tile = $map->[ $t->[1] ][ $t->[0] ];
 
-                return TRUE unless $tile->{type};
-                return TRUE if $tile->{group};
+                    return TRUE unless $tile->{type};
+                    return TRUE if $tile->{group};
+                }
                 return FALSE;
             },
         },
         'convert to _corridor tile' => {
             disable => sub { 
-                my $tile = $map->[ $_[1] ][ $_[0] ];
+                for my $t ( @_ ) {
+                    my $tile = $map->[ $t->[1] ][ $t->[0] ];
 
-                return TRUE if $tile->{type};
-                return TRUE if $tile->{group};
+                    return TRUE if $tile->{type};
+                    return TRUE if $tile->{group};
+                }
                 return FALSE;
             },
         },
@@ -784,16 +788,27 @@ sub right_click_map {
     my ($this, $event) = @_;
 
     my @a;
-    if( my @o = (@{ $this->[O_LT] }) ) {
-        if( my $s2 = @{$this->[S_ARG]}[2] ) {
-            @a = (@o, $s2->[0]);
-
-        } else {
-            @a = @o;
+    if( my $s = $this->[SELECTION] ) {
+        for my $r (@$s) {
+            for my $x ($r->[0] .. $r->[2]) {
+            for my $y ($r->[1] .. $r->[3]) {
+            }}
         }
+        die "not done";
 
     } else {
-        return FALSE;
+        if( my @o = (@{ $this->[O_LT] }) ) {
+            if( my $s2 = @{$this->[S_ARG]}[2] ) {
+                @a = (@o, $s2->[0]);
+
+            } else {
+                @a = @o;
+            }
+
+        } else {
+            return FALSE;
+        }
+        @a = \@a;
     }
 
     $this->_build_rccm unless $this->[RCCM];
