@@ -31,6 +31,7 @@ use constant {
     FNAME => $x++, MAREA  => $x++, VP_DIM    => $x++, STAT   => $x++,
     MP    => $x++, O_LT   => $x++, O_DR      => $x++, S_ARG  => $x++,
     RCCM  => $x++, SEL_S  => $x++, SELECTION => $x++, SEL_E  => $x++,
+    SHST  => $x++,
 };
 
 1;
@@ -415,6 +416,10 @@ sub draw_map {
     my $map = $this->[MAP];
        $map = $this->[MAP] = $this->blank_map unless $map;
 
+    # clear out any selections or cursors that probably nolonger apply
+    $this->[SEL_S] = $this->[SEL_E] = $this->[SELECTION] = $this->[O_DR] = $this->[S_ARG] = undef;
+    @{$this->[O_LT]}=();
+
     $map->set_exporter( "BasicImage" );
     my $image = $map->export( -retonly );
 
@@ -508,7 +513,9 @@ sub draw_map_w_cursor {
 sub marea_button_press_event {
     my ($this, $ebox, $ebut) = @_;
 
-    $this->[SEL_S] = [@{ $this->[O_LT] }];
+    my @o_lt = @{ $this->[O_LT] };
+
+    $this->[SEL_S] = \@o_lt if @o_lt == 2;
 }
 # }}}
 # marea_button_release_event {{{
@@ -522,8 +529,11 @@ sub marea_button_release_event {
 # }}}
 # marea_selection_handler {{{
 sub marea_selection_handler {
-    my ($this, $o_lt, $lt) = @_;
+    my ($this, $o_lt, $lt, $event) = @_;
     my $s_sel = $this->[SEL_S];
+
+    my @state = $event->device->get_state( $this->[MAREA]->get_parent_window );
+    my $shift = $state[0] * 'shift-mask'; # see Glib under flgas for reasons this makes sense
 
     $this->[SEL_E] = $lt;
 
@@ -537,17 +547,30 @@ sub marea_selection_handler {
     ($a->[0],$a->[2]) = ($a->[2],$a->[0]) if $a->[2] < $a->[0];
     ($a->[1],$a->[3]) = ($a->[3],$a->[1]) if $a->[3] < $a->[1];
 
-    $this->[SELECTION] = [$a];
+    if( $shift ) {
+        my $s = $this->[SELECTION];
+
+        for my $i (reverse 0 .. $#$s) {
+            my $l = $s->[$i];
+
+            if( $l->[0]>=$a->[0] and $l->[2]<=$a->[2] ) {
+            if( $l->[1]>=$a->[1] and $l->[3]<=$a->[3] ) {
+                warn "splice out $i";
+                splice @$s, $i, 1;
+            }}
+        }
+
+        push @$s, $a;
+        warn "recs: " . int @$s;
+
+    } else {
+        $this->[SELECTION] = [$a];
+    }
 }
 # }}}
 # marea_motion_notify_event {{{
 sub marea_motion_notify_event {
     my ($this,$s_up,$eb,$em) = @_;
-
-  # NOTE: this definitely works, but it's probably smarter to use the click and drag events 
-  # my $dev = $em->device;
-  # my $mod = $em->state;
-  # warn "button-1 ..." if $mod * 'button1-mask'; # Overload Magic apparently, see Glib under flags
 
     my ($x, $y) = ($em->x, $em->y);
     my @cs      = split 'x', $this->[MAP]{cell_size};
@@ -561,7 +584,7 @@ sub marea_motion_notify_event {
     if( @$o_lt!=2 or ($lt[0] != $o_lt->[0] or $lt[1] != $o_lt->[1]) ) {
         my @bb = split 'x', $this->[MAP]{bounding_box};
 
-        $this->marea_selection_handler([@$o_lt], [@lt]) if $this->[SEL_S];
+        $this->marea_selection_handler([@$o_lt], [@lt], $em) if $this->[SEL_S];
 
         $lt[0] = $bb[0]-1 if $lt[0]>=$bb[0];
         $lt[1] = $bb[1]-1 if $lt[1]>=$bb[1];
@@ -644,6 +667,8 @@ sub _od_desc {
 }
 # }}}
 # right_click_map {{{
+#
+# _build_context_menu {{{
 sub _build_context_menu {
     my $this = shift;
     my $menu = new Gtk2::Menu->new;
@@ -665,7 +690,8 @@ sub _build_context_menu {
     $menu->show_all;
     $menu;
 }
-
+# }}}
+# _build_rccm {{{
 sub _build_rccm {
     my $this = shift;
     my $map  = $this->[MAP]{_the_map};
@@ -691,13 +717,10 @@ sub _build_rccm {
         },
     );
 }
+# }}}
 
 sub right_click_map {
     my ($this, $event) = @_;
-    my $device = $event->device;
-    my @list   = $device->keys;
-
-    die "list=@list";
 
     my @a;
     if( my @o = (@{ $this->[O_LT] }) ) {
