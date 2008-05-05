@@ -763,10 +763,10 @@ sub _build_rccm {
                 for my $t ( @_ ) {
                     my $tile = $map->[ $t->[1] ][ $t->[0] ];
 
-                    return TRUE unless $tile->{type};
-                    return TRUE if $tile->{group};
+                    next if $tile->{group};
+                    return FALSE if $tile->{type};
                 }
-                return FALSE;
+                return TRUE;
             },
         },
         'convert to _corridor tile' => {
@@ -774,10 +774,10 @@ sub _build_rccm {
                 for my $t ( @_ ) {
                     my $tile = $map->[ $t->[1] ][ $t->[0] ];
 
-                    return TRUE if $tile->{type};
-                    return TRUE if $tile->{group};
+                    next if $tile->{group};
+                    return FALSE unless $tile->{type};
                 }
-                return FALSE;
+                return TRUE;
             },
         },
     );
@@ -797,18 +797,19 @@ sub right_click_map {
         die "not done";
 
     } else {
+        my @b;
         if( my @o = (@{ $this->[O_LT] }) ) {
             if( my $s2 = @{$this->[S_ARG]}[2] ) {
-                @a = (@o, $s2->[0]);
+                @b = (@o, $s2->[0]);
 
             } else {
-                @a = @o;
+                @b = @o;
             }
 
         } else {
             return FALSE;
         }
-        @a = \@a;
+        @a = (\@b);
     }
 
     $this->_build_rccm unless $this->[RCCM];
