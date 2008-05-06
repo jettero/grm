@@ -731,8 +731,8 @@ sub _od_desc {
 # }}}
 
 # EDITING COMMANDS
-# convert_to_wall_tiles {{{
-sub convert_to_wall_tiles {
+# tileconvert_to_wall_tiles {{{
+sub tileconvert_to_wall_tiles {
     my $this = shift;
 
     # NOTE: The @_ passed to us is prefiltered by our {enable} from the context menu
@@ -751,8 +751,8 @@ sub convert_to_wall_tiles {
     $this->draw_map;
 }
 # }}}
-# convert_to_corridor_tiles {{{
-sub convert_to_corridor_tiles {
+# tileconvert_to_corridor_tiles {{{
+sub tileconvert_to_corridor_tiles {
     my $this = shift;
 
     # NOTE: The @_ passed to us is prefiltered by our {enable} from the context menu
@@ -788,7 +788,7 @@ sub _build_rccm {
                 map  { $map->[ $_->[1] ][ $_->[0] ] }
                 @_
             },
-            activate => sub { $this->convert_to_wall_tiles(@{$_[1]{result}}) },
+            activate => sub { $this->tileconvert_to_wall_tiles(@{$_[1]{result}}) },
         },
         'convert to _corridor tile' => {
             enable => sub { 
@@ -796,7 +796,30 @@ sub _build_rccm {
                 map  { $map->[ $_->[1] ][ $_->[0] ] }
                 @_
             },
-            activate => sub { $this->convert_to_corridor_tiles(@{$_[1]{result}}) },
+            activate => sub { $this->tileconvert_to_corridor_tiles(@{$_[1]{result}}) },
+        },
+    );
+
+    # NOTE: I'm writing these to later take arrays of closures instead of just singles...
+    # but for now, you can only select one closure at a time.
+    $this->[RCCM][1] = $this->_build_context_menu(
+        'convert to _wall' => {
+            enable => sub { 
+                grep { $_->[1] }
+                map  { my $t = $map->[ $_->[1] ][ $_->[0] ]; [ $t, $t->{od}{$_->[2]}, $t->{nb}{$_->[2]} ] }
+                grep { @$_ == 3 }
+                @_
+            },
+            activate => sub { $this->closureconvert_to_wall(@{$_[1]{result}}) },
+        },
+        'convert to _opening' => {
+            enable => sub { 
+                grep { $_->[0]{type} and $_->[1]{type} and (not($_->[2]) or ref($_->[2])) }
+                map  { my $t = $map->[ $_->[1] ][ $_->[0] ]; [ $t, $t->{nb}{$_->[2]}, $t->{od}{$_->[2]} ] }
+                grep { @$_ == 3 }
+                @_
+            },
+            activate => sub { $this->closureconvert_to_opening(@{$_[1]{result}}) },
         },
     );
 }
@@ -857,7 +880,7 @@ sub right_click_map {
     $this->_build_rccm unless $this->[RCCM];
 
     my @menus = @{ $this->[RCCM] };
-    my $menu  = $menus[@a==3 ? 1:0];
+    my $menu  = $menus[@{$a[0]}==3 ? 1:0];
 
     $_->(@a) for @{$menu->{_a}};
 
