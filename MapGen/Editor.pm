@@ -735,19 +735,16 @@ sub _od_desc {
 sub convert_to_wall_tiles {
     my $this = shift;
 
+    # NOTE: The @_ passed to us is prefiltered by our {enable} from the context menu
+
     for my $tile (@_) {
         delete $tile->{group};
         delete $tile->{type};
 
-        my $od = $tile->{od};
-        my $nb = $tile->{nb};
         for my $d (qw(n e s w)) {
-            $od->{od}{$d} = 0;
-
             my $o = $Games::RolePlay::MapGen::opp{$d};
-            my $n = $nb->{$d};
 
-            $n->{od}{$o} = 0;
+            $tile->{od}{$d} = $tile->{nb}{$d}{od}{$o} = 0;
         }
     }
 
@@ -758,9 +755,24 @@ sub convert_to_wall_tiles {
 sub convert_to_corridor_tiles {
     my $this = shift;
 
+    # NOTE: The @_ passed to us is prefiltered by our {enable} from the context menu
+
     for my $tile (@_) {
-        warn "$tile";
+        $tile->{type} = "corridor";
+
+        for my $d (qw(n e s w)) {
+            my $o = $Games::RolePlay::MapGen::opp{$d};
+            my $n = $tile->{nb}{$d};
+            my $t = $n->{type};
+
+            # Arguably, this should use the map's door settings to drop doors
+            # when appropriate... later maybe
+
+            $tile->{od}{$d} = $n->{od}{$o} = 1 if $t and $t eq "corridor";
+        }
     }
+
+    $this->draw_map;
 }
 # }}}
 
