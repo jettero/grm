@@ -727,8 +727,43 @@ sub _od_desc {
     return ['wall'];
 }
 # }}}
-# right_click_map {{{
 
+# convert_to_wall_tiles {{{
+sub convert_to_wall_tiles {
+    warn dump({ctwt=>[map {ref $_} @_]});
+}
+# }}}
+# convert_to_corridor_tiles {{{
+sub convert_to_corridor_tiles {
+    warn dump({ctct=>[map {ref $_} @_]});
+}
+# }}}
+
+# _build_rccm {{{
+sub _build_rccm {
+    my $this = shift;
+    my $map  = $this->[MAP]{_the_map};
+
+    $this->[RCCM][0] = $this->_build_context_menu(
+        'convert to _wall tile' => {
+            enable => sub { 
+                grep { not $_->{group} and $_->{type} }
+                map  { $map->[ $_->[1] ][ $_->[0] ] }
+                @_
+            },
+            activate => sub { $this->convert_to_wall_tiles(@_) },
+        },
+        'convert to _corridor tile' => {
+            enable => sub { 
+                grep { not $_->{group} and not $_->{type} }
+                map  { $map->[ $_->[1] ][ $_->[0] ] }
+                @_
+            },
+            activate => sub { $this->convert_to_corridor_tiles(@_) },
+        },
+    );
+}
+# }}}
 # _build_context_menu {{{
 sub _build_context_menu {
     my $this = shift;
@@ -742,8 +777,9 @@ sub _build_context_menu {
     while( my($name, $opts) = splice @_, 0, 2 ) {
         my $item = Gtk2::MenuItem->new_with_mnemonic($name);
 
-        push @a, sub { $item->set_sensitive(not $opts->{disable}->(@_)) } if $opts->{disable};
-        $item->set_signal( activate => $opts->{activate} ) if exists $opts->{activate};
+        push @a, sub { my @r =  $opts->{enable}->(@_); $item->set_sensitive( scalar @r ); $opts->{result} = \@r } if $opts->{enable};
+        push @a, sub { my @r = $opts->{disable}->(@_); $item->set_sensitive(  not   @r ); $opts->{result} = \@r } if $opts->{disable};
+        $item->signal_connect( activate => $opts->{activate}, $opts ) if exists $opts->{activate};
         $menu->append( $item );
     }
 
@@ -752,38 +788,7 @@ sub _build_context_menu {
     $menu;
 }
 # }}}
-# _build_rccm {{{
-sub _build_rccm {
-    my $this = shift;
-    my $map  = $this->[MAP]{_the_map};
-
-    $this->[RCCM][0] = $this->_build_context_menu(
-        'convert to _wall tile' => {
-            disable => sub { 
-                for my $t ( @_ ) {
-                    my $tile = $map->[ $t->[1] ][ $t->[0] ];
-
-                    next if $tile->{group};
-                    return FALSE if $tile->{type};
-                }
-                return TRUE;
-            },
-        },
-        'convert to _corridor tile' => {
-            disable => sub { 
-                for my $t ( @_ ) {
-                    my $tile = $map->[ $t->[1] ][ $t->[0] ];
-
-                    next if $tile->{group};
-                    return FALSE unless $tile->{type};
-                }
-                return TRUE;
-            },
-        },
-    );
-}
-# }}}
-
+# right_click_map {{{
 sub right_click_map {
     my ($this, $event) = @_;
 
