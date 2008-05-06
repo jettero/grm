@@ -235,6 +235,7 @@ sub error {
 }
 # }}}
 
+# FILE MANIPULATION
 # open_file {{{
 sub open_file {
     my $this = shift;
@@ -409,6 +410,7 @@ sub pulser {
 }
 # }}}
 
+# DRAWING 
 # draw_map {{{
 sub draw_map {
     my $this = shift;
@@ -728,14 +730,37 @@ sub _od_desc {
 }
 # }}}
 
+# EDITING COMMANDS
 # convert_to_wall_tiles {{{
 sub convert_to_wall_tiles {
-    warn dump({ctwt=>[map {ref $_} @_]});
+    my $this = shift;
+
+    for my $tile (@_) {
+        delete $tile->{group};
+        delete $tile->{type};
+
+        my $od = $tile->{od};
+        my $nb = $tile->{nb};
+        for my $d (qw(n e s w)) {
+            $od->{od}{$d} = 0;
+
+            my $o = $Games::RolePlay::MapGen::opp{$d};
+            my $n = $nb->{$d};
+
+            $n->{od}{$o} = 0;
+        }
+    }
+
+    $this->draw_map;
 }
 # }}}
 # convert_to_corridor_tiles {{{
 sub convert_to_corridor_tiles {
-    warn dump({ctct=>[map {ref $_} @_]});
+    my $this = shift;
+
+    for my $tile (@_) {
+        warn "$tile";
+    }
 }
 # }}}
 
@@ -751,7 +776,7 @@ sub _build_rccm {
                 map  { $map->[ $_->[1] ][ $_->[0] ] }
                 @_
             },
-            activate => sub { $this->convert_to_wall_tiles(@_) },
+            activate => sub { $this->convert_to_wall_tiles(@{$_[1]{result}}) },
         },
         'convert to _corridor tile' => {
             enable => sub { 
@@ -759,7 +784,7 @@ sub _build_rccm {
                 map  { $map->[ $_->[1] ][ $_->[0] ] }
                 @_
             },
-            activate => sub { $this->convert_to_corridor_tiles(@_) },
+            activate => sub { $this->convert_to_corridor_tiles(@{$_[1]{result}}) },
         },
     );
 }
@@ -797,9 +822,9 @@ sub right_click_map {
         for my $r (@$s) {
             for my $x ($r->[0] .. $r->[2]) {
             for my $y ($r->[1] .. $r->[3]) {
+                push @a, [$x,$y];
             }}
         }
-        die "not done";
 
     } else {
         my @b;
@@ -837,6 +862,7 @@ sub right_click_map {
 }
 # }}}
 
+# OPTS AND PREFS
 # blank_map {{{
 sub blank_map {
     my $this = shift;
@@ -1172,6 +1198,7 @@ sub preferences {
 }
 # }}}
 
+# MISC
 # about {{{
 sub about {
     my $this = shift;
@@ -1193,7 +1220,6 @@ sub about {
     );
 }
 # }}}
-
 # unknown_menu_callback {{{
 sub unknown_menu_callback {
     my $this = shift;
