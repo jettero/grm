@@ -18,6 +18,7 @@ use Data::Dump qw(dump);
 use POSIX qw(ceil);
 
 use Games::RolePlay::MapGen::Editor::_MForm qw(make_form $default_restore_defaults);
+use Games::RolePlay::MapGen::Tools qw( roll _door choice );
 
 our $DEFAULT_GENERATOR         = 'Basic';
 our @GENERATORS                = (qw( Basic Blank OneBigRoom Perfect SparseAndLoops ));
@@ -123,7 +124,7 @@ sub new {
             item_type => '<Branch>',
             children => [
                 '_Redraw' => {
-                    callback    => sub { $this->draw_map_w_cursor },
+                    callback    => sub { $this->draw_map; $this->draw_map_w_cursor },
                     accelerator => '<ctrl>R',
                 },
                 'Render _Settings'=> {
@@ -804,6 +805,73 @@ sub closureconvert_to_opening {
     $this->draw_map;
 }
 # }}}
+# closureconvert_to_door {{{
+sub closureconvert_to_door {
+    my $this = shift;
+
+    my $minor_dirs = {
+        n => [qw(e w)],
+        s => [qw(e w)],
+
+        e => [qw(n s)],
+        w => [qw(n s)],
+    };
+
+    for my $ca (@_) {
+        my ($t, $d) = @$ca;
+        my $o = $Games::RolePlay::MapGen::opp{$d};
+        my $n = $t->{nb}{$d};
+
+        my ($ttype, $ntype) = ($t->{type}, $n->{type});
+
+        if( $ttype eq "room" and $ntype eq "room" ) {
+            $ntype = "corridor";
+        }
+
+        my $tkey  = ( $t->{od}{$d} ? "open" : "closed" );
+           $tkey .= "_" . join("_", reverse sort( $ttype, $ntype ));
+           $tkey .= "_door_percent";
+
+        my $chances = $this->[MAP]->{$tkey};
+        die "chances error for $tkey" unless defined $chances;
+
+        $t->{od}{$d} = $n->{od}{$o} = &_door(
+            (map {$_ => ((roll(1, 10000) <= $chances->{$_}*100) ? 1:0) } qw(locked stuck secret)),
+
+            open_dir => {
+                major => &choice( $d, $o ),
+                minor => &choice( @{$minor_dirs->{$d}} ),
+            },
+        );
+    }
+
+    $this->draw_map;
+}
+# }}}
+# closure_door_properties {{{
+sub closure_door_properties {
+    my $this = shift;
+
+    my $c = 0;
+    for my $ca (@_) {
+        my $od = $ca->[0]{od}{$ca->[1]};
+        my $i = { %$od };
+
+        my $options = [[ # column 1
+            { mnemonic => "Locked: ", type => "bool", desc => "is the door locked?", name => 'locked' },
+            { mnemonic => "Secret: ", type => "bool", desc => "is the door secret?", name => 'secret' },
+            { mnemonic => "Stuck: ",  type => "bool", desc => "is the door stuck?",  name => 'stuck'  },
+        ]];
+
+        my ($result, $o) = $this->make_form($this->[WINDOW], $i, $options);
+        next unless $result eq "ok";
+        $c ++;
+        $od->{$_} = $o->{$_} for keys %$o;
+    }
+
+    $this->draw_map if $c;
+}
+# }}}
 
 # _build_rccm {{{
 sub _build_rccm {
@@ -851,6 +919,26 @@ sub _build_rccm {
                 @_
             },
             activate => sub { $this->closureconvert_to_opening(@{$_[1]{result}}) },
+        },
+        'convert to _door' => {
+            enable => sub { 
+                map  { [ $_->[0], $_->[-1][-1] ] }
+                grep { $_->[0]{type} and $_->[1]{type} and (not($_->[2]) or not ref($_->[2])) }
+                map  { my $t = $map->[ $_->[1] ][ $_->[0] ]; [ $t, $t->{nb}{$_->[2]}, $t->{od}{$_->[2]}, $_ ] }
+                grep { @$_ == 3 }
+                @_
+            },
+            activate => sub { $this->closureconvert_to_door(@{$_[1]{result}}) },
+        },
+        'door _properties' => {
+            enable => sub { 
+                map  { [ $_->[0], $_->[-1][-1] ] }
+                grep { ref $_->[1] }
+                map  { my $t = $map->[ $_->[1] ][ $_->[0] ]; [ $t, $t->{od}{$_->[2]}, $_ ] }
+                grep { @$_ == 3 }
+                @_
+            },
+            activate => sub { $this->closure_door_properties(@{$_[1]{result}}) },
         },
     );
 }
