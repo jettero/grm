@@ -895,6 +895,32 @@ sub _build_rccm {
             },
             activate => sub { $this->tileconvert_to_corridor_tiles(@{$_[1]{result}}) },
         },
+        'convert _inside closures to openings' => {
+            enable => sub { 
+                my $min_x = $_->[0]; my $max_x = $_->[0];
+                my $min_y = $_->[1]; my $max_y = $_->[1];
+
+                map  { $map->[ $_->[1] ][ $_->[0] ]{ $_->[2] } }
+                grep {
+                    my $ret = 1;
+                    $ret = 0 if $_->[0] == $min_x and $_->[2] eq "w";
+                    $ret = 0 if $_->[0] == $max_x and $_->[2] eq "e";
+                    $ret = 0 if $_->[1] == $min_y and $_->[2] eq "n";
+                    $ret = 0 if $_->[1] == $max_y and $_->[2] eq "s";
+                    $ret;
+                }
+                map  {
+                    my $l = $_;
+
+                    $min_x = $l->[0] if $l->[0] < $min_x; $max_x = $l->[0] if $l->[0] > $max_x;
+                    $min_y = $l->[1] if $l->[1] < $min_y; $max_y = $l->[1] if $l->[1] > $max_y;
+
+                    (map { [@$l, $_] } qw(n e s w))
+                }
+                @_
+            },
+            activate => sub { $this->tileconvert_to_corridor_tiles(@{$_[1]{result}}) },
+        },
     );
 
     # NOTE: I'm writing these to later take arrays of closures instead of just singles...
