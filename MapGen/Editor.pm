@@ -950,7 +950,7 @@ sub _build_context_menu {
 
     @_ = @{$_[0]} if ref $_[0];
 
-    # NOTE: this should become a module like _MForm
+    # TODO: this should become a module like _MForm.pm
 
     my @a;
     while( my($name, $opts) = splice @_, 0, 2 ) {
