@@ -776,6 +776,35 @@ sub tileconvert_to_corridor_tiles {
 }
 # }}}
 
+# closureconvert_to_wall {{{
+sub closureconvert_to_wall {
+    my $this = shift;
+
+    for my $ca (@_) {
+        my ($tile, $d) = @$ca;
+        my $o = $Games::RolePlay::MapGen::opp{$d};
+
+        $tile->{od}{$d} = $tile->{nb}{$d}{od}{$o} = 0;
+    }
+
+    $this->draw_map;
+}
+# }}}
+# closureconvert_to_opening {{{
+sub closureconvert_to_opening {
+    my $this = shift;
+
+    for my $ca (@_) {
+        my ($tile, $d) = @$ca;
+        my $o = $Games::RolePlay::MapGen::opp{$d};
+
+        $tile->{od}{$d} = $tile->{nb}{$d}{od}{$o} = 1;
+    }
+
+    $this->draw_map;
+}
+# }}}
+
 # _build_rccm {{{
 sub _build_rccm {
     my $this = shift;
@@ -805,8 +834,9 @@ sub _build_rccm {
     $this->[RCCM][1] = $this->_build_context_menu(
         'convert to _wall' => {
             enable => sub { 
+                map  { [ $_->[0], $_->[-1][-1] ] }
                 grep { $_->[1] }
-                map  { my $t = $map->[ $_->[1] ][ $_->[0] ]; [ $t, $t->{od}{$_->[2]}, $t->{nb}{$_->[2]} ] }
+                map  { my $t = $map->[ $_->[1] ][ $_->[0] ]; [ $t, $t->{od}{$_->[2]}, $t->{nb}{$_->[2]}, $_ ] }
                 grep { @$_ == 3 }
                 @_
             },
@@ -814,8 +844,9 @@ sub _build_rccm {
         },
         'convert to _opening' => {
             enable => sub { 
+                map  { [ $_->[0], $_->[-1][-1] ] }
                 grep { $_->[0]{type} and $_->[1]{type} and (not($_->[2]) or ref($_->[2])) }
-                map  { my $t = $map->[ $_->[1] ][ $_->[0] ]; [ $t, $t->{nb}{$_->[2]}, $t->{od}{$_->[2]} ] }
+                map  { my $t = $map->[ $_->[1] ][ $_->[0] ]; [ $t, $t->{nb}{$_->[2]}, $t->{od}{$_->[2]}, $_ ] }
                 grep { @$_ == 3 }
                 @_
             },
