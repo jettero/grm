@@ -879,7 +879,7 @@ sub _build_rccm {
     my $map  = $this->[MAP]{_the_map};
 
     $this->[RCCM][0] = $this->_build_context_menu(
-        'convert to _wall tile' => {
+        'convert to w_all tile' => {
             enable => sub { 
                 grep { not $_->{group} and $_->{type} }
                 map  { $map->[ $_->[1] ][ $_->[0] ] }
@@ -897,10 +897,12 @@ sub _build_rccm {
         },
         'convert _inside closures to openings' => {
             enable => sub { 
-                my $min_x = $_->[0]; my $max_x = $_->[0];
-                my $min_y = $_->[1]; my $max_y = $_->[1];
+                my $min_x = $_[0][0]; my $max_x = $_[0][0];
+                my $min_y = $_[0][1]; my $max_y = $_[0][1];
 
-                map  { $map->[ $_->[1] ][ $_->[0] ]{ $_->[2] } }
+                grep { my $od = $_->[0]{od}{ $_->[1] };
+                    $_->[0]{type} and $_->[0]{nb}{$_->[1]}{type} and (not($od) or ref($od)) }
+                map  { [ $map->[ $_->[1] ][ $_->[0] ], $_->[2] ] }
                 grep {
                     my $ret = 1;
                     $ret = 0 if $_->[0] == $min_x and $_->[2] eq "w";
@@ -919,7 +921,87 @@ sub _build_rccm {
                 }
                 @_
             },
-            activate => sub { $this->tileconvert_to_corridor_tiles(@{$_[1]{result}}) },
+            activate => sub { $this->closureconvert_to_opening(@{$_[1]{result}}) },
+        },
+        'convert _north edge of selection to walls' => {
+            enable => sub { 
+                my $min_y = $_[0][1];
+
+                grep { $_->[0]{od}{ $_->[1] } }
+                map  { [ $map->[ $_->[1] ][ $_->[0] ], $_->[2] ] }
+                grep {
+                    my $ret = 0;
+                    $ret = 1 if $_->[1] == $min_y;
+                    $ret;
+                }
+                map  {
+                    $min_y = $_->[1] if $_->[1] < $min_y;
+
+                    [@$_, 'e']
+                }
+                @_
+            },
+            activate => sub { $this->closureconvert_to_wall(@{$_[1]{result}}) },
+        },
+        'convert _east edge of selection to walls' => {
+            enable => sub { 
+                my $max_x = $_[0][0];
+
+                grep { $_->[0]{od}{ $_->[1] } }
+                map  { [ $map->[ $_->[1] ][ $_->[0] ], $_->[2] ] }
+                grep {
+                    my $ret = 0;
+                    $ret = 1 if $_->[0] == $max_x;
+                    $ret;
+                }
+                map  {
+                    $max_x = $_->[0] if $_->[0] > $max_x;
+
+                    [@$_, 'e']
+                }
+                @_
+            },
+            activate => sub { $this->closureconvert_to_wall(@{$_[1]{result}}) },
+        },
+        'convert _south edge of selection to walls' => {
+            enable => sub { 
+                my $max_y = $_[0][1];
+
+                grep { $_->[0]{od}{ $_->[1] } }
+                map  { [ $map->[ $_->[1] ][ $_->[0] ], $_->[2] ] }
+                grep {
+                    my $ret = 0;
+                    $ret = 1 if $_->[1] == $max_y;
+                    $ret;
+                }
+                map  {
+                    $max_y = $_->[1] if $_->[1] > $max_y;
+
+                    [@$_, 's']
+                }
+                @_
+            },
+            activate => sub { $this->closureconvert_to_wall(@{$_[1]{result}}) },
+        },
+        'convert _west edge of selection to walls' => {
+            enable => sub { 
+                my $min_x = $_[0][0];
+
+                grep { $_->[0]{od}{ $_->[1] } }
+                map  { [ $map->[ $_->[1] ][ $_->[0] ], $_->[2] ] }
+                grep {
+                    my $ret = 0;
+                    $ret = 1 if $_->[0] == $min_x;
+                    $ret;
+                }
+                map  {
+                    $min_x = $_->[0] if $_->[0] < $min_x;
+
+                    [@$_, 'w']
+                }
+                @_
+            },
+            activate => sub { $this->closureconvert_to_wall(@{$_[1]{result}}) },
         },
     );
 
