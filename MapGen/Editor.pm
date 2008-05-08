@@ -770,7 +770,10 @@ sub tileconvert_to_wall_tiles {
         for my $d (qw(n e s w)) {
             my $o = $Games::RolePlay::MapGen::opp{$d};
 
-            $tile->{od}{$d} = $tile->{nb}{$d}{od}{$o} = 0;
+            if( my $n = $tile->{nb}{$d} ) {
+                warn "d=$d; n=$n;";
+                $tile->{od}{$d} = $n->{od}{$o} = 0;
+            }
         }
     }
 
@@ -788,13 +791,17 @@ sub tileconvert_to_corridor_tiles {
 
         for my $d (qw(n e s w)) {
             my $o = $Games::RolePlay::MapGen::opp{$d};
-            my $n = $tile->{nb}{$d};
-            my $t = $n->{type};
 
-            # Arguably, this should use the map's door settings to drop doors
-            # when appropriate... later maybe
+            if( my $n = $tile->{nb}{$d} ) {
+                my $t = $n->{type};
 
-            $tile->{od}{$d} = $n->{od}{$o} = 1 if $t and $t eq "corridor";
+                # Arguably, this should use the map's door settings to drop doors
+                # when appropriate... later maybe
+
+                warn "d=$d; n=$n;";
+
+                $tile->{od}{$d} = $n->{od}{$o} = 1 if $t and $t eq "corridor";
+            }
         }
     }
 
@@ -944,7 +951,7 @@ sub _build_rccm {
                 map  { [ $map->[ $_->[1] ][ $_->[0] ], $_->[2] ] }
                 grep {
                     my $ret = 1;
-                    $ret = 0 if $_->[0] == $min_x and $_->[2] eq "w";
+                    $ret = 0 if $_->[0] == $min_x and $_->[2] eq "w"; # this amounts to check if there exists a {nb}{d}
                     $ret = 0 if $_->[0] == $max_x and $_->[2] eq "e";
                     $ret = 0 if $_->[1] == $min_y and $_->[2] eq "n";
                     $ret = 0 if $_->[1] == $max_y and $_->[2] eq "s";
@@ -968,7 +975,7 @@ sub _build_rccm {
 
                 my $min_y = $_[0][1];
 
-                grep { $_->[0]{od}{ $_->[1] } }
+                grep { $_->[0]{od}{ $_->[1] } } # this amounts to check if there exists an {nb}{d}
                 map  { [ $map->[ $_->[1] ][ $_->[0] ], $_->[2] ] }
                 grep {
                     my $ret = 0;
@@ -1058,7 +1065,7 @@ sub _build_rccm {
         'convert to _wall' => {
             enable => sub { 
                 map  { [ $_->[0], $_->[-1][-1] ] }
-                grep { $_->[1] }
+                grep { $_->[1] } # this amounts to checking if there exists an {nb}{d}
                 map  { my $t = $map->[ $_->[1] ][ $_->[0] ]; [ $t, $t->{od}{$_->[2]}, $t->{nb}{$_->[2]}, $_ ] }
                 grep { @$_ == 3 }
                 @_
@@ -1068,7 +1075,7 @@ sub _build_rccm {
         'convert to _opening' => {
             enable => sub { 
                 map  { [ $_->[0], $_->[-1][-1] ] }
-                grep { $_->[0]{type} and $_->[1]{type} and (not($_->[2]) or ref($_->[2])) }
+                grep { $_->[1] and $_->[0]{type} and $_->[1]{type} and (not($_->[2]) or ref($_->[2])) }
                 map  { my $t = $map->[ $_->[1] ][ $_->[0] ]; [ $t, $t->{nb}{$_->[2]}, $t->{od}{$_->[2]}, $_ ] }
                 grep { @$_ == 3 }
                 @_
@@ -1078,7 +1085,7 @@ sub _build_rccm {
         'convert to _door' => {
             enable => sub { 
                 map  { [ $_->[0], $_->[-1][-1] ] }
-                grep { $_->[0]{type} and $_->[1]{type} and (not($_->[2]) or not ref($_->[2])) }
+                grep { $_->[1] and $_->[0]{type} and $_->[1]{type} and (not($_->[2]) or not ref($_->[2])) }
                 map  { my $t = $map->[ $_->[1] ][ $_->[0] ]; [ $t, $t->{nb}{$_->[2]}, $t->{od}{$_->[2]}, $_ ] }
                 grep { @$_ == 3 }
                 @_
