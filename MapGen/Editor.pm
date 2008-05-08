@@ -2,6 +2,12 @@
 
 package Games::RolePlay::MapGen::Editor;
 
+# NOTE: I'm aware this is monolithic and heinous, please don't judge me.  I
+# intend to split this up into manageable chunks (aka modules) later.  I'm new
+# to GUI code and I'm surprised how big it gets.
+#
+# -Paul
+
 use strict;
 use Glib qw(TRUE FALSE);
 use Gtk2 -init; # -init tells import to ->init() your app
