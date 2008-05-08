@@ -771,7 +771,6 @@ sub tileconvert_to_wall_tiles {
             my $o = $Games::RolePlay::MapGen::opp{$d};
 
             if( my $n = $tile->{nb}{$d} ) {
-                warn "d=$d; n=$n;";
                 $tile->{od}{$d} = $n->{od}{$o} = 0;
             }
         }
@@ -797,8 +796,6 @@ sub tileconvert_to_corridor_tiles {
 
                 # Arguably, this should use the map's door settings to drop doors
                 # when appropriate... later maybe
-
-                warn "d=$d; n=$n;";
 
                 $tile->{od}{$d} = $n->{od}{$o} = 1 if $t and $t eq "corridor";
             }
