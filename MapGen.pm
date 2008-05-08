@@ -159,7 +159,7 @@ sub save_map {
 
     my @keys = keys %$this;
 
-    open my $save, ">$filename" or die "couldn't open $filename for write: $!";
+    open my $save, ">$filename" or croak "couldn't open $filename for write: $!";
     print $save "#!/usr/bin/perl\n\n";
     print $save Data::Dumper->Dump([map($this->{$_}, @keys)], [map("\$this\-\>{$_}", @keys)]);
     close $save;
