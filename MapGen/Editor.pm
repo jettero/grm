@@ -895,6 +895,20 @@ sub _build_rccm {
             },
             activate => sub { $this->tileconvert_to_corridor_tiles(@{$_[1]{result}}) },
         },
+        'convert room to corridor' => {
+            enable   => sub { 0 },
+            activate => sub { die "not done" },
+        },
+        'convert selection to room' => {
+            enable => sub {
+                my @a = grep { not $_->{group} and $_->{type} }
+                        map  { $map->[ $_->[1] ][ $_->[0] ] }
+                        @_;
+
+                @_ == @a ? @a : undef
+            },
+            activate => sub { die "not done" },
+        },
         'convert _inside closures to openings' => {
             enable => sub { 
                 my $min_x = $_[0][0]; my $max_x = $_[0][0];
