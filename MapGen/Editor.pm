@@ -173,12 +173,6 @@ sub new {
     my $al    = Gtk2::Alignment->new(0.5,0.5,0,0);
     my $eb    = Gtk2::EventBox->new;
 
-    $eb->signal_connect ('button-press-event' => sub {
-        my ($widget, $event) = @_;
-        return FALSE unless $event->button == 3;
-        return $this->right_click_map($event);
-    });
-
     # This is so we can later determin the size of the viewport.
     $this->[VP_DIM] = my $dim = [];
     $vp->signal_connect( 'size-allocate' => sub { my $r = $_[1]; $dim->[0] = $r->width; $dim->[1] = $r->height; 0; });
@@ -207,14 +201,39 @@ sub new {
 
     $this->[O_LT]=[];
 
+    my $bpe = 0;
+
     $eb->add_events([qw(leave-notify-mask pointer-motion-mask pointer-motion-hint-mask)]);
     $eb->signal_connect( motion_notify_event => sub { $this->marea_motion_notify_event($s_up, @_); 0; });
-    $eb->signal_connect(  leave_notify_event => sub { @{$this->[O_LT]} = (); $s_up->(); $this->draw_map_w_cursor; });
+    $eb->signal_connect(  leave_notify_event => sub {
+        if( $bpe ) {
+            $bpe = 0; # bpe prevents the leave_notify once
 
-    # boolean = button-press-event (Gtk2::Widget, Gtk2::Gdk::Event)
-    # boolean = button-release-event (Gtk2::Widget, Gtk2::Gdk::Event) 
-    $eb->signal_connect( button_press_event   => sub { $this->marea_button_press_event(@_) } );
-    $eb->signal_connect( button_release_event => sub { $this->marea_button_release_event(@_) } );
+        } else {
+            @{$this->[O_LT]} = (); $s_up->(); $this->draw_map_w_cursor;
+        }
+    });
+
+    $eb->signal_connect( button_release_event => sub {
+        my ($widget, $event) = @_;
+
+        return FALSE if $event->button == 3;
+        $this->marea_button_release_event(@_);
+    });
+
+    $eb->signal_connect ('button-press-event' => sub {
+        my ($widget, $event) = @_;
+
+        if( $event->button == 3 ) {
+            $bpe = 1; # bpe prevents the leave_notify_event once
+            $this->right_click_map($event);
+
+        } else {
+            $this->marea_button_press_event(@_);
+        }
+
+        return FALSE; # returning true prevents other events from firing
+    });
 
     $scwin->set_policy('automatic', 'automatic');
     $scwin->add($vp);
@@ -945,6 +964,8 @@ sub _build_rccm {
         },
         'convert _north edge of selection to walls' => {
             enable => sub { 
+                return unless $this->[SELECTION];
+
                 my $min_y = $_[0][1];
 
                 grep { $_->[0]{od}{ $_->[1] } }
@@ -965,6 +986,8 @@ sub _build_rccm {
         },
         'convert _east edge of selection to walls' => {
             enable => sub { 
+                return unless $this->[SELECTION];
+
                 my $max_x = $_[0][0];
 
                 grep { $_->[0]{od}{ $_->[1] } }
@@ -985,6 +1008,8 @@ sub _build_rccm {
         },
         'convert _south edge of selection to walls' => {
             enable => sub { 
+                return unless $this->[SELECTION];
+
                 my $max_y = $_[0][1];
 
                 grep { $_->[0]{od}{ $_->[1] } }
@@ -1005,6 +1030,8 @@ sub _build_rccm {
         },
         'convert _west edge of selection to walls' => {
             enable => sub { 
+                return unless $this->[SELECTION];
+
                 my $min_x = $_[0][0];
 
                 grep { $_->[0]{od}{ $_->[1] } }
@@ -1139,8 +1166,6 @@ sub right_click_map {
             $event->button,
             $event->time
     );
-
-    return TRUE;
 }
 # }}}
 
