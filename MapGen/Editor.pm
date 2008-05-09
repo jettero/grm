@@ -130,7 +130,7 @@ sub new {
             item_type => '<Branch>',
             children => [
                 '_Redraw' => {
-                    callback    => sub { $this->draw_map; $this->draw_map_w_cursor },
+                    callback    => sub { warn "yeah"; $this->draw_map; $this->draw_map_w_cursor },
                     accelerator => '<ctrl>R',
                 },
                 'Render _Settings'=> {
@@ -458,6 +458,15 @@ sub draw_map {
 
     $map->set_exporter( "BasicImage" );
     my $image = $map->export( -retonly );
+
+    our $debug ++;
+    open my $debugfh, ">/tmp/debug-$debug.png" or die $!;
+    print $debugfh $image->png;
+    close $debugfh;
+
+    $this->[MAP]->save_map("/tmp/debug-$debug.pl");
+
+    warn "saved /tmp/debug-$debug.png and /tmp/debug-$debug.pl";
 
     my $loader = Gtk2::Gdk::PixbufLoader->new;
        $loader->write($image->png);
