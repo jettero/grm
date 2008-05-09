@@ -932,7 +932,19 @@ sub _build_rccm {
             activate => sub { $this->tileconvert_to_corridor_tiles(@{$_[1]{result}}) },
         },
         'convert room to corridor' => {
-            enable   => sub { 0 },
+            enable => sub {
+                my @g = grep { $_ }
+                         map { $map->[ $_->[1] ][ $_->[0] ]{group} }
+                         @_;
+
+                return unless @g == @_;
+
+                my %unique;
+                @g = grep { my $r = 0; $unique{0+$_} = $r = 1 unless $unique{0+$_}; $r } @g;
+
+                return unless @g == 1;
+                @g;
+            },
             activate => sub { die "not done" },
         },
         'convert selection to room' => {
@@ -1122,8 +1134,9 @@ sub _build_context_menu {
     while( my($name, $opts) = splice @_, 0, 2 ) {
         my $item = Gtk2::MenuItem->new_with_mnemonic($name);
 
-        push @a, sub { my @r =  $opts->{enable}->(@_); $item->set_sensitive( scalar @r ); $opts->{result} = \@r } if $opts->{enable};
-        push @a, sub { my @r = $opts->{disable}->(@_); $item->set_sensitive(  not   @r ); $opts->{result} = \@r } if $opts->{disable};
+        push @a, sub { my @r =  $opts->{enable}->(@_); $item->set_sensitive( $r[-1] ? 1 : 0 ); $opts->{result} = \@r; } if $opts->{enable};
+        push @a, sub { my @r = $opts->{disable}->(@_); $item->set_sensitive( $r[-1] ? 0 : 1 ); $opts->{result} = \@r; } if $opts->{disable};
+
         $item->signal_connect( activate => $opts->{activate}, $opts ) if exists $opts->{activate};
         $menu->append( $item );
     }
