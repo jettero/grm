@@ -451,12 +451,14 @@ sub draw_map {
     $map->set_exporter( "BasicImage" );
     my $image = $map->export( -retonly );
 
-    ## DEBUG ## our $debug ++;
-    ## DEBUG ## open my $debugfh, ">/tmp/debug-$debug.png" or die $!;
-    ## DEBUG ## print $debugfh $image->png;
-    ## DEBUG ## close $debugfh;
+    our $debug ++;
+    open my $debugfh, ">/tmp/debug-$debug.png" or die $!;
+    print $debugfh $image->png;
+    close $debugfh;
 
-    ## DEBUG ## $this->[MAP]->save_map("/tmp/debug-$debug.pl");
+    $this->[MAP]->save_map("/tmp/debug-$debug.pl");
+
+    warn "saved /tmp/debug-$debug.png and /tmp/debug-$debug.pl";
 
     my $loader = Gtk2::Gdk::PixbufLoader->new;
        $loader->write($image->png);
