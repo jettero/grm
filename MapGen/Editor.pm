@@ -459,15 +459,6 @@ sub draw_map {
     $map->set_exporter( "BasicImage" );
     my $image = $map->export( -retonly );
 
-    our $debug ++;
-    open my $debugfh, ">/tmp/debug-$debug.png" or die $!;
-    print $debugfh $image->png;
-    close $debugfh;
-
-    $this->[MAP]->save_map("/tmp/debug-$debug.pl");
-
-    warn "saved /tmp/debug-$debug.png and /tmp/debug-$debug.pl";
-
     my $loader = Gtk2::Gdk::PixbufLoader->new;
        $loader->write($image->png);
        $loader->close;
@@ -681,19 +672,18 @@ sub marea_motion_notify_event {
     my ($x, $y) = ($em->x, $em->y);
     my @cs      = split 'x', $this->[MAP]{cell_size};
     my @lt      = (int($x/$cs[0]), int($y/$cs[1]));
-    my $tile    = $this->[MAP]{_the_map}[ $lt[1] ][ $lt[0] ];
+    my @bb      = split 'x', $this->[MAP]{bounding_box};
 
-    my $go = 0;
+    $lt[0] = $bb[0]-1 if $lt[0]>=$bb[0];
+    $lt[1] = $bb[1]-1 if $lt[1]>=$bb[1];
+
+    my $tile = $this->[MAP]{_the_map}[ $lt[1] ][ $lt[0] ];
+    my $go   = 0;
 
     my $o_lt  = $this->[O_LT];
     my $s_arg = $this->[S_ARG];
     if( @$o_lt!=2 or ($lt[0] != $o_lt->[0] or $lt[1] != $o_lt->[1]) ) {
-        my @bb = split 'x', $this->[MAP]{bounding_box};
-
         $this->marea_selection_handler([@$o_lt], [@lt], $em) if $this->[SEL_S];
-
-        $lt[0] = $bb[0]-1 if $lt[0]>=$bb[0];
-        $lt[1] = $bb[1]-1 if $lt[1]>=$bb[1];
 
         @$o_lt = @lt;
 
