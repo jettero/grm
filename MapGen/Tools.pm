@@ -77,19 +77,34 @@ sub interconnect_map {
 sub disconnect_map {
     my $map = shift;
 
-    untie @$_, for $map, @$map;
 
-    for my $i (0 .. $#$map) {
-        my $jend = $#{ $map->[$i] };
+    eval {
+        untie @$_ for grep {tied $_} @$map;
+        untie @$map if tied $map;
 
-        for my $j (0 .. $jend) {
-            # Destroying the map wouldn't destroy the tiles if they're self
-            # referencing like this.  That's not a problem because of the
-            # global destructor, *whew*; except that each new map generated,
-            # until perl exits, would eat up more memory.  
+        for my $i (0 .. $#$map) {
+            my $jend = $#{ $map->[$i] };
 
-            delete $map->[$i][$j]{nb}; # So we have to break the self-refs here.
+            for my $j (0 .. $jend) {
+                # Destroying the map wouldn't destroy the tiles if they're self
+                # referencing like this.  That's not a problem because of the
+                # global destructor, *whew*; except that each new map generated,
+                # until perl exits, would eat up more memory.  
+
+                delete $map->[$i][$j]{nb}; # So we have to break the self-refs here.
+            }
         }
+    };
+
+    if( $@ ) {
+        # NOTE: The above emits a fatal under global destruction for some
+        # reason, probably the bless+tie gets cleaned up in the wrong order or
+        # something.  It doesn't really matter since we're already exiting perl
+        # anyway.  This assumption may be false under win32, where it may
+        # create a memory leak.  Does windows clean up when a process exits?
+        # It really aught to, but I have my doubts.
+
+        die $@ unless $@ =~ m/global destruction/;
     }
 
     # You can test to make sure the tiles are dying when a map goes out of
@@ -546,19 +561,10 @@ that people use it.
 
 =head1 COPYRIGHT
 
-GPL!  I included a gpl.txt for your reading enjoyment.
+Copyright (c) 2008 Paul Miller -- LGPL [Software::License::LGPL_2_1]
 
-Though, additionally, I will say that I'll be tickled if you were to
-include this package in any commercial endeavor.  Also, any thoughts to
-the effect that using this module will somehow make your commercial
-package GPL should be washed away.
-
-I hereby release you from any such silly conditions.
-
-This package and any modifications you make to it must remain GPL.  Any
-programs you (or your company) write shall remain yours (and under
-whatever copyright you choose) even if you use this package's intended
-and/or exported interfaces in them.
+    perl -MSoftware::License::LGPL_2_1 -e '$l = Software::License::LGPL_2_1->new({holder=>"Paul Miller"});
+          print $l->fulltext' | less
 
 =head1 SEE ALSO
 
