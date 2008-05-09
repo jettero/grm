@@ -2,38 +2,37 @@
 
 use strict;
 
-my $map = {
-    bounding_box => '3x3',
-    _the_map => [
-       [1,2,3],
-       [1,2,3],
-       [1,2,3],
-    ],
-};
+my $map = [ [1,2,3],
+            [1,2,3],
+            [1,2,3] ];
 
-bless $map->{_the_map}, "icm";
-tie @{$map->{_the_map}}, 'icm';
+tie @$_, 'Games::RolePlay::MapGen::_disallow_autoviv', $_ for $map, @$map;
 
-$map->{_the_map}->yeah;
-$map->{_the_map}[ 0 ];
-$map->{_the_map}[ 3 ];
+eval { $map->[ 0 ][ 0 ]; }; warn "crap: $@" if $@;
+eval { $map->[ 2 ][ 3 ]; }; warn "crap: didn't work" unless $@;
+eval { $map->[ 3 ][ 0 ]; }; warn "crap: didn't work" unless $@;
 
-package icm;
+package Games::RolePlay::MapGen::_disallow_autoviv;
 
 use strict;
 use Tie::Array;
 use base 'Tie::StdArray';
 use Carp;
 
+sub TIEARRAY {
+    my $class = shift;
+    my $this  = bless [], $class;
+    my $that  = shift;
+
+    @$this = @$that;
+
+    $this;
+}
+
 sub FETCH {
     my $this = shift;
     
-    croak "no no no, $_[0] is beyond the end of the map rows" if $_[0]> $#$this;
-    print "yeah, fetching($_[0])\n";
+    croak "autovivifing new rows and columns is disabled ($_[0]>$#$this)" if $_[0] > $#$this;
 
     $this->SUPER::FETCH(@_);
-}
-
-sub yeah {
-    print "yeah\n";
 }

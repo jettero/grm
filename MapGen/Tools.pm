@@ -1,6 +1,33 @@
 # vi:tw=0 syntax=perl:
 
 # package ::_interconnected_map {{{
+package Games::RolePlay::MapGen::_disallow_autoviv;
+
+use strict;
+use Tie::Array;
+use base 'Tie::StdArray';
+use Carp;
+
+1;
+
+sub TIEARRAY {
+    my $class = shift;
+    my $this  = bless [], $class;
+    my $that  = shift;
+
+    @$this = @$that;
+
+    $this;
+}
+
+sub FETCH {
+    my $this = shift;
+    
+    croak "autovivifing new rows and columns is disabled ($_[0]>$#$this)" if $_[0] > $#$this;
+
+    $this->SUPER::FETCH(@_);
+}
+
 package Games::RolePlay::MapGen::_interconnected_map;
 
 use strict;
@@ -13,6 +40,8 @@ sub interconnect_map {
     my $map = shift;
 
     # This interconnected array stuff is _REALLY_ handy, but it needs to be cleaned up, so it gets it's own class
+
+    tie @$_, "Games::RolePlay::MapGen::_disallow_autoviv", $_ for $map, @$map;
 
     for my $i (0 .. $#$map) {
         my $jend = $#{ $map->[$i] };
@@ -47,6 +76,8 @@ sub interconnect_map {
 # disconnect_map {{{
 sub disconnect_map {
     my $map = shift;
+
+    untie @$_, for $map, @$map;
 
     for my $i (0 .. $#$map) {
         my $jend = $#{ $map->[$i] };
