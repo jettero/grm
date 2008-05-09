@@ -17,6 +17,7 @@ $vbox->add($label);
 
 $button->signal_connect( clicked => sub {
     my $file_chooser = Gtk2::FileChooserDialog->new("Test", $window, 'open', 'gtk-cancel' => 'cancel', 'gtk-ok' => 'ok');
+       $file_chooser->set_default_response('ok');
 
     if( $file_chooser->run eq "ok" ) {
         my $filename = $file_chooser->get_filename;
