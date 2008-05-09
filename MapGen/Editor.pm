@@ -270,6 +270,8 @@ sub open_file {
         Gtk2::FileChooserDialog->new ('Open a Map File',
             $this->[WINDOW], 'open', 'gtk-cancel' => 'cancel', 'gtk-ok' => 'ok');
 
+    $file_chooser->set_default_response('ok');
+
     if( $file_chooser->run eq 'ok' ) {
         my $filename = $file_chooser->get_filename;
 
@@ -309,6 +311,8 @@ sub save_file_as {
         Gtk2::FileChooserDialog->new ('Save a Map File',
             $this->[WINDOW], 'save', 'gtk-cancel' => 'cancel', 'gtk-ok' => 'ok');
 
+    $file_chooser->set_default_response('ok');
+
     if ('ok' eq $file_chooser->run) {
         my $fname = $file_chooser->get_filename;
            $fname .= ".xml" unless $fname =~ m/\.xml\z/i;
@@ -332,6 +336,8 @@ sub save_image_as {
     my $file_chooser =
         Gtk2::FileChooserDialog->new ('Save a Map Image',
             $this->[WINDOW], 'save', 'gtk-cancel' => 'cancel', 'gtk-ok' => 'ok');
+
+    $file_chooser->set_default_response('ok');
 
     if ('ok' eq $file_chooser->run) {
         my $fname = $file_chooser->get_filename;
@@ -361,6 +367,8 @@ sub save_text_as {
     my $file_chooser =
         Gtk2::FileChooserDialog->new ('Save a Map Image',
             $this->[WINDOW], 'save', 'gtk-cancel' => 'cancel', 'gtk-ok' => 'ok');
+
+    $file_chooser->set_default_response('ok');
 
     if ('ok' eq $file_chooser->run) {
         my $fname = $file_chooser->get_filename;
