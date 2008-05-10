@@ -115,7 +115,7 @@ sub make_form {
 
             } elsif( $IT eq "choice" ) {
                 $attach = $widget = Gtk2::ComboBox->new_text;
-                my $d = $i->{$item->{name}} || $item->{default};
+                my $d = $i->{$item->{name}} || $item->{default} || $item->{choices}[0];
                    $d = $item->{trevnoc}->($d) if ref $d and exists $item->{trevnoc};
 
                 my $i = 0;

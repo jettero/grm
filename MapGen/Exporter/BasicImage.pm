@@ -156,72 +156,112 @@ sub genmap {
                         $gd->filledRectangle( $xp-$dm, $yp+$dM => $xp+$dm, $Yp-$dM, $door_color ) if $dir eq "w";
                     }
 
+                    if( $door->{'open'} ) {
+                        $gd->filledRectangle( $xp+$dM, $yp-$dm => $Xp-$dM, $yp+$dm, $white ) if $dir eq "n";
+                        $gd->filledRectangle( $xp+$dM, $Yp-$dm => $Xp-$dM, $Yp+$dm, $white ) if $dir eq "s";
+                        $gd->filledRectangle( $Xp-$dm, $yp+$dM => $Xp+$dm, $Yp-$dM, $white ) if $dir eq "e";
+                        $gd->filledRectangle( $xp-$dm, $yp+$dM => $xp+$dm, $Yp-$dM, $white ) if $dir eq "w";
+
+                    }
+
                     # Here, we draw the diagonal line and arc indicating how the door opens.
                     my $oi = "$dir$door->{open_dir}{major}$door->{open_dir}{minor}";
-                    # draw the door line/arcs ... sadly, this is a 16 part if-else block {{{
-                    if( $oi eq "sne" ) {
-                        $gd->arc(  $Xp-$dM, $Yp-$am, $wx, $wy, 180, 180+$oa,           $door_arc_color );
-                        $gd->line( $Xp-$dM, $Yp-$am => ($Xp-$dM)-$ns_b, $Yp-$am-$ns_h, $door_arc_color );
+                    # draw the door line/arcs ... sadly, this is a 8 part if-else block {{{
+                    if( $oi eq "nne" ) {  # same as above, but $Yp changes to $yp
+                        $gd->arc(  $Xp-$dM, $yp-$am, $wx, $wy, 180, 180+$oa, $door_arc_color );
+                        my @l = (  $Xp-$dM, $yp-$am => ($Xp-$dM)-$ns_b, $yp-$am-$ns_h  );
+                        if( $door->{'open'} and not $door->{secret} ) {
+                            $gd->line(@l, $door_color); $l[1]+=1; $l[3]+=1;
+                            $gd->line(@l, $door_color); $l[1]-=2; $l[3]-=2;
+                            $gd->line(@l, $door_color);
 
-                    } elsif( $oi eq "nne" ) {  # same as above, but $Yp changes to $yp
-                        $gd->arc(  $Xp-$dM, $yp-$am, $wx, $wy, 180, 180+$oa,           $door_arc_color );
-                        $gd->line( $Xp-$dM, $yp-$am => ($Xp-$dM)-$ns_b, $yp-$am-$ns_h, $door_arc_color );
-
-                    } elsif( $oi eq "sse" ) {  # same as two above, but 180-$oa and +$ns_h
-                        $gd->arc(  $Xp-$dM, $Yp+$am, $wx, $wy, 180-$oa, 180,           $door_arc_color );
-                        $gd->line( $Xp-$dM, $Yp+$am => ($Xp-$dM)-$ns_b, $Yp+$am+$ns_h, $door_arc_color );
+                        } else {
+                            $gd->line(@l, $door_arc_color);
+                        }
 
                     } elsif( $oi eq "nse" ) {  # same as above, but $Yp to $yp
-                        $gd->arc(  $Xp-$dM, $yp+$am, $wx, $wy, 180-$oa, 180,           $door_arc_color );
-                        $gd->line( $Xp-$dM, $yp+$am => ($Xp-$dM)-$ns_b, $yp+$am+$ns_h, $door_arc_color );
+                        $gd->arc(  $Xp-$dM, $yp+$am, $wx, $wy, 180-$oa, 180, $door_arc_color );
+                        my @l = (  $Xp-$dM, $yp+$am => ($Xp-$dM)-$ns_b, $yp+$am+$ns_h  );
+                        if( $door->{'open'} and not $door->{secret} ) {
+                            $gd->line(@l, $door_color); $l[1]+=1; $l[3]+=1;
+                            $gd->line(@l, $door_color); $l[1]-=2; $l[3]-=2;
+                            $gd->line(@l, $door_color);
 
-                    } elsif( $oi eq "snw" ) { # same as sne, but 360-$oa, $xp, and +$ns_b
-                        $gd->arc(  $xp+$dM, $Yp-$am, $wx, $wy, 360-$oa, 360,           $door_arc_color );
-                        $gd->line( $xp+$dM, $Yp-$am => ($xp+$dM)+$ns_b, $Yp-$am-$ns_h, $door_arc_color );
+                        } else {
+                            $gd->line(@l, $door_arc_color);
+                        }
 
                     } elsif( $oi eq "nnw" ) { # same as above, but $yp
-                        $gd->arc(  $xp+$dM, $yp-$am, $wx, $wy, 360-$oa, 360,           $door_arc_color );
-                        $gd->line( $xp+$dM, $yp-$am => ($xp+$dM)+$ns_b, $yp-$am-$ns_h, $door_arc_color );
+                        $gd->arc(  $xp+$dM, $yp-$am, $wx, $wy, 360-$oa, 360, $door_arc_color );
+                        my @l = (  $xp+$dM, $yp-$am => ($xp+$dM)+$ns_b, $yp-$am-$ns_h  );
+                        if( $door->{'open'} and not $door->{secret} ) {
+                            $gd->line(@l, $door_color); $l[1]+=1; $l[3]+=1;
+                            $gd->line(@l, $door_color); $l[1]-=2; $l[3]-=2;
+                            $gd->line(@l, $door_color);
 
-                    } elsif( $oi eq "ssw" ) { # same as sse, but $xp, +$ns_b, and 360+$oa
-                        $gd->arc(  $xp+$dM, $Yp+$am, $wx, $wy, 360, 360+$oa,           $door_arc_color );
-                        $gd->line( $xp+$dM, $Yp+$am => ($xp+$dM)+$ns_b, $Yp+$am+$ns_h, $door_arc_color );
+                        } else {
+                            $gd->line(@l, $door_arc_color);
+                        }
 
                     } elsif( $oi eq "nsw" ) { # same as above, but $yp
-                        $gd->arc(  $xp+$dM, $yp+$am, $wx, $wy, 360, 360+$oa,           $door_arc_color );
-                        $gd->line( $xp+$dM, $yp+$am => ($xp+$dM)+$ns_b, $yp+$am+$ns_h, $door_arc_color );
+                        $gd->arc(  $xp+$dM, $yp+$am, $wx, $wy, 360, 360+$oa, $door_arc_color );
+                        my @l = (  $xp+$dM, $yp+$am => ($xp+$dM)+$ns_b, $yp+$am+$ns_h  );
+                        if( $door->{'open'} and not $door->{secret} ) {
+                            $gd->line(@l, $door_color); $l[1]+=1; $l[3]+=1;
+                            $gd->line(@l, $door_color); $l[1]-=2; $l[3]-=2;
+                            $gd->line(@l, $door_color);
 
-                    } elsif( $oi eq "een" ) {
-                        $gd->arc(  $Xp+$am, $yp+$dM, $wx, $wy, 90-$oa, 90,             $door_arc_color );
-                        $gd->line( $Xp+$am, $yp+$dM => $Xp+$am+$ew_h, ($yp+$dM)+$ew_b, $door_arc_color );
+                        } else {
+                            $gd->line(@l, $door_arc_color);
+                        }
 
                     } elsif( $oi eq "wen" ) { # same as above but $Xp to $xp
-                        $gd->arc(  $xp+$am, $yp+$dM, $wx, $wy, 90-$oa, 90,             $door_arc_color );
-                        $gd->line( $xp+$am, $yp+$dM => $xp+$am+$ew_h, ($yp+$dM)+$ew_b, $door_arc_color );
+                        $gd->arc(  $xp+$am, $yp+$dM, $wx, $wy, 90-$oa, 90, $door_arc_color );
+                        my @l = (  $xp+$am, $yp+$dM => $xp+$am+$ew_h, ($yp+$dM)+$ew_b  );
+                        if( $door->{'open'} and not $door->{secret} ) {
+                            $gd->line(@l, $door_color); $l[1]+=1; $l[3]+=1;
+                            $gd->line(@l, $door_color); $l[1]-=2; $l[3]-=2;
+                            $gd->line(@l, $door_color);
 
-                    } elsif( $oi eq "ewn" ) { # same as two above, but 90+$oa and -$ew_h
-                        $gd->arc(  $Xp-$am, $yp+$dM, $wx, $wy, 90, 90+$oa,             $door_arc_color );
-                        $gd->line( $Xp-$am, $yp+$dM => $Xp-$am-$ew_h, ($yp+$dM)+$ew_b, $door_arc_color );
+                        } else {
+                            $gd->line(@l, $door_arc_color);
+                        }
 
                     } elsif( $oi eq "wwn" ) { # same as above but $Xp to $xp
-                        $gd->arc(  $xp-$am, $yp+$dM, $wx, $wy, 90, 90+$oa,             $door_arc_color );
-                        $gd->line( $xp-$am, $yp+$dM => $xp-$am-$ew_h, ($yp+$dM)+$ew_b, $door_arc_color );
+                        $gd->arc(  $xp-$am, $yp+$dM, $wx, $wy, 90, 90+$oa, $door_arc_color );
+                        my @l = (  $xp-$am, $yp+$dM => $xp-$am-$ew_h, ($yp+$dM)+$ew_b  );
+                        if( $door->{'open'} and not $door->{secret} ) {
+                            $gd->line(@l, $door_color); $l[1]+=1; $l[3]+=1;
+                            $gd->line(@l, $door_color); $l[1]-=2; $l[3]-=2;
+                            $gd->line(@l, $door_color);
 
-                    } elsif( $oi eq "ees" ) { # same as een, but $Yp, -$ew_b and 270+$oa
-                        $gd->arc(  $Xp+$am, $Yp-$dM, $wx, $wy, 270, 270+$oa,           $door_arc_color );
-                        $gd->line( $Xp+$am, $Yp-$dM => $Xp+$am+$ew_h, ($Yp-$dM)-$ew_b, $door_arc_color );
+                        } else {
+                            $gd->line(@l, $door_arc_color);
+                        }
 
                     } elsif( $oi eq "wes" ) { # same as above, but $xp
-                        $gd->arc(  $xp+$am, $Yp-$dM, $wx, $wy, 270, 270+$oa,           $door_arc_color );
-                        $gd->line( $xp+$am, $Yp-$dM => $xp+$am+$ew_h, ($Yp-$dM)-$ew_b, $door_arc_color );
+                        $gd->arc(  $xp+$am, $Yp-$dM, $wx, $wy, 270, 270+$oa, $door_arc_color );
+                        my @l = (  $xp+$am, $Yp-$dM => $xp+$am+$ew_h, ($Yp-$dM)-$ew_b  );
+                        if( $door->{'open'} and not $door->{secret} ) {
+                            $gd->line(@l, $door_color); $l[1]+=1; $l[3]+=1;
+                            $gd->line(@l, $door_color); $l[1]-=2; $l[3]-=2;
+                            $gd->line(@l, $door_color);
 
-                    } elsif( $oi eq "ews" ) { # same as ewn above, but 
-                        $gd->arc(  $Xp-$am, $Yp-$dM, $wx, $wy, 270-$oa, 270,           $door_arc_color );
-                        $gd->line( $Xp-$am, $Yp-$dM => $Xp-$am-$ew_h, ($Yp-$dM)-$ew_b, $door_arc_color );
+                        } else {
+                            $gd->line(@l, $door_arc_color);
+                        }
 
                     } elsif( $oi eq "wws" ) { # same as above, but $xp
-                        $gd->arc(  $xp-$am, $Yp-$dM, $wx, $wy, 270-$oa, 270,           $door_arc_color );
-                        $gd->line( $xp-$am, $Yp-$dM => $xp-$am-$ew_h, ($Yp-$dM)-$ew_b, $door_arc_color );
+                        $gd->arc(  $xp-$am, $Yp-$dM, $wx, $wy, 270-$oa, 270, $door_arc_color );
+                        my @l = (  $xp-$am, $Yp-$dM => $xp-$am-$ew_h, ($Yp-$dM)-$ew_b  );
+                        if( $door->{'open'} and not $door->{secret} ) {
+                            $gd->line(@l, $door_color); $l[1]+=1; $l[3]+=1;
+                            $gd->line(@l, $door_color); $l[1]-=2; $l[3]-=2;
+                            $gd->line(@l, $door_color);
+
+                        } else {
+                            $gd->line(@l, $door_arc_color);
+                        }
 
                     }
                     # }}}

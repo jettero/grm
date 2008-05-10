@@ -130,7 +130,7 @@ sub new {
             item_type => '<Branch>',
             children => [
                 '_Redraw' => {
-                    callback    => sub { warn "yeah"; $this->draw_map; $this->draw_map_w_cursor },
+                    callback    => sub { warn "forced redraw"; $this->draw_map; $this->draw_map_w_cursor },
                     accelerator => '<ctrl>R',
                 },
                 'Render _Settings'=> {
@@ -869,7 +869,9 @@ sub closureconvert_to_door {
            $tkey .= "_door_percent";
 
         my $chances = $this->[MAP]->{$tkey};
-        die "chances error for $tkey" unless defined $chances;
+
+        # NOTE this really only comes up on blank maps before we've loaded the BasicDoors plugin
+        $chances = {locked=>0, stuck=>0, secret=>0} unless defined $chances;
 
         $t->{od}{$d} = $n->{od}{$o} = &_door(
             (map {$_ => ((roll(1, 10000) <= $chances->{$_}*100) ? 1:0) } qw(locked stuck secret)),
@@ -893,16 +895,33 @@ sub closure_door_properties {
         my $od = $ca->[0]{od}{$ca->[1]};
         my $i = { %$od };
 
+        $i->{_open_dir_major} = $od->{open_dir}{major};
+        $i->{_open_dir_minor} = $od->{open_dir}{minor};
+
+        my $maj = [$ca->[1], $Games::RolePlay::MapGen::opp{$ca->[1]}];
+        my $min = {
+            n => [qw(e w)],
+            s => [qw(e w)],
+
+            e => [qw(n s)],
+            w => [qw(n s)],
+        }->{$maj->[0]};
+
         my $options = [[ # column 1
-            { mnemonic => "Locked: ", type => "bool", desc => "is the door locked?", name => 'locked' },
-            { mnemonic => "Secret: ", type => "bool", desc => "is the door secret?", name => 'secret' },
-            { mnemonic => "Stuck: ",  type => "bool", desc => "is the door stuck?",  name => 'stuck'  },
+            { mnemonic => "_Open: ",            type => "bool", desc => "is the door open?",   name => 'open' },
+            { mnemonic => "_Locked: ",          type => "bool", desc => "is the door locked?", name => 'locked' },
+            { mnemonic => "_Secret: ",          type => "bool", desc => "is the door secret?", name => 'secret' },
+            { mnemonic => "St_uck: ",           type => "bool", desc => "is the door stuck?",  name => 'stuck'  },
+            { mnemonic => "M_ajor Direction: ", type => "choice", choices => $maj, name => '_open_dir_major', desc => "The initial direction of the door swing.", },
+            { mnemonic => "M_inor Direction: ", type => "choice", choices => $min, name => '_open_dir_minor', desc => "The final direction of the door swing.",   },
         ]];
 
         my ($result, $o) = make_form($this->[WINDOW], $i, $options);
         next unless $result eq "ok";
         $c ++;
-        $od->{$_} = $o->{$_} for keys %$o;
+        $od->{$_} = $o->{$_} for qw(open locked secret stuck);
+        $od->{open_dir}{major} = $o->{_open_dir_major};
+        $od->{open_dir}{minor} = $o->{_open_dir_minor};
     }
 
     $this->draw_map if $c;
@@ -1378,6 +1397,14 @@ sub get_generate_opts {
           trevnoc  => sub { join(", ", @{$_[0]}{qw( door secret stuck locked )}) },
           matches  => [sub { (grep {$_ >= 0 and $_ <= 100} $_[0] =~ m/^(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)$/) == 4 }],
           fixes    => [sub { $_[0] =~ s/[^\d,\s]+//g }], },
+
+        { mnemonic => "Max Span: ", 
+          type     => "text",
+          desc     => "The door dropper will close spans larger than a single tile in order to drop a door.  This is the maximum sized span that it will close.",
+          name     => 'max_span',
+          default  => '50',
+          disable  => { generator_plugins => sub { (grep {$_ eq "BasicDoors"} @{$_[0]}) ? 0:1 } },
+          fixes    => [sub { $_[0] =~ s/\D+//g }], },
 
     ], [ # column 2
 

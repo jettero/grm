@@ -91,6 +91,7 @@ sub genmap {
                         my $d_locked = ($xp->findvalue( '@locked' => $closure ) eq "yes" ? 1:0);
                         my $d_stuck  = ($xp->findvalue( '@stuck'  => $closure ) eq "yes" ? 1:0);
                         my $d_secret = ($xp->findvalue( '@secret' => $closure ) eq "yes" ? 1:0);
+                        my $d_open   = ($xp->findvalue( '@open'   => $closure ) eq "yes" ? 1:0);
                         my $d_majod  = substr $xp->findvalue( '@major_open_dir' => $closure ), 0, 1;
                         my $d_minod  = substr $xp->findvalue( '@minor_open_dir' => $closure ), 0, 1;
 
@@ -98,6 +99,7 @@ sub genmap {
                             locked => $d_locked,
                             stuck  => $d_stuck,
                             secret => $d_secret,
+                            'open' => $d_open,
                             open_dir => {
                                 major => $d_majod,
                                 minor => $d_minod,
