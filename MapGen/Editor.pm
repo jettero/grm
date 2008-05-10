@@ -920,6 +920,8 @@ sub groupconvert_room_to_corridor {
 
         warn "WARNING: this group seems to include tiles that aren't in the group"
             unless $group == delete $tile->{group};
+
+        $tile->{type} = "corridor";
     }
 
     my $groups = $this->[MAP]{_the_groups};
@@ -955,7 +957,10 @@ sub groupconvert_corridor_to_room {
 
     push @$groups, $group;
 
-    $map->[ $_->[1] ][ $_->[0] ]{group} = $group for ($group->enumerate_tiles);
+    for my $tile (map {$map->[ $_->[1] ][ $_->[0] ]} $group->enumerate_tiles) {
+        $tile->{group} = $group;
+        $tile->{type}  = "room";
+    }
 }
 # }}}
 
