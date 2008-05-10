@@ -11,6 +11,9 @@ Games::RolePlay::MapGen::Editor - An experimental (eventually possibly cool) Map
 
 Here are some screenshots of the Editor:
 
+L<http://voltar.org/PerlModules/grm-editor-shot1.png>
+L<http://voltar.org/PerlModules/grm-editor-shot2.png>
+
 =head1 INSTRUCTIONS
 
 The documentation is pretty light on this, sorry.  I think most things in the
