@@ -24,7 +24,7 @@ use Data::Dump qw(dump);
 use POSIX qw(ceil);
 
 use Games::RolePlay::MapGen::Editor::_MForm qw(make_form $default_restore_defaults);
-use Games::RolePlay::MapGen::Tools qw( roll _door choice );
+use Games::RolePlay::MapGen::Tools qw( roll choice _door _group );
 
 our $DEFAULT_GENERATOR         = 'Basic';
 our @GENERATORS                = (qw( Basic Blank OneBigRoom Perfect SparseAndLoops ));
@@ -909,6 +909,56 @@ sub closure_door_properties {
 }
 # }}}
 
+# groupconvert_room_to_corridor {{{
+sub groupconvert_room_to_corridor {
+    my $this  = shift;
+    my $group = shift;
+    my $map   = $this->[MAP]{_the_map};
+
+    for my $tilel ($group->enumerate_tiles) {
+        my $tile = $map->[ $tilel->[1] ][ $tilel->[0] ];
+
+        warn "WARNING: this group seems to include tiles that aren't in the group"
+            unless $group == delete $tile->{group};
+    }
+
+    my $groups = $this->[MAP]{_the_groups};
+      @$groups = grep {$_!=$group} @$groups;
+}
+# }}}
+# groupconvert_corridor_to_room {{{
+sub groupconvert_corridor_to_room {
+    my $this   = shift;
+    my $map    = $this->[MAP]{_the_map};
+    my $groups = $this->[MAP]{_the_groups};
+
+    my $rn = 0;
+    for my $g (@$groups) {
+        my $n = $g->name;
+        my ($x) = $n =~ m/Room #(\d+)/;
+
+        $rn = $x if $x > $rn;
+    }
+
+    $rn ++;
+
+    my $group = &_group();
+       $group->name( "Room #$rn" );
+       $group->type( "room" );
+
+    for my $s (@{ $this->[SELECTION] }) {
+        my $loc = [@$s[0,1]];
+        my $siz = [1+$s->[2]-$s->[0], 1+$s->[3]-$s->[1]];
+
+        $group->add_rectangle( $loc, $siz );
+    }
+
+    push @$groups, $group;
+
+    $map->[ $_->[1] ][ $_->[0] ]{group} = $group for ($group->enumerate_tiles);
+}
+# }}}
+
 # _build_rccm {{{
 sub _build_rccm {
     my $this = shift;
@@ -945,17 +995,19 @@ sub _build_rccm {
                 return unless @g == 1;
                 @g;
             },
-            activate => sub { die "not done" },
+            activate => sub { $this->groupconvert_room_to_corridor(@{$_[1]{result}}) },
         },
         'convert selection to room' => {
             enable => sub {
+                return unless $this->[SELECTION];
+
                 my @a = grep { not $_->{group} and $_->{type} }
                         map  { $map->[ $_->[1] ][ $_->[0] ] }
                         @_;
 
-                @_ == @a ? @a : undef
+                @_ == @a ? 1 : 0 # we're not using the return value at all
             },
-            activate => sub { die "not done" },
+            activate => sub { $this->groupconvert_corridor_to_room(@{$this->[SELECTION]}) },
         },
         'convert _inside closures to openings' => {
             enable => sub { 
