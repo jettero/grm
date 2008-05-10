@@ -1,3 +1,8 @@
+1.2.0: Sat May 10 11:23:51 EDT 2008
+   - Added visuals for door status (open, locked, etc)
+   - Added an editor
+   - Expanded the functioning of groups, ignoring all uses other than rooms.
+
 1.0.3: Sun Aug 26 19:43 EDT 2007
    - More and more documentation problems.  Meh.
 

@@ -31,11 +31,13 @@ t/08_interconnects.t
 t/08_xmlinter.t
 t/10_groups.t
 t/11_groups_a5s.t
-vis1.map.xml
 MapGen.pod
 t/08_interconnects_xml.t
 MapGen/Editor.pm
 MapGen/Generator/Blank.pm
 MapGen/GeneratorPlugin/ClearDoors.pm
 MapGen/Editor/_MForm.pm
+vis1.map.xml
 vis2.map.xml
+vis1.map.png
+vis2.map.png

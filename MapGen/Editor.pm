@@ -243,7 +243,9 @@ sub new {
     $vbox->pack_start($scwin,1,1,0);
     $vbox->pack_end($sb,0,0,0);
 
-    $this->read_file($ARGV[0]) if $ARGV[0] and -f $ARGV[0];
+    if( $ARGV[0] and -f $ARGV[0] ) {
+        $this->read_file( $this->[SETTINGS]{LAST_FNAME} = $ARGV[0] );
+    }
     $this->draw_map;
 
     return $this;

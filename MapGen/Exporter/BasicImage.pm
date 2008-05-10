@@ -89,6 +89,7 @@ sub genmap {
        $L++;       # $L is one less than it seems...
 
     my ($dm, $dM) = (1, 4); # akin to L, but for doors (door minor horrizontal, door minor vertical and door major)
+    my ($sm, $sM) = (3, 8); # status mark dimensions
     my ($wx, $wy) = ( $opts->{x_size}*2-$dM*4, $opts->{y_size}*2-$dM*4 ); # the width and height of the door-arcs (cell size)
 
     my $am = $dm +1; # the arc displacement is just a little bigger so it doesn't overlap the doors...
@@ -271,29 +272,29 @@ sub genmap {
 
                     unless( $door->{'open'} ) {
                         if( $door->{locked} ) {
-                            my @l1 = ( $dir eq "n" ? ($xp+8, $yp-4) :
-                                       $dir eq "s" ? ($xp+8, $Yp-4) :
-                                       $dir eq "e" ? ($Xp-4, $yp+8) :
-                                                     ($xp-4, $yp+8) );
+                            my @l1 = ( $dir eq "n" ? ($xp+$sM, $yp-$sm) :
+                                       $dir eq "s" ? ($xp+$sM, $Yp-$sm) :
+                                       $dir eq "e" ? ($Xp-$sm, $yp+$sM) :
+                                                     ($xp-$sm, $yp+$sM) );
 
-                            my @l2 = ( $dir eq "n" ? ($xp+8, $yp+4) :
-                                       $dir eq "s" ? ($xp+8, $Yp+4) :
-                                       $dir eq "e" ? ($Xp+4, $yp+8) :
-                                                     ($xp+4, $yp+8) );
+                            my @l2 = ( $dir eq "n" ? ($xp+$sM, $yp+$sm) :
+                                       $dir eq "s" ? ($xp+$sM, $Yp+$sm) :
+                                       $dir eq "e" ? ($Xp+$sm, $yp+$sM) :
+                                                     ($xp+$sm, $yp+$sM) );
 
                             $gd->line( @l1 => @l2 => $red );
                         }
 
                         if( $door->{stuck} ) {
-                            my @l1 = ( $dir eq "n" ? ($Xp-8, $yp-4) :
-                                       $dir eq "s" ? ($Xp-8, $Yp-4) :
-                                       $dir eq "e" ? ($Xp-4, $Yp-8) :
-                                                     ($xp-4, $Yp-8) );
+                            my @l1 = ( $dir eq "n" ? ($Xp-$sM, $yp-$sm) :
+                                       $dir eq "s" ? ($Xp-$sM, $Yp-$sm) :
+                                       $dir eq "e" ? ($Xp-$sm, $Yp-$sM) :
+                                                     ($xp-$sm, $Yp-$sM) );
 
-                            my @l2 = ( $dir eq "n" ? ($Xp-8, $yp+4) :
-                                       $dir eq "s" ? ($Xp-8, $Yp+4) :
-                                       $dir eq "e" ? ($Xp+4, $Yp-8) :
-                                                     ($xp+4, $Yp-8) );
+                            my @l2 = ( $dir eq "n" ? ($Xp-$sM, $yp+$sm) :
+                                       $dir eq "s" ? ($Xp-$sM, $Yp+$sm) :
+                                       $dir eq "e" ? ($Xp+$sm, $Yp-$sM) :
+                                                     ($xp+$sm, $Yp-$sM) );
 
                             $gd->line( @l1 => @l2 => $blue );
                         }
