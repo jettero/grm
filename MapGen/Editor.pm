@@ -899,7 +899,7 @@ sub closure_door_properties {
             { mnemonic => "Stuck: ",  type => "bool", desc => "is the door stuck?",  name => 'stuck'  },
         ]];
 
-        my ($result, $o) = $this->make_form($this->[WINDOW], $i, $options);
+        my ($result, $o) = make_form($this->[WINDOW], $i, $options);
         next unless $result eq "ok";
         $c ++;
         $od->{$_} = $o->{$_} for keys %$o;
@@ -1398,7 +1398,7 @@ sub get_generate_opts {
               FiveSplit  => 'Divides map tiles with tiles larger than 5 units square into tiles precisely 5 units square.  E.g., if the tile size is set to 10, this will double the bounding box size of your map, but your hallways will be two tiles wide.',
           },
           name     => 'generator_plugins',
-          disable  => { FiveSplit => {tile_size => sub { ($_[0]/5) !~ m/\./ }} },
+          disable  => { FiveSplit => {tile_size => sub { ($_[0]/5) =~ m/\./ }} },
           defaults => [@DEFAULT_GENERATOR_PLUGINS],
           choices  => [@GENERATOR_PLUGINS] },
 
@@ -1474,7 +1474,7 @@ sub get_generate_opts {
         ],
     ];
 
-    my ($result, $o) = $this->make_form($this->[WINDOW], $i, $options, $extra_buttons);
+    my ($result, $o) = make_form($this->[WINDOW], $i, $options, $extra_buttons);
     if( $result eq "ok" ) {
         $i->{$_} = $o->{$_} for keys %$o;
         $this->[SETTINGS]{GENERATE_OPTS} = freeze $i;
@@ -1538,7 +1538,7 @@ sub render_settings {
        $i = thaw $i if $i;
        $i = {} unless $i;
 
-    my ($result, $o) = $this->make_form($this->[WINDOW], $i, $options);
+    my ($result, $o) = make_form($this->[WINDOW], $i, $options);
     return unless $result eq "ok";
 
     if($o->{cell_size} ne $i->{cell_size}) {
@@ -1575,7 +1575,7 @@ sub preferences {
           default  => 1 },
     ]];
 
-    my ($result, $o) = $this->make_form($this->[WINDOW], $i, $options);
+    my ($result, $o) = make_form($this->[WINDOW], $i, $options);
     return unless $result eq "ok";
     $this->[SETTINGS]{$_} = $o->{$_} for keys %$o;
 }

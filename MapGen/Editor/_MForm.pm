@@ -48,7 +48,6 @@ our $default_restore_defaults = sub {
     };
 
 sub make_form {
-    my $this = shift;
     my ($parent_window, $i, $options, $extra_buttons) = @_;
 
     my $dialog = new Gtk2::Dialog("Map Generation Options", $parent_window, [], 'gtk-cancel' => "cancel", 'gtk-ok' => "ok");
@@ -130,7 +129,7 @@ sub make_form {
                 $widget->set_tooltip_text( $item->{desc} ) if exists $item->{desc};
 
                 if( $item->{convert} ) {
-                    $item->{extract} = sub { $this->{convert}->( $widget->get_active_text ) };
+                    $item->{extract} = sub { $item->{convert}->( $widget->get_active_text ) };
 
                 } else {
                     $item->{extract} = sub { $widget->get_active_text };
@@ -202,7 +201,7 @@ sub make_form {
                 $z = (exists $item->{z} ? $item->{z} : 2);
 
                 if( $item->{convert} ) {
-                    $item->{extract} = sub { $this->{convert}->( [map {$d->[$_]} $widget->get_selected_indices] ) };
+                    $item->{extract} = sub { $item->{convert}->( [map {$d->[$_]} $widget->get_selected_indices] ) };
 
                 } else {
                     $item->{extract} = sub { [map {$d->[$_]} $widget->get_selected_indices] };
@@ -238,35 +237,78 @@ sub make_form {
                 my $this_e = $reref->{$item->{name}};
                 my $this_type = $this_e->[0]{type};
 
-                unless( $this_type eq "choice" or $this_type eq "text" ) {
-                    warn "not prepared to deal with TreeViews in the disable code (yet) ... skipping";
-                    next
-                }
+                if( $this_type eq "choices" ) {
+                    my %disabled; # It appears treviews don't have a row-sensitive function, so we're going to hook
+                                  # the changed signal and play some pretend.
 
-                for my $k (keys %$d) {
-                    my $that_e = $reref->{$k};
-                    my $that_type = $that_e->[0]{type};
+                    my @d = @{ $item->{choices} };
+                    my $LOOPER = 0;
 
-                    if( $that_type eq "choice" or $that_type eq "text") {
-                        $that_e->[1]->signal_connect( changed => my $f = sub {
-                            my $sensitive = ($d->{$k}->( $that_e->[0]{extract}->() ) ? FALSE : TRUE);
-                             
-                            $this_e->[1]->set_sensitive($sensitive)
-                        });
+                    $this_e->[1]->get_selection->signal_connect(changed => my $changed = sub {
+                        unless( $LOOPER ) {
+                            $LOOPER = 1;
+                            my @s = grep {!$disabled{$d[$_]}} $this_e->[1]->get_selected_indices;
+                            $this_e->[1]->get_selection->unselect_all;
+                            $this_e->[1]->select(@s);
+                            $LOOPER = 0;
+                        }
+                    });
 
-                        $f->();
+                    for my $row_name (keys %$d) { my $row = $d->{$row_name};
+                    for my $k (keys %$row) {
+                        my $that_e = $reref->{$k};
+                        my $that_type = $that_e->[0]{type};
 
-                    } elsif( $that_type eq "choices" ) {
-                        $that_e->[1]->get_selection->signal_connect( changed => my $f = sub {
-                            my $sensitive = ($d->{$k}->( $that_e->[0]{extract}->() ) ? FALSE : TRUE);
-                             
-                            $this_e->[1]->set_sensitive($sensitive)
-                        });
+                        if( $that_type eq "choice" or $that_type eq "text") {
+                            $that_e->[1]->signal_connect( changed => my $f = sub {
+                                my $sensitive = ($row->{$k}->( $that_e->[0]{extract}->() ) ? FALSE : TRUE);
+                                 
+                                $disabled{$row_name} = not $sensitive;
+                                $changed->();
+                            });
 
-                        $f->();
+                            $f->();
+
+                        } elsif( $that_type eq "choices" ) {
+                            $that_e->[1]->get_selection->signal_connect( changed => my $f = sub {
+                                my $sensitive = ($row->{$k}->( $that_e->[0]{extract}->() ) ? FALSE : TRUE);
+                                 
+                                $disabled{$row_name} = not $sensitive;
+                                $changed->();
+                            });
+
+                            $f->();
+                        }
+                        
+                        else { die "unhandled disabler: $k/$that_type" }
+                    }}
+
+                } else {
+                    for my $k (keys %$d) {
+                        my $that_e = $reref->{$k};
+                        my $that_type = $that_e->[0]{type};
+
+                        if( $that_type eq "choice" or $that_type eq "text") {
+                            $that_e->[1]->signal_connect( changed => my $f = sub {
+                                my $sensitive = ($d->{$k}->( $that_e->[0]{extract}->() ) ? FALSE : TRUE);
+                                 
+                                $this_e->[1]->set_sensitive($sensitive)
+                            });
+
+                            $f->();
+
+                        } elsif( $that_type eq "choices" ) {
+                            $that_e->[1]->get_selection->signal_connect( changed => my $f = sub {
+                                my $sensitive = ($d->{$k}->( $that_e->[0]{extract}->() ) ? FALSE : TRUE);
+                                 
+                                $this_e->[1]->set_sensitive($sensitive)
+                            });
+
+                            $f->();
+                        }
+                        
+                        else { die "unhandled disabler: $k/$that_type" }
                     }
-                    
-                    else { die "unhandled disabler: $k/$that_type" }
                 }
             }
     }}
