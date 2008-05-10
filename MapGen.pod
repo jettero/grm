@@ -200,8 +200,10 @@ Really, without his work, I never would have written this module!
 
 Copyright (c) 2008 Paul Miller -- LGPL [Software::License::LGPL_2_1]
 
-    perl -MSoftware::License::LGPL_2_1 -e '$l = Software::License::LGPL_2_1->new({holder=>"Paul Miller"});
-          print $l->fulltext' | less
+    perl -MSoftware::License::LGPL_2_1 \
+         -e '$l = Software::License::LGPL_2_1->new({
+             holder=>"Paul Miller"});
+             print $l->fulltext' | less
 
 =head1 SEE ALSO
 

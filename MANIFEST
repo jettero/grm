@@ -38,6 +38,4 @@ MapGen/Generator/Blank.pm
 MapGen/GeneratorPlugin/ClearDoors.pm
 MapGen/Editor/_MForm.pm
 vis1.map.xml
-vis2.map.xml
-vis1.map.png
-vis2.map.png
+MapGen/Editor.pod

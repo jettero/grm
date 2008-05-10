@@ -14,6 +14,7 @@ use Gtk2 -init; # -init tells import to ->init() your app
 use Gtk2::Ex::Simple::Menu;
 use Gtk2::Ex::Dialogs::ErrorMsg;
 use Gtk2::Ex::Dialogs::Question;
+use Gtk2::Ex::PodViewer;
 use Gtk2::SimpleList;
 use Games::RolePlay::MapGen;
 use User;
@@ -150,10 +151,15 @@ sub new {
         _Help => {
             item_type => '<LastBranch>',
             children => [
+                _Help => {
+                    item_type  => '<StockItem>',
+                    callback   => sub { $this->help },
+                    extra_data => 'gtk-help',
+                },
                 _About => {
-                    item_type => '<StockItem>',
-                    callback  => sub { $this->about },
-                    extra_data  => 'gtk-about',
+                    item_type  => '<StockItem>',
+                    callback   => sub { $this->about },
+                    extra_data => 'gtk-about',
                 },
             ],
         },
@@ -1616,6 +1622,30 @@ sub preferences {
 # }}}
 
 # MISC
+# help {{{
+sub help {
+    my $this = shift;
+
+    my $viewer = Gtk2::Ex::PodViewer->new;
+       $viewer->load('Games::RolePlay::MapGen::Editor');
+       $viewer->show;  # see, it's a widget!
+
+    my $vp = Gtk2::Viewport->new(undef,undef);
+       $vp->add($viewer);
+
+    my $scwin = Gtk2::ScrolledWindow->new;
+       $scwin->set_policy('automatic', 'automatic');
+       $scwin->add($vp);
+
+    my $dialog = Gtk2::Dialog->new("GRM Editor Help", $this->[WINDOW], 'destroy-with-parent', 'gtk-ok' => 'ok');
+       $dialog->vbox->add($scwin);
+       $dialog->set_size_request(600,450);
+       $dialog->set_default_response('ok');
+       $dialog->show_all;
+       $dialog->run;
+       $dialog->destroy;
+}
+# }}}
 # about {{{
 sub about {
     my $this = shift;
