@@ -19,6 +19,10 @@ L<http://voltar.org/PerlModules/vis1.map.png>
 
 L<http://voltar.org/PerlModules/vis1.map.xml>
 
+L<http://voltar.org/PerlModules/vis2.map.png>
+
+L<http://voltar.org/PerlModules/vis2.map.xml>
+
 =head1 INSTRUCTIONS
 
 The documentation is pretty light on this, sorry.  I had originally intended
