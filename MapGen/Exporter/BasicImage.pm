@@ -147,21 +147,24 @@ sub genmap {
 
             for my $dir (qw(n s e w)) {
                 if( ref(my $door = $t->{od}{$dir}) ) {
+                    my @q1 = ( $dir eq "n" ? ($xp+$dM, $yp-$dm) :
+                               $dir eq "s" ? ($xp+$dM, $Yp-$dm) :
+                               $dir eq "e" ? ($Xp-$dm, $yp+$dM) :
+                                             ($xp-$dm, $yp+$dM) );
+
+                    my @q2 = ( $dir eq "n" ? ($Xp-$dM, $yp+$dm) :
+                               $dir eq "s" ? ($Xp-$dM, $Yp+$dm) :
+                               $dir eq "e" ? ($Xp+$dm, $Yp-$dM) :
+                                             ($xp+$dm, $Yp-$dM) );
+
                     unless( $door->{secret} ) {
                         # Regular old unlocked, open, unstock, unhidden doors are these cute little rectangles.
 
-                        $gd->filledRectangle( $xp+$dM, $yp-$dm => $Xp-$dM, $yp+$dm, $door_color ) if $dir eq "n";
-                        $gd->filledRectangle( $xp+$dM, $Yp-$dm => $Xp-$dM, $Yp+$dm, $door_color ) if $dir eq "s";
-                        $gd->filledRectangle( $Xp-$dm, $yp+$dM => $Xp+$dm, $Yp-$dM, $door_color ) if $dir eq "e";
-                        $gd->filledRectangle( $xp-$dm, $yp+$dM => $xp+$dm, $Yp-$dM, $door_color ) if $dir eq "w";
+                        $gd->filledRectangle( @q1 => @q2, $door_color );
                     }
 
                     if( $door->{'open'} ) {
-                        $gd->filledRectangle( $xp+$dM, $yp-$dm => $Xp-$dM, $yp+$dm, $white ) if $dir eq "n";
-                        $gd->filledRectangle( $xp+$dM, $Yp-$dm => $Xp-$dM, $Yp+$dm, $white ) if $dir eq "s";
-                        $gd->filledRectangle( $Xp-$dm, $yp+$dM => $Xp+$dm, $Yp-$dM, $white ) if $dir eq "e";
-                        $gd->filledRectangle( $xp-$dm, $yp+$dM => $xp+$dm, $Yp-$dM, $white ) if $dir eq "w";
-
+                        $gd->filledRectangle( @q1 => @q2, $white );
                     }
 
                     # Here, we draw the diagonal line and arc indicating how the door opens.
@@ -266,6 +269,35 @@ sub genmap {
                     }
                     # }}}
 
+                    unless( $door->{'open'} ) {
+                        if( $door->{locked} ) {
+                            my @l1 = ( $dir eq "n" ? ($xp+8, $yp-4) :
+                                       $dir eq "s" ? ($xp+8, $Yp-4) :
+                                       $dir eq "e" ? ($Xp-4, $yp+8) :
+                                                     ($xp-4, $yp+8) );
+
+                            my @l2 = ( $dir eq "n" ? ($xp+8, $yp+4) :
+                                       $dir eq "s" ? ($xp+8, $Yp+4) :
+                                       $dir eq "e" ? ($Xp+4, $yp+8) :
+                                                     ($xp+4, $yp+8) );
+
+                            $gd->line( @l1 => @l2 => $red );
+                        }
+
+                        if( $door->{stuck} ) {
+                            my @l1 = ( $dir eq "n" ? ($Xp-8, $yp-4) :
+                                       $dir eq "s" ? ($Xp-8, $Yp-4) :
+                                       $dir eq "e" ? ($Xp-4, $Yp-8) :
+                                                     ($xp-4, $Yp-8) );
+
+                            my @l2 = ( $dir eq "n" ? ($Xp-8, $yp+4) :
+                                       $dir eq "s" ? ($Xp-8, $Yp+4) :
+                                       $dir eq "e" ? ($Xp+4, $Yp-8) :
+                                                     ($xp+4, $Yp-8) );
+
+                            $gd->line( @l1 => @l2 => $blue );
+                        }
+                    }
                 }
             }
 
