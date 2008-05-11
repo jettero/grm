@@ -9,6 +9,7 @@ package Games::RolePlay::MapGen::Editor;
 # -Paul
 
 use strict;
+use GD;
 use Glib qw(TRUE FALSE);
 use Gtk2 -init; # -init tells import to ->init() your app
 use Gtk2::Ex::Simple::Menu;
