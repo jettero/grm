@@ -35,7 +35,7 @@ use XML::Simple;
 set_exporter $map("XML");
 export $map("map.xml"); 
 
-skip( (not (-f "/usr/bin/xmllint")) => system(qw(/usr/bin/xmllint --path blib/lib --postvalid --noout map.xml)), 0);
+skip( (not (-f "/usr/bin/xmllint")) => system(qw(/usr/bin/xmllint --path blib/lib/Games/RolePlay/MapGen --postvalid --noout map.xml)), 0);
 
 open IN, "map.xml" or die $!;
 my $xmap = XMLin( join("\n", <IN>) )->{'map'}; close IN;
