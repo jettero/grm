@@ -7,6 +7,8 @@ use Carp;
 use base qw(Games::RolePlay::MapGen::Generator);
 use Games::RolePlay::MapGen::Tools qw( _group _tile _door );
 use XML::XPath;
+use XML::Parser;
+use File::Spec;
 
 1;
 
@@ -14,9 +16,30 @@ sub genmap {
     my $this = shift;
     my $opts = shift;
 
+    my $xml_path = $INC{ 'Games/RolePlay/MapGen.pm' };
+       $xml_path =~ s/\.pm$//;
+
     croak "you must supply a filename with xml_input_file => \"something.xml\"" unless exists $opts->{xml_input_file};
     open my $input, $opts->{xml_input_file} or croak "unable to open $opts->{xml_input_file}: $!";
     my $xp = XML::XPath->new( ioref => $input );
+    $xp->set_parser( XML::Parser->new(
+        ErrorContext  => 2,
+        ParseParamEnt => 1,
+        Handlers=>{ExternEnt => sub {
+            my ($base, $name) = @_[1,2];
+            my $fname = ($base ? File::Spec->catfile($base, $name) : $name);
+
+            ## DEBUG ## warn "\e[1;32mbase=$base; name=$name; xml_path=$xml_path\e[m";
+
+            my $fh;
+            open $fh, $fname or
+            open $fh, File::Spec->catfile($xml_path, $fname) or
+            open $fh, File::Spec->catfile($xml_path, $name) or
+            die "unable to find \"$fname\"";
+
+            $fh;
+        }},
+    ));
 
     my $Mo = $xp->find('/MapGen/option');
     for my $op ($Mo->get_nodelist) {

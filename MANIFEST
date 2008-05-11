@@ -1,5 +1,5 @@
-MapGen.dtd
-MapGen.xsl
+lib/Games/RolePlay/MapGen/MapGen.dtd
+lib/Games/RolePlay/MapGen/MapGen.xsl
 README
 Changes
 Makefile.PL
