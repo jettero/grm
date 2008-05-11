@@ -100,7 +100,7 @@ sub AUTOLOAD {
 
         delete $this->{objs}{$type} if $this->{objs}{$type};
 
-        croak "Couldn't locate module \"$modu\"" unless $this->{$type} = $this->_check_mod_path( $modu );
+        croak "Couldn't locate module \"$modu\" during execution of $sub()" unless $this->{$type} = $this->_check_mod_path( $modu );
 
         return;
 
@@ -111,7 +111,7 @@ sub AUTOLOAD {
 
         delete $this->{objs}{$type} if $this->{objs}{$type};
 
-        croak "Couldn't locate module \"$plug\"" unless $newn = $this->_check_mod_path( $plug );
+        croak "Couldn't locate module \"$plug\" during execution of $sub()" unless $newn = $this->_check_mod_path( $plug );
 
         push @{ $this->{plugins}{$type} }, $newn;
 
@@ -120,7 +120,7 @@ sub AUTOLOAD {
     } elsif( $sub =~ m/MapGen\:\:set_([\w\d\_]+)$/ ) {
         my $n = $1;
 
-        croak "ERROR: set_$n() unknown setting" unless exists $known_opts{$n};
+        croak "ERROR: set_$n() unknown setting during execution of $sub()" unless exists $known_opts{$n};
 
         $this->{$n} = shift;
 
