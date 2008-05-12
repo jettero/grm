@@ -42,10 +42,12 @@ sub _check_mod_path  {
 
     my $found = 0;
     my $mod;
+    warn "working on omod=$omod";
     for my $toadd ("", "Games/RolePlay/MapGen/Generator/", "Games/RolePlay/MapGen/GeneratorPlugin/", "Games/RolePlay/MapGen/Exporter/", "Games/RolePlay/MapGen/ExporterPlugin/") {
         $mod = "$toadd$omod";
+        warn "trying mod=$od";
         for my $dir (@INC) {
-            # warn "trying $dir/$mod.pm" if $dir =~ m/blib/ and $mod =~ m/Text/;
+            warn "trying dirf=$dir/$mod.pm";
             if( -f "$dir/$mod.pm" ) {
                 $found = 1;
                 goto _NO_MORE_MOD_CHECK;
