@@ -29,13 +29,25 @@ sub genmap {
             my ($base, $name) = @_[1,2];
             my $fname = ($base ? File::Spec->catfile($base, $name) : $name);
 
-            ## DEBUG ## warn "\e[1;32mbase=$base; name=$name; xml_path=$xml_path\e[m";
+            if( $INC{'PAR.pm'} ) {
+                # NOTE: this could be about a million times more portable, but it isn't. 
+                # I posted a r.cpan bug (wishlist) about it:
+                #   http://rt.cpan.org/Ticket/Display.html?id=35821
+
+                # NOTE: doh, I can just return the contents of the file.  Pfft.
+
+                my $contents = eval {
+                    PAR::read_file(File::Spec->catfile(qw(lib Games RolePlay MapGen MapGen.dtd)));
+                };
+
+                return $contents if $contents and not $@;
+            }
 
             my $fh;
             open $fh, $fname or
             open $fh, File::Spec->catfile($xml_path, $fname) or
             open $fh, File::Spec->catfile($xml_path, $name) or
-            die "unable to find \"$fname\"";
+            die "unable to find \"$fname\" even using ($xml_path)";
 
             $fh;
         }},

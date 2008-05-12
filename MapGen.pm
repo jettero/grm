@@ -89,18 +89,20 @@ sub AUTOLOAD {
 
         delete $this->{objs}{$type} if $this->{objs}{$type};
 
-        croak "Couldn't locate module \"$modu\" during execution of $sub()" unless $this->{$type} = $this->_check_mod_path( $modu );
+        my $module = "Games::RolePlay::MapGen::" . (ucfirst $type) . "::$modu";
+        croak "Couldn't locate module \"$modu\" during execution of $sub() $@" unless eval { "require $module" };
+
+        # NOTE: why does this not have {objs}? 5/12/8
+        $this->{$type} = $module;
 
         return;
 
     } elsif( $sub =~ m/MapGen\:\:add_(generator|exporter)_plugin$/ ) {
         my $type = $1;
         my $plug = shift;
-        my $newn;
 
-        delete $this->{objs}{$type} if $this->{objs}{$type};
-
-        croak "Couldn't locate module \"$plug\" during execution of $sub()" unless $newn = $this->_check_mod_path( $plug );
+        my $newn = "Games::RolePlay::MapGen::" . (ucfirst $type) . "Plugin::$plug";
+        croak "Couldn't locate module \"$plug\" during execution of $sub()" unless eval { "require $newn" };
 
         push @{ $this->{plugins}{$type} }, $newn;
 
@@ -115,6 +117,8 @@ sub AUTOLOAD {
 
         for my $o (qw(generator exporter)) {
             if( my $oo = $this->{objs}{$o} ) {
+
+                # NOTE: how does this->{$n} relate to this->{objs}{$n} ... 5/12/8
                 $oo->{o}{$n} = $this->{$n};
             }
         }
