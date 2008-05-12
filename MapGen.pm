@@ -40,26 +40,13 @@ sub _check_mod_path  {
     my $omod = shift;
        $omod =~ s/\:\:/\//g;
 
-    my $found = 0;
-    my $mod;
-    warn "working on omod=$omod";
-    for my $toadd ("", "Games/RolePlay/MapGen/Generator/", "Games/RolePlay/MapGen/GeneratorPlugin/", "Games/RolePlay/MapGen/Exporter/", "Games/RolePlay/MapGen/ExporterPlugin/") {
-        $mod = "$toadd$omod";
-        warn "trying mod=$od";
-        for my $dir (@INC) {
-            warn "trying dirf=$dir/$mod.pm";
-            if( -f "$dir/$mod.pm" ) {
-                $found = 1;
-                goto _NO_MORE_MOD_CHECK;
-            }
-        }
+    for my $mod ($omod, map {$_ . "::$omod"} "Games::RolePlay::MapGen::Generator", "Games::RolePlay::MapGen::GeneratorPlugin",
+            "Games::RolePlay::MapGen::Exporter", "Games::RolePlay::MapGen::ExporterPlugin") {
+
+        return $mod if eval "require $mod";
     }
 
-    _NO_MORE_MOD_CHECK:
-    return undef unless $found;
-
-    $mod =~ s/\/+/\:\:/g;
-    return $mod;
+    return;
 }
 # }}}
 # _check_opts {{{
