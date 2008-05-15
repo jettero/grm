@@ -1627,7 +1627,16 @@ sub preferences {
 sub help {
     my $this = shift;
 
+    my $search = Pod::Simple::Search->new;
+       $search->inc(1);
+
+    my $x = $search->find("Games::RolePlay::MapGen::Editor");
+    my $s = { 'Games::RolePlay::MapGen::Editor' => $x };
+
+    warn "INC=(@INC) x=$x";
+
     my $viewer = Gtk2::Ex::PodViewer->new;
+       $viewer->set_db($s); # cuz, do we really need to find THEM ALL?
        $viewer->load('Games::RolePlay::MapGen::Editor');
        $viewer->show;  # see, it's a widget!
 
