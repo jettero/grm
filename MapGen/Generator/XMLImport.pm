@@ -29,19 +29,22 @@ sub genmap {
             my ($base, $name) = @_[1,2];
             my $fname = ($base ? File::Spec->catfile($base, $name) : $name);
 
-            if( $INC{'PAR.pm'} ) {
-                # NOTE: this could be about a million times more portable, but it isn't. 
-                # I posted a r.cpan bug (wishlist) about it:
-                #   http://rt.cpan.org/Ticket/Display.html?id=35821
+            ## we're doing this in the grmedit.pl now ## if( $INC{'PAR.pm'} ) {
+            ## we're doing this in the grmedit.pl now ##     # NOTE: this could be about a million times more portable, but it isn't. 
+            ## we're doing this in the grmedit.pl now ##     # I posted a r.cpan bug (wishlist) about it:
+            ## we're doing this in the grmedit.pl now ##     #   http://rt.cpan.org/Ticket/Display.html?id=35821
 
-                # NOTE: doh, I can just return the contents of the file.  Pfft.
+            ## we're doing this in the grmedit.pl now ##     # NOTE: doh, I can just return the contents of the file.  Pfft.
 
-                my $contents = eval {
-                    PAR::read_file(File::Spec->catfile(qw(lib Games RolePlay MapGen MapGen.dtd)));
-                };
+            ## we're doing this in the grmedit.pl now ##     my $contents = eval {
+            ## we're doing this in the grmedit.pl now ##         my $r = PAR::read_file(my $f = File::Spec->catfile(qw(lib Games RolePlay MapGen MapGen.dtd)));
+            ## we're doing this in the grmedit.pl now ##         $r;
+            ## we're doing this in the grmedit.pl now ##     };
 
-                return $contents if $contents and not $@;
-            }
+            ## we're doing this in the grmedit.pl now ##     warn "@=$@" if $@;
+
+            ## we're doing this in the grmedit.pl now ##     return $contents if $contents and not $@;
+            ## we're doing this in the grmedit.pl now ## }
 
             my $fh;
             open $fh, $fname or

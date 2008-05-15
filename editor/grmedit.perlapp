@@ -1,0 +1,48 @@
+#!C:\Program Files\ActiveState Perl Dev Kit 6.0\bin\lib\pai.exe
+PAP-Version: 1.0
+Packer: C:\Program Files\ActiveState Perl Dev Kit 6.0\bin\perlapp.exe
+Script: grmedit.pl
+Cwd: C:\Documents and Settings\jettero\Desktop\w32perl\mapgen\editor
+Add: Gtk2
+Add: Glib
+Add: Gtk2::SimpleList
+Add: Gtk2::Ex::PodViewer
+Add: Gtk2::Ex::Dialogs
+Add: Gtk2::Ex::Simple::Menu
+Add: Data::Dumper
+Add: Data::Dump
+Add: User
+Add: DB_File
+Add: POSIX
+Add: Tie::Array
+Add: Math::Trig
+Add: XML::XPath
+Add: GD
+Bind: grm.par[file=grm.par,extract,mode=666]
+Clean: 0
+Date: 2008-05-14 19:10:04
+Debug: 
+Dependent: 0
+Dyndll: 0
+Exe: grmedit.exe
+Force: 0
+Gui: 0
+Hostname: ranger
+Icon: glyph.ico
+No-Compress: 0
+No-Logo: 0
+Runlib: 
+Shared: none
+Tmpdir: 
+Verbose: 0
+Version-Comments: 
+Version-CompanyName: 
+Version-FileDescription: 
+Version-FileVersion: 
+Version-InternalName: 
+Version-LegalCopyright: 
+Version-LegalTrademarks: 
+Version-OriginalFilename: 
+Version-ProductName: 
+Version-ProductVersion: 
+Xclude: 0
