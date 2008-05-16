@@ -39,3 +39,4 @@ MapGen/GeneratorPlugin/ClearDoors.pm
 MapGen/Editor/_MForm.pm
 vis1.map.xml
 MapGen/Editor.pod
+Locale_gettext.patch
