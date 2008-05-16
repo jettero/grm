@@ -1,19 +1,27 @@
 
 use strict;
 use Test;
+use File::Slurp;
 
 use Games::RolePlay::MapGen;
 my $map = new Games::RolePlay::MapGen({bounding_box => join("x", 25, 25) });
    $map->add_generator_plugin("BasicDoors");
    $map->generate;
 
-plan tests => 3 + (25*25) + 1;
+plan tests => 3 + (25*25) + 1 + 2;
 
 # if you know of a way to actually test these, you go ahead and email me, ok?
 
-set_exporter $map("Text");
-export $map("map.txt"); 
+$map->set_exporter("Text");
+$map->export("map.txt"); 
 ok( -f "map.txt" );
+
+$map->export( fname=>"map.tnc", nocolor=>1 ); 
+ok( -f "map.txt" );
+
+my $txt = read_file('map.txt'); $txt =~ s/\e\[[\d;]*m//g;
+my $tnc = read_file('map.tnc');
+ok( $txt, $tnc );
 
 eval "use GD;"; 
 if( $@ ) {

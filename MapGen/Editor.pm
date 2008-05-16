@@ -389,7 +389,7 @@ sub save_text_as {
         my $map = $this->[MAP];
         eval {
             $map->set_exporter( "Text" );
-            $map->export( $fname );
+            $map->export( fname=>$fname, nocolor=>1 );
         };
         $this->error($@) if $@;
         $pulser->('destroy');

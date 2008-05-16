@@ -44,6 +44,8 @@ sub _show_by_od {
     my $dir  = shift;
     my $od   = $tile->{od}{$dir};
 
+    our $nocolor;
+
     if( $od == 1 ) {
         return " ";
 
@@ -51,6 +53,8 @@ sub _show_by_od {
         # A door!
         my $color = ( ($od->{locked} and $od->{stuck}) ? "[35m" : $od->{locked} ? "[31m" : $od->{stuck} ? "[m" : "[33m" );
         my $reset = "[m";
+
+        $color = $reset = "" if $nocolor;
 
         if( $od->{secret} ) {
             my $wall = {n=>"-", s=>"-", e=>"|", w=>"|"}->{$dir};
@@ -75,8 +79,10 @@ sub genmap {
     my $m    = $opts->{_the_map};
     my $g    = $opts->{_the_groups};
 
+    our $nocolor = $opts->{nocolor};
+
     my @above    = ();
-    my $map      = "[m";
+    my $map      = "[m"; $map = "" if $nocolor;
     my $rooms    = "";
        $rooms   .= "$_->{name} $_->{loc_size}\n" for (grep /^room$/, @$g);
 

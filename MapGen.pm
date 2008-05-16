@@ -21,6 +21,8 @@ our %known_opts = (
     tile_size              => 10,
     cell_size              => "20x20",
 
+    nocolor => 0, # for the text map generator
+
     num_rooms              => "1d4+1",
     min_room_size          => "2x2",
     max_room_size          => "7x7",
