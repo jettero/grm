@@ -12,6 +12,7 @@ Games::RolePlay::MapGen::Editor - An experimental (eventually possibly cool) Map
 Here are some screenshots of the Editor:
 
 L<http://voltar.org/PerlModules/grm-editor-shot1.png>
+
 L<http://voltar.org/PerlModules/grm-editor-shot2.png>
 
 =head1 INSTRUCTIONS
@@ -36,27 +37,4 @@ Copyright (c) 2008 Paul Miller -- LGPL [Software::License::LGPL_2_1]
 
 =head1 SEE ALSO
 
-=head2 Gtk2::Ex::PodViewer
-
-I use this to display the package's very limited documentation.  It depends on
-L<Locale::gettext>, which is shockingly difficult ot compile under win32.  It
-turns out it's trivially removable from the package using this patch and the
-environment variable NOGETTEXT.
-
-    --- Gtk2-Ex-PodViewer-0.17-tJdpGn/Makefile.PL	2006-05-16 12:01:19.000000000 -0400
-    +++ Gtk2-Ex-PodViewer-0.17-new/Makefile.PL	2008-05-14 15:01:48.000000000 -0400
-    @@ -23,8 +23,9 @@
-            'Pod::Parser'		=> 0,
-            'IO::Scalar'		=> 0,
-            'File::Basename'	=> 0,
-    -    	'Locale::gettext'	=> 0,
-    +    	($ENV{NOGETTEXT} ? () : ('Locale::gettext'=> 0)),
-            'Pod::Simple::Search'	=> 0,
-         },
-    -    'EXE_FILES'			=> [ 'src/podviewer' ]
-    +    'EXE_FILES'			=> [ 'src/podviewer' ],
-    +    ($ENV{NOGETTEXT} ? ('PM_FILTER' => 'grep -v gettext') : ()),
-     );
-
-
-perl(1), Games::RolePlay::MapGen(1)
+perl(1), Games::RolePlay::MapGen(1), Gtk2(1)
