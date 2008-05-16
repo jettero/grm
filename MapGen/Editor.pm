@@ -1633,7 +1633,7 @@ sub help {
     my $x = $search->find("Games::RolePlay::MapGen::Editor");
     my $s = { 'Games::RolePlay::MapGen::Editor' => $x };
 
-    warn "INC=(@INC) x=$x";
+## DEBUG ## warn "\e[33mINC=\e[m(\e[1;33m@INC\e[m) x=$x";
 
     my $viewer = Gtk2::Ex::PodViewer->new;
        $viewer->set_db($s); # cuz, do we really need to find THEM ALL?
