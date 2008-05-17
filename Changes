@@ -1,10 +1,10 @@
-1.2.1: Sat May 10 11:23:51 EDT 2008
+1.2.13: Sat May 17 15:52:35 EDT 2008
    - Discovered various problems with different versions of XML::Parser less
      than 2.33 -- Added numeric prereq
    - Disabled the /usr/bin/xmllint test (a single test) for platforms where
      xmllint doesn't behave exactly like mine.
 
-1.2.0: Sat May 10 11:23:51 EDT 2008
+1.2.10: Sat May 10 11:23:51 EDT 2008
    - Added visuals for door status (open, locked, etc)
    - Added an editor
    - Expanded the functioning of groups, ignoring all uses other than rooms.
