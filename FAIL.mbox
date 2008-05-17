@@ -43,6 +43,7 @@ X-Old-Spam-Check-By: 16.mx.develooper.com
 X-Old-Spam-Status: No, hits=-6.6 required=8.0
 	tests=BAYES_00,PERLBUG_CONF
 Status: RO
+X-Status: A
 Content-Length: 11991
 Lines: 206
 
