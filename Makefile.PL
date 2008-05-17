@@ -25,6 +25,7 @@ WriteMakefile(
         'XML::Simple' => 0,
         'Tie::IxHash' => 0,
         'XML::XPath'  => 0,
+        'XML::Parser' => 2.33,
         'Test' => 1.25,
 
         # These are just for t/05_export.t
