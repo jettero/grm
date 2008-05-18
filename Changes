@@ -1,3 +1,8 @@
+1.2.14: Sun May 18 09:27:29 EDT 2008
+   - Require the most recnet versions of XML::XPath and XML::Parser
+     (Yet another freebsd patch... this might work, who knows, it already works
+     fine on my freebsd virtual machine.)
+
 1.2.13: Sat May 17 15:52:35 EDT 2008
    - Discovered various problems with different versions of XML::Parser less
      than 2.33 -- Added numeric prereq
