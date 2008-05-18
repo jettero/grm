@@ -24,8 +24,8 @@ WriteMakefile(
         'Software::License::LGPL_2_1' => 0,
         'XML::Simple' => 0,
         'Tie::IxHash' => 0,
-        'XML::XPath'  => 0,
-        'XML::Parser' => 2.33,
+        'XML::XPath'  => 1.13,
+        'XML::Parser' => 2.36,
         'Test' => 1.25,
 
         # These are just for t/05_export.t

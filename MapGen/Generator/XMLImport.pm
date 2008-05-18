@@ -29,6 +29,9 @@ sub genmap {
             my ($base, $name) = @_[1,2];
             my $fname = ($base ? File::Spec->catfile($base, $name) : $name);
 
+          # warn "base=$base; name=$name; fname=$fname";
+          # sleep 1;
+
             my $fh;
             open $fh, $fname or
             open $fh, File::Spec->catfile($xml_path, $fname) or
