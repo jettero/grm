@@ -27,8 +27,8 @@ if( (my $c = getcwd()) and chdir "bsd6.1" ) {
         open my $out, ">xml_parser.res";
 
     } else {
-        warn "\nYour XML::Parser doesn't seem to be able to parse XML.  Skipping tests.\n";
-        warn "Most likely the XMLimporter Games::RolePlay::MapGen will not work correctly.\n";
+        warn "\nYour XML::Parser doesn't seem to be able to parse valid XML.  Skipping tests.\n";
+        warn "Most likely the XMLimporter Games::RolePlay::MapGen will not work correctly.\n\n";
         sleep 1;
     }
 }

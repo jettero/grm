@@ -2,7 +2,7 @@
 use strict;
 use Test;
 
-unless( -f "lawl_xml_parser.res" ) {
+unless( -f "xml_parser.res" ) {
     plan tests => 1;
     skip(1,1,1);
     exit 0;

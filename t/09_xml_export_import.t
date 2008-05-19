@@ -5,7 +5,7 @@ use Games::RolePlay::MapGen;
 
 plan tests => 1;
 
-unless( -f "lawl_xml_parser.res" ) {
+unless( -f "xml_parser.res" ) {
     skip(1,1,1);
     exit 0;
 }
