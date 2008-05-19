@@ -5,6 +5,11 @@ use Games::RolePlay::MapGen;
 
 plan tests => 1;
 
+unless( -f "lawl_xml_parser.res" ) {
+    skip(1,1,1);
+    exit 0;
+}
+
 my $map = new Games::RolePlay::MapGen({
     tile_size    => 10,
     cell_size    => "23x23", 

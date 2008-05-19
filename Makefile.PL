@@ -1,6 +1,7 @@
 # vi:set syntax=perl:
 
 use 5.008;
+use Cwd;
 use ExtUtils::MakeMaker;
 
 unlink "xmllint.res";
@@ -17,6 +18,21 @@ if( -f "xmllint.res" ) {
     print "and the test just isn't that important anyway. (Skipping.)\n\n";
 }
 
+if( (my $c = getcwd()) and chdir "bsd6.1" ) {
+    my $r = do "test.pl";
+
+    chdir $c or die "couldn't cd back from bsd6.1 xml test dir: $!";
+
+    if( $r and not $@ ) {
+        open my $out, ">xml_parser.res";
+
+    } else {
+        warn "\nYour XML::Parser doesn't seem to be able to parse XML.  Skipping tests.\n";
+        warn "Most likely the XMLimporter Games::RolePlay::MapGen will not work correctly.\n";
+        sleep 1;
+    }
+}
+
 WriteMakefile(
     'NAME'         => 'Games::RolePlay::MapGen',
     'VERSION_FROM' => 'MapGen.pm',
@@ -24,8 +40,8 @@ WriteMakefile(
         'Software::License::LGPL_2_1' => 0,
         'XML::Simple' => 0,
         'Tie::IxHash' => 0,
-        'XML::XPath'  => 1.13,
-        'XML::Parser' => 2.36,
+        'XML::XPath'  => 0, # I versioned these up during the bsd-6.1-hates-me senerio # 1.13,
+        'XML::Parser' => 0, # I versioned these up during the bsd-6.1-hates-me senerio # 1.36,
         'Test' => 1.25,
 
         # These are just for t/05_export.t
@@ -33,5 +49,5 @@ WriteMakefile(
         'Algorithm::Diff' => 0, # <-- this is used automatcially by the test harness
     },
 
-    clean => { FILES => "xmllint.res m*.txt map.png *.log *.map [0-9][0-9]_*.xml m*.xml 10_groups.* map.dumper.* *.tnc log" },
+    clean => { FILES => "xml_parser.res xmllint.res m*.txt map.png *.log *.map [0-9][0-9]_*.xml m*.xml 10_groups.* map.dumper.* *.tnc log" },
 );
