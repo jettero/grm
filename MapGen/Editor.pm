@@ -28,6 +28,8 @@ use POSIX qw(ceil);
 use Games::RolePlay::MapGen::Editor::_MForm qw(make_form $default_restore_defaults);
 use Games::RolePlay::MapGen::Tools qw( roll choice _door _group );
 
+our $VERSION = "1.0.0";
+
 our $DEFAULT_GENERATOR         = 'Basic';
 our @GENERATORS                = (qw( Basic Blank OneBigRoom Perfect SparseAndLoops ));
 our @GENERATOR_PLUGINS         = (qw( BasicDoors FiveSplit ));
@@ -1664,6 +1666,9 @@ sub about {
     eval 'use Software::License::LGPL_2_1; $license = (Software::License::LGPL_2_1->new({holder=>"Paul Miller"}))->fulltext';
     warn "error loading license: $@" if $@;
 
+    my $ver = $Games::RolePlay::MapGen::Editor::VERSION;
+    my $mer = $Games::RolePlay::MapGen::VERSION;
+
     Gtk2->show_about_dialog($this->[WINDOW],
 
         'program-name' => "GRM Editor",
@@ -1671,10 +1676,9 @@ sub about {
         authors        => ['Paul Miller <jettero@cpan.org>'],
         copyright      => 'Copyright (c) 2008 Paul Miller',
         comments       =>
-        "This is part of the Games::RolePlay::MapGen (GRM) Distribution v$Games::RolePlay::MapGen::VERSION.
-         You can use it in your own projrects with few restrictions.
-         Use at your own risk.  Designed for fun.  Have fun.",
-    );
+        "This editor is version v$ver.  It is part of the Games::RolePlay::MapGen (GRM)
+        Distribution v$mer.  You can use it in your own projrects with few
+        restrictions.  Use at your own risk.  Designed for fun.  Have fun.");
 }
 # }}}
 # unknown_menu_callback {{{
