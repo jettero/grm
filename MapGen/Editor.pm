@@ -71,7 +71,7 @@ sub new {
     my $vbox = new Gtk2::VBox;
     my $window = $this->[WINDOW] = new Gtk2::Window("toplevel");
        $window->signal_connect( delete_event => sub { $this->quit } );
-       $window->set_size_request(200,200);
+       $window->set_size_request(700,475);
        $window->set_position('center');
        $window->add($vbox);
        $window->set_title("GRM Editor");
