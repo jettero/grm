@@ -11,28 +11,25 @@ my @cmd = qw(xmllint --path xmllint.test/t2 --postvalid --noout);
 if( (system(@cmd, 'xmllint.test/map.xml') == 0) and (system(@cmd, 'xmllint.test/bad.xml') != 0) ) {
     open my $out, ">xmllint.res" or die "couldn't open a file, this makefile is dooooomed: $!";
 }
+
+open OLDOUT, ">&", \*STDOUT or die "unable to dup: $!";
+open STDOUT, ">/dev/null" or die "unable to close STDOUT: $!";
+if( do "t/06_xml_parser_test.t" ) {
+    open my $out, ">xml_parser.res";
+}
+
+open STDOUT, ">&OLDOUT" or die "unable to reopen STDOUT: $!";
 open STDERR, ">&OLDERR" or die "unable to reopen STDERR: $!";
 
-if( -f "xmllint.res" ) {
+unless( -f "xmllint.res" ) {
 
-} else {
     print "\n\nYour xmllint doesn't seem to work quite like the author's\n";
     print "and the test just isn't that important anyway. (Skipping.)\n\n";
 }
 
-if( (my $c = getcwd()) and chdir "bsd6.1" ) {
-    my $r = do "test.pl";
-
-    chdir $c or die "couldn't cd back from bsd6.1 xml test dir: $!";
-
-    if( $r and not $@ ) {
-        open my $out, ">xml_parser.res";
-
-    } else {
-        warn "\nYour XML::Parser doesn't seem to be able to parse valid XML.  Skipping tests.\n";
-        warn "Most likely the XMLimporter Games::RolePlay::MapGen will not work correctly.\n\n";
-        sleep 1;
-    }
+unless( -f "xml_parser.res" ) {
+    warn "\nYour XML::Parser doesn't seem to be able to parse valid XML.  Skipping tests.\n";
+    warn "Most likely the XMLimporter Games::RolePlay::MapGen will not work correctly.\n\n";
 }
 
 WriteMakefile(
@@ -51,5 +48,5 @@ WriteMakefile(
         'Algorithm::Diff' => 0, # <-- this is used automatcially by the test harness
     },
 
-    clean => { FILES => "xml_parser.res xmllint.res m*.txt map.png *.log *.map [0-9][0-9]_*.xml m*.xml 10_groups.* map.dumper.* *.tnc log" },
+    clean => { FILES => "xml_parser.res test.* xmllint.res m*.txt map.png *.log *.map [0-9][0-9]_*.xml m*.xml 10_groups.* map.dumper.* *.tnc log" },
 );

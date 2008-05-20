@@ -1,3 +1,9 @@
+1.2.16: Tue May 20 19:43:19 EDT 2008
+   - I built a special test, which I think should prove the
+     problem is with XML::Parser and not with the way I'm using
+     it.  If it doesn't fail, then it has something to do with my
+     Handler code I guess.
+
 1.2.15: Sun May 18 09:27:29 EDT 2008
    - Un-Require the most recnet versions of XML::XPath and XML::Parser
      (that actually didn't help.)

@@ -1,7 +1,0 @@
-
-<!ELEMENT test (a*)>
-<!ELEMENT a (b*)>
-<!ELEMENT b EMPTY>
-
-<!ATTLIST b c CDATA #REQUIRED>
-
