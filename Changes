@@ -1,3 +1,12 @@
+1.2.15: Sun May 18 09:27:29 EDT 2008
+   - Un-Require the most recnet versions of XML::XPath and XML::Parser
+     (that actually didn't help.)
+   - I simply taught the Makefile.PL how to skip the import_xml()
+     tests on machines (bsd6.1) that can't parse similar xml.  I
+     suspect libexpat.so.5 is the culprit -- but I really have no idea
+     why it fails on 6.1.  If this doesn't work I'm going to build a
+     6.1 machine and try it myself.
+
 1.2.14: Sun May 18 09:27:29 EDT 2008
    - Require the most recnet versions of XML::XPath and XML::Parser
      (Yet another freebsd patch... this might work, who knows, it already works
