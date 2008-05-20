@@ -4,14 +4,16 @@ use 5.008;
 use Cwd;
 use ExtUtils::MakeMaker;
 
+open OLDERR, ">&", \*STDERR or die "unable to dup: $!";
+open STDERR, ">/dev/null" or die "unable to close STDERR: $!";
 unlink "xmllint.res";
 my @cmd = qw(xmllint --path xmllint.test/t2 --postvalid --noout);
 if( (system(@cmd, 'xmllint.test/map.xml') == 0) and (system(@cmd, 'xmllint.test/bad.xml') != 0) ) {
     open my $out, ">xmllint.res" or die "couldn't open a file, this makefile is dooooomed: $!";
 }
+open STDERR, ">&OLDERR" or die "unable to reopen STDERR: $!";
 
 if( -f "xmllint.res" ) {
-    print "\n\nNo worries, the error above proved your xmllint worked correctly.\n\n";
 
 } else {
     print "\n\nYour xmllint doesn't seem to work quite like the author's\n";
