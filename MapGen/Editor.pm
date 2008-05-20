@@ -1671,7 +1671,7 @@ sub about {
         authors        => ['Paul Miller <jettero@cpan.org>'],
         copyright      => 'Copyright (c) 2008 Paul Miller',
         comments       =>
-        "This is part of the Games::RolePlay::MapGen (GRM) Distribution.
+        "This is part of the Games::RolePlay::MapGen (GRM) Distribution v$Games::RolePlay::MapGen::VERSION.
          You can use it in your own projrects with few restrictions.
          Use at your own risk.  Designed for fun.  Have fun.",
     );

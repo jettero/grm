@@ -2,6 +2,12 @@
 use strict;
 use Test;
 
+unless( -f "xml_parser.res" ) {
+    plan tests => 1;
+    skip(1,1,1);
+    exit 0;
+}
+
 my ($x, $y) = (15, 15);
 
 use Games::RolePlay::MapGen;
