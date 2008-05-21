@@ -32,18 +32,18 @@ sub genmap {
           # warn "base=$base; name=$name; fname=$fname";
           # sleep 1;
 
-            my $fh;
-            open $fh, $fname or
-            open $fh, File::Spec->catfile($xml_path, $fname) or
-            open $fh, File::Spec->catfile($xml_path, $name) or return undef;
+          # my $fh;
+          # open $fh, $fname or
+          # open $fh, File::Spec->catfile($xml_path, $fname) or
+          # open $fh, File::Spec->catfile($xml_path, $name) or return undef;
 
-          # warn "pulled up a file as: $fh";
-            local $/ = undef;
-            my $entire_file = <$fh>;
-          # warn "entire_file=$entire_file";
-            return $entire_file;
+          # $fh; # NOTE: this causes FAIL reports on various platforms almost at random
 
-            $fh; # NOTE: this causes FAIL reports on various platforms almost at random
+            open _XML_PARSER_REQUIRES_A_GLOBAL_GLOB, $fname or
+            open _XML_PARSER_REQUIRES_A_GLOBAL_GLOB, File::Spec->catfile($xml_path, $fname) or
+            open _XML_PARSER_REQUIRES_A_GLOBAL_GLOB, File::Spec->catfile($xml_path, $name) or return undef;
+
+            *_XML_PARSER_REQUIRES_A_GLOBAL_GLOB;
         }},
     ));
 
