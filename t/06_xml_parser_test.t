@@ -101,7 +101,8 @@ eval {
 };
 warn "WARNING: failed to parse xml docs: $@" if $@;
 
-ok( my $result = ($@ ? 0 : 1) );
+my $result = ($@ ? 0 : 1);
+ok( not $result, $result ); # if this fails, skip it
 
 no warnings 'void';
 $result;
