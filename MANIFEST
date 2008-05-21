@@ -42,3 +42,7 @@ MapGen/Editor.pod
 Locale_gettext.patch
 FAIL.mbox
 t/06_xml_parser_test.t
+xmllint.test/bad.xml
+xmllint.test/map.xml
+xmllint.test/t2/MapGen.dtd
+xmllint.test/t2/MapGen.xsl
