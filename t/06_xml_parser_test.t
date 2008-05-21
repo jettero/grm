@@ -63,13 +63,18 @@ eval {
             my ($base, $name) = @_[1,2];
             my $fname = ($base ? File::Spec->catfile($base, $name) : $name);
 
-            my $fh;
-            open $fh, $fname or
-            open $fh, File::Spec->catfile($name) or return undef;
+          # my $fh;
+          # open $fh, $fname or
+          # open $fh,  $name or return undef;
 
-            warn "file=$fh ref-type=" . ref $fh;
+          # warn "file=$fh ref-type=" . ref $fh;
 
-            $fh;
+          # $fh;
+
+            open _TESTHANDLE, $fname or
+            open _TESTHANDLE, $name  or return undef;
+
+            *_TESTHANDLE;
         }},
     );
 
@@ -78,7 +83,7 @@ eval {
 };
 
 ok( my $result = ($@ ? 0 : 1) );
-warn "WARNING: failed to parse xml docs: $@";
+warn "WARNING: failed to parse xml docs: $@" if $@;
 
 no warnings 'void';
 $result;
