@@ -99,7 +99,10 @@ eval {
     my $p2 = XML::Parser->new(ErrorContext=>2, ParseParamEnt=>1, $ENV{DEBUG} ? (Style => 'Debug') : (), @doom);
        $p2->parsefile('test.xml');
 };
-warn "WARNING: failed to parse xml docs: $@" if $@;
+if( $@ ) {
+    warn "\nWARNING: failed to parse xml docs: $@\n";
+    warn "  * Sadly, this error was entirely expected on about 5% to 20% of the perls out there. *\n\n";
+}
 
 my $result = ($@ ? 0 : 1);
 ok( not $result, $result ); # if this fails, skip it
