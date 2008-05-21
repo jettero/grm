@@ -29,18 +29,21 @@ sub genmap {
             my ($base, $name) = @_[1,2];
             my $fname = ($base ? File::Spec->catfile($base, $name) : $name);
 
-            warn "base=$base; name=$name; fname=$fname";
-            sleep 1;
+          # warn "base=$base; name=$name; fname=$fname";
+          # sleep 1;
 
             my $fh;
             open $fh, $fname or
             open $fh, File::Spec->catfile($xml_path, $fname) or
-            open $fh, File::Spec->catfile($xml_path, $name) or
-            die "unable to find \"$fname\" even using ($xml_path)";
+            open $fh, File::Spec->catfile($xml_path, $name) or return undef;
 
-            warn "pulled up a file as: $fh";
+          # warn "pulled up a file as: $fh";
+            local $/ = undef;
+            my $entire_file = <$fh>;
+          # warn "entire_file=$entire_file";
+            return $entire_file;
 
-            $fh;
+            $fh; # NOTE: this causes FAIL reports on various platforms almost at random
         }},
     ));
 

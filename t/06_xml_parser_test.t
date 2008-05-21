@@ -55,8 +55,30 @@ EOF
        $p1->parsefile('test.xml');
 };
 
-my $result = ($@ ? 0 : 1);
-ok($result);
+ok($@ ? 0 : 1);
+
+eval {
+    my @doom = (
+        Handlers=>{ExternEnt => sub {
+            my ($base, $name) = @_[1,2];
+            my $fname = ($base ? File::Spec->catfile($base, $name) : $name);
+
+            my $fh;
+            open $fh, $fname or
+            open $fh, File::Spec->catfile($name) or return undef;
+
+            warn "file=$fh ref-type=" . ref $fh;
+
+            $fh;
+        }},
+    );
+
+    my $p2 = XML::Parser->new(ErrorContext=>2, ParseParamEnt=>1, $ENV{DEBUG} ? (Style => 'Debug') : (), @doom);
+       $p2->parsefile('test.xml');
+};
+
+ok( my $result = ($@ ? 0 : 1) );
+warn "WARNING: failed to parse xml docs: $@";
 
 no warnings 'void';
 $result;
