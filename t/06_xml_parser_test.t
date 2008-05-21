@@ -105,7 +105,5 @@ if( $@ ) {
 }
 
 my $result = ($@ ? 0 : 1);
-skip( 1,0,1 ); # just skip this test
-
-no warnings 'void';
-$result;
+  skip( 1,0,1 ); # just skip this test
+# ok( $result );

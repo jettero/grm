@@ -11,25 +11,12 @@ my @cmd = qw(xmllint --path xmllint.test/t2 --postvalid --noout);
 if( (system(@cmd, 'xmllint.test/map.xml') == 0) and (system(@cmd, 'xmllint.test/bad.xml') != 0) ) {
     open my $out, ">xmllint.res" or die "couldn't open a file, this makefile is dooooomed: $!";
 }
-
-open OLDOUT, ">&", \*STDOUT or die "unable to dup: $!";
-open STDOUT, ">/dev/null" or die "unable to close STDOUT: $!";
-if( do "t/06_xml_parser_test.t" ) {
-    open my $out, ">xml_parser.res";
-}
-
-open STDOUT, ">&OLDOUT" or die "unable to reopen STDOUT: $!";
 open STDERR, ">&OLDERR" or die "unable to reopen STDERR: $!";
 
 unless( -f "xmllint.res" ) {
 
     print "\n\nYour xmllint doesn't seem to work quite like the author's\n";
     print "and the test just isn't that important anyway. (Skipping.)\n\n";
-}
-
-unless( -f "xml_parser.res" ) {
-    warn "\nYour XML::Parser doesn't seem to be able to parse valid XML.  Skipping tests.\n";
-    warn "Most likely the XMLimporter Games::RolePlay::MapGen will not work correctly.\n\n";
 }
 
 WriteMakefile(
@@ -41,7 +28,7 @@ WriteMakefile(
         'Tie::IxHash' => 0,
         'XML::XPath'  => 0, # I versioned these up during the bsd-6.1-hates-me senerio # 1.13,
         'XML::Parser' => 0, # I versioned these up during the bsd-6.1-hates-me senerio # 1.36,
-        'Test' => 1.25,
+        'Test' => 1.25,     # NOTE: it was never bsd, it was XML::Parser that was hating me
 
         # These are just for t/05_export.t
         'File::Slurp'     => 0, # <-- this, I could just as well have used ``...
