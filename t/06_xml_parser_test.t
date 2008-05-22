@@ -86,7 +86,7 @@ eval {
 };
 if( $@ ) {
     warn "\nWARNING: failed to parse xml docs: $@\n";
-    warn "  * Sadly, this error was entirely expected on about 5% to 20% of the perls out there. *\n\n";
+    warn "  * Sadly, this error was entirely expected but only affects about 5% to 20% of the perls out there. *\n\n";
 }
 
 my $result = ($@ ? 0 : 1);
