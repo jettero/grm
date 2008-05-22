@@ -10,13 +10,10 @@ eval {
     do {
         open my $testxml, ">test.xml" or die $!;
         open my $testdtd, ">test.dtd" or die $!;
-        open my $testxsl, ">test.xsl" or die $!;
-
 
 print $testxml <<EOF
 <?xml version="1.0" encoding="ISO-8859-1"?>
 <!DOCTYPE test SYSTEM "test.dtd">
-<?xml-stylesheet type="text/xsl" href="test.xsl"?>
 
 <test>
   <a>
@@ -35,18 +32,6 @@ print $testdtd <<EOF
 
 <!ATTLIST b c CDATA #REQUIRED>
 
-EOF
-;
-
-print $testxsl <<EOF
-<?xml version="1.0" encoding="ISO-8859-1"?>
-
-<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
-<xsl:output type="text" encoding="utf-8"/>
-
-<xsl:template match="/test"><xsl:text>test</xsl:text></xsl:template>
-
-</xsl:stylesheet>
 EOF
 ;
     };
