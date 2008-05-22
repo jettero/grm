@@ -1,3 +1,12 @@
+1.2.18: Tue May 20 19:43:19 EDT 2008
+   - OK.  My tests should all pass everywhere now.  The problem was actually an
+     XML::Parser Handler Extern problem.  They say you can return a *GLOB or a
+     ref to "something" like an IO::Handle.  I was using open my $fh and
+     returning the which is a GLOB ref.  It's sorta half way inbetween their
+     allowed types and it only fails on like 15% of the perls out there.
+
+     Weird.
+
 1.2.17: Tue May 20 19:43:19 EDT 2008
    - forgot to MANIFEST the xmllint.test/ directory
 
