@@ -2,7 +2,7 @@
 use strict;
 use Test;
 
-plan tests => 2;
+plan tests => 3;
 
 use XML::Parser;
 
@@ -54,6 +54,7 @@ EOF
     my $p1 = XML::Parser->new(ErrorContext=>2, ParseParamEnt=>1, $ENV{DEBUG} ? (Style => 'Debug') : ());
        $p1->parsefile('test.xml');
 };
+warn "WARNING: failed to parse xml docs: $@" if $@;
 
 ok($@ ? 0 : 1);
 
@@ -63,16 +64,10 @@ eval {
             my ($base, $name) = @_[1,2];
             my $fname = ($base ? File::Spec->catfile($base, $name) : $name);
 
-          # my $fh;
-          # open $fh, $fname or
-          # open $fh,  $name or return undef;
-
-          # warn "file=$fh ref-type=" . ref $fh;
-
-          # $fh;
-
             open _TESTHANDLE, $fname or
             open _TESTHANDLE, $name  or return undef;
+
+          # warn "file=*_TESTHANDLE; ref-type=" . ref *_TESTHANDLE;
 
             *_TESTHANDLE;
         }},
@@ -81,9 +76,32 @@ eval {
     my $p2 = XML::Parser->new(ErrorContext=>2, ParseParamEnt=>1, $ENV{DEBUG} ? (Style => 'Debug') : (), @doom);
        $p2->parsefile('test.xml');
 };
+warn "WARNING: failed to parse xml docs: $@" if $@;
+
+ok( $@ ? 0 : 1 );
+
+eval {
+    my @doom = (
+        Handlers=>{ExternEnt => sub {
+            my ($base, $name) = @_[1,2];
+            my $fname = ($base ? File::Spec->catfile($base, $name) : $name);
+
+            my $fh;
+            open $fh, $fname or
+            open $fh,  $name or return undef;
+
+          # warn "file=$fh ref-type=" . ref $fh;
+
+            $fh;
+        }},
+    );
+
+    my $p2 = XML::Parser->new(ErrorContext=>2, ParseParamEnt=>1, $ENV{DEBUG} ? (Style => 'Debug') : (), @doom);
+       $p2->parsefile('test.xml');
+};
+warn "WARNING: failed to parse xml docs: $@" if $@;
 
 ok( my $result = ($@ ? 0 : 1) );
-warn "WARNING: failed to parse xml docs: $@" if $@;
 
 no warnings 'void';
 $result;
