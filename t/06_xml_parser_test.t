@@ -2,7 +2,7 @@
 use strict;
 use Test;
 
-plan tests => 1;
+plan tests => 2;
 
 use XML::Parser;
 
