@@ -44,7 +44,7 @@ warn "WARNING: failed to parse xml docs: $@" if $@;
 ok($@ ? 0 : 1);
 
 eval {
-    my @doom = (
+    my @nodoom = (
         Handlers=>{ExternEnt => sub {
             my ($base, $name) = @_[1,2];
             my $fname = ($base ? File::Spec->catfile($base, $name) : $name);
@@ -58,7 +58,7 @@ eval {
         }},
     );
 
-    my $p2 = XML::Parser->new(ErrorContext=>2, ParseParamEnt=>1, $ENV{DEBUG} ? (Style => 'Debug') : (), @doom);
+    my $p2 = XML::Parser->new(ErrorContext=>2, ParseParamEnt=>1, $ENV{DEBUG} ? (Style => 'Debug') : (), @nodoom);
        $p2->parsefile('test.xml');
 };
 warn "WARNING: failed to parse xml docs: $@" if $@;
