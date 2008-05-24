@@ -28,7 +28,8 @@ use POSIX qw(ceil);
 use Games::RolePlay::MapGen::Editor::_MForm qw(make_form $default_restore_defaults);
 use Games::RolePlay::MapGen::Tools qw( roll choice _door _group );
 
-our $VERSION = "1.0.0";
+use version;
+our $VERSION = version->new("1.0.0")->numify;
 
 our $DEFAULT_GENERATOR         = 'Basic';
 our @GENERATORS                = (qw( Basic Blank OneBigRoom Perfect SparseAndLoops ));
