@@ -18,7 +18,7 @@ use Gtk2::Ex::Dialogs::Question;
 use Gtk2::Ex::PodViewer;
 use Gtk2::SimpleList;
 use Games::RolePlay::MapGen;
-use User;
+use File::HomeDir;
 use File::Spec;
 use DB_File;
 use Storable qw(freeze thaw);
@@ -29,7 +29,7 @@ use Games::RolePlay::MapGen::Editor::_MForm qw(make_form $default_restore_defaul
 use Games::RolePlay::MapGen::Tools qw( roll choice _door _group );
 
 use version;
-our $VERSION = version->new("1.0.0")->numify;
+our $VERSION = qv("1.0.0");
 
 our $DEFAULT_GENERATOR         = 'Basic';
 our @GENERATORS                = (qw( Basic Blank OneBigRoom Perfect SparseAndLoops ));
@@ -60,11 +60,12 @@ sub new {
         substr($fname,0,0) = ".";
     }
 
-    my @homedir = User->Home;
+    my @homedir = File::HomeDir->my_home;
     push @homedir, "Application Data" if "@homedir" =~ m/Documents and Settings/i;
 
     $fname = File::Spec->catfile(@homedir, $fname);
 
+    # warn "fname=$fname";
     my %o; tie %o, DB_File => $fname or die $!;
 
     $o{REMEMBER_SP} = 1 unless defined $o{REMEMBER_SP};

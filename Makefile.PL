@@ -23,12 +23,15 @@ WriteMakefile(
     'NAME'         => 'Games::RolePlay::MapGen',
     'VERSION_FROM' => 'MapGen.pm',
     'PREREQ_PM'     => { 
+        'version' => 0,
+
         'Software::License::LGPL_2_1' => 0,
         'XML::Simple' => 0,
         'Tie::IxHash' => 0,
         'XML::XPath'  => 0, # I versioned these up during the bsd-6.1-hates-me senerio # 1.13,
         'XML::Parser' => 0, # I versioned these up during the bsd-6.1-hates-me senerio # 1.36,
         'Test' => 1.25,     # NOTE: it was never bsd, it was XML::Parser that was hating me
+        version => 0, # CRAP!
 
         # These are just for t/05_export.t
         'File::Slurp'     => 0, # <-- this, I could just as well have used ``...
