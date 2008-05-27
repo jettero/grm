@@ -1,4 +1,3 @@
-# vi:syntax=perl:
 
 package Games::RolePlay::MapGen::Editor;
 
@@ -28,8 +27,7 @@ use POSIX qw(ceil);
 use Games::RolePlay::MapGen::Editor::_MForm qw(make_form $default_restore_defaults);
 use Games::RolePlay::MapGen::Tools qw( roll choice _door _group );
 
-use version;
-our $VERSION = qv("1.0.0");
+use version; our $VERSION = qv("1.0.0");
 
 our $DEFAULT_GENERATOR         = 'Basic';
 our @GENERATORS                = (qw( Basic Blank OneBigRoom Perfect SparseAndLoops ));

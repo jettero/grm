@@ -7,8 +7,8 @@ use AutoLoader;
 use Carp;
 use Data::Dumper; $Data::Dumper::Indent = 1; $Data::Dumper::SortKeys = 1;
 
-use version;
-our $VERSION = qv('1.2.19');
+use version; our $VERSION = qv('1.2.20');
+
 our $AUTOLOAD;
 
 our %opp  = (n=>"s", e=>"w", s=>"n", w=>"e");
