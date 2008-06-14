@@ -1,0 +1,227 @@
+
+=head1 NAME
+
+Games::RolePlay::MapGen::MapQueue - And object for storing objects by location, on a map, with visi-calc support
+
+=head1 SYNOPSIS
+
+    use Games::RolePlay::MapGen;
+    use Games::RolePlay::MapGen::MapQueue;
+
+    my $map = new Games::RolePlay::MapGen;
+       $map->generate;
+
+    my $queue = new Games::RolePlay::MapGen::MapQueue( $map );
+       $queue->add( $object1 => (1, 2) );
+       $queue->add( $object2 => (5, 3) );
+       # The objects can be any unique identifier or reference (blessed or unblessed).
+
+       $queue->replace( $object3 => (5, 3) );
+       # remove first if it's already on the map somewhere else
+
+       $queue->remove( $object3 ); # just remove it
+
+    my $distance = $map->distance( $object1, $object2 );
+    # the distance from o1 to o2 or undef if the tile is not visible
+
+    my @all = $queue->all_open_locations;
+    my @all = $queue->locations_in_line_of_sight( @dude_position );
+
+=head1 DETAILS
+
+=head2 new
+
+C<new()> takes a single argument, which is required: a MapGen map object
+
+=head2 retag
+
+The MapQueue stores the location of objects by name for quick location queries.
+After a deep copy (e.g. L<Storable>) or data dump (e.g. L<Data::Dumper>) object
+tags for non-scalar queue entries (e.g. blessed references or references) will
+not be linked correctly and you must C<retag()> the new copy to make everything
+line up again.
+
+    use Storable qw(dclone);
+    my $q2 = dclone($queue);
+       $q2->retag;
+
+=head2 flush
+
+Most of the MapQueue functions are cached with L<Memoize>, C<flush()> clears the
+caches.
+
+=head2 add
+
+Store an object on the map at a specified location.  This function will raise an
+error if the location doesn't make any sense.  To make sense, the location must
+be within the map boundaries and must be an open tile -- either a corridor or a
+room tile.  It will additionally raise an error if the object is already
+elsewhere on the map.
+
+    my $pistol = bless {}, "Sig P229r";
+    $mq->add($pistol, (2,2) );
+    $mq->add( "boring string", (2,3) );
+
+=head2 remove
+
+Remove an object on the map.  It raises an error if the object isn't on the map
+or if the location doesn't make sense (see C<add()>).
+
+    $mq->remove( $pistol );
+    $mq->remove( "boring string" );
+
+=head2 replace
+
+Exactly like C<add()>, except that it removes the pistol iff it's already on the
+map.
+
+    $mq->replace( $pistol, (5,4) );
+    $mq->replace( $pistol, (5,4) );
+    $mq->replace( blagh => (2,3) );
+
+=head2 location
+
+Locates an object in the queue, returning the (x,y) coordinate.  Raises an error
+if the object isn't on the map.
+
+    my @loc = eval { $mq->add($pistol) }; warn "wasn't there" if $@;
+
+=head2 distance
+
+In scalar context, C<distance()> returns the distance from one object to
+another.  It raises errors if the lhs or rhs objects aren't found in the queue.  
+If there is no line of sight from the lhs to the rhs, the function returns a
+scalar undef (even in list context).
+
+    my $dist = $mq->distance( blagh => $pistol );
+
+If C<distance()> is given a third argument that evaluates to true, distance will
+instead return both the distance and a boolean value indicating whether there's
+a line of sight.  (It returns the distance even if there's no line of sight.)
+
+    my ($dist, $los) = $mq->distance( blagh => $pistol, 1 );
+
+=head2 ldistance
+
+Works rather like C<distance()> but takes locations as arguments instead of
+objects.  It raises errors if either of the locations don't make sense (see
+C<add()>).  If there's no line of sight, C<ldistance()> returns a scalar undef
+(even in list context).
+
+    my $dist = $mq->ldistance( (1,1), (2,2) );
+
+If given a fifth argument, C<ldistance> returns C<$dist> and C<$los> like
+C<distance()>.
+
+    my ($dist, $los) = $mq->ldistance( (1,1), (2,2), 1 );
+
+=head2 line_of_sight
+
+Returns a scalar indicating whether there's a line of sight from the lhs object
+to the rhs object.  C<$los> will be one of C<LOS_NO> or C<LOS_YES>, which are
+exported in to the requiring namespace.  They are usable as booleans, so you
+don't have to use the names, and are single scalars in list context.
+
+The C<$los> values returned from distance are of the same type as the C<$los>
+returned here.
+
+    my $los = $mq->line_of_sight( blagh => $pistol );
+    if( $los == LOS_NO ) { # if( $los ) is fine also
+        # blargh
+    }
+
+The function raises errors if the objects aren't found on the map.
+
+=head2 lline_of_sight
+
+Works just like C<line_of_sight> but takes locations as arguments instead of
+objects.  The function raises an error if the locations don't make any sense.
+
+    my $los = $mq->lline_of_sight( (1,1), (2,2) );
+
+=head2 closure_line_of_sight
+
+Determines if there is a line of sight from an object to a closure (a wall,
+door, or opening of a tile).  Presently there are no functions to return
+door objects from the map, but you can get them from the map yourself.
+
+    my $door = $map->[ $y ][ $x ]{od}{ w }; # west door of ($x,$y);
+
+    $mq->add( $some_player_object );
+    $mq->closure_line_of_sight( $some_player_object, $door );
+
+The function raises errors if the C<$door> isn't a door object (or isn't on the
+map) or if the lhs object isn't on the map.
+
+The decision about whether there's a line of sight includes the idea that the
+line of sight doesn't do much good if you can't see most of the door at an angle
+that allows you to examine it...
+
+That minimum angle is a package global that can be changed but defaults to 9
+degrees.  The global is in radians, but can be set like this:
+
+    $Games::RolePlay::MapGen::MapQueue::CLOS_MIN_ANGLE = deg2rad(9);
+
+(C<deg2rad()> comes from L<Math::Trig>.)
+
+=head2 closure_lline_of_sight
+
+Like C<closure_line_of_sight()>, this tells whether there's a line of sight from
+a tile location to a closure.  It takes I<five> arguments:
+
+    $mq->closure_lline_of_sight( ($x,$y), ($x,$y,$d) );
+
+Like the other "l-I<name>" functions, the lhs and rhs are coordinate pairs, but
+unlike the others this function also takes a direction argument (to name the
+closure).  The fifth argument must be one of 'C<n>', 'C<e>', 'C<s>', or 'C<w>'.
+
+Predictably, it raises errors if the locations don't make sense or the direction
+is incorrect or missing.
+
+=head2 objs
+=head2 objs_at_location
+=head2 objs_in_line_of_sight
+=head2 objs_with_locations
+
+=head2 all_open_locations
+=head2 random_open_location
+
+=head2 locations_in_path
+=head2 locations_in_line_of_sight
+=head2 locations_in_range_and_line_of_sight
+
+=head2 melee_cover
+=head2 ranged_cover
+=head2 ignorable_cover
+
+=head2 is_open
+=head2 is_door_open
+=head2 is_door
+=head2 open_door
+=head2 close_door
+
+=head2 map_range
+=head2 map_domain
+
+=head1 AUTHOR
+
+Paul Miller C<jettero@cpan.org>
+
+I am using this software in my own projects...  If you find bugs, please please
+please let me know.
+
+I normally hang out on #perl on freenode, so you can try to get immediate
+gratification there if you like.  L<irc://irc.freenode.net/perl>
+
+=head1 COPYRIGHT
+
+Copyright (c) 2008 Paul Miller -- LGPL [Software::License::LGPL_2_1]
+
+    perl -MSoftware::License::LGPL_2_1 \
+         -e '$l = Software::License::LGPL_2_1->new({
+             holder=>"Paul Miller"});
+             print $l->fulltext' | less
+
+=head1 SEE ALSO
+
+perl(1), L<Games::RolePlay::MapGen>
