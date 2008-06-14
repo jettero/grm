@@ -46,3 +46,11 @@ xmllint.test/bad.xml
 xmllint.test/map.xml
 xmllint.test/t2/MapGen.dtd
 xmllint.test/t2/MapGen.xsl
+t/90_maps.t
+t/92_paths.t
+t/94_cLoS.t
+t/95_clos_bug.t
+t/96_losxs.t
+t/97_rlos.t
+mq.xs
+MapGen/MapQueue.pm
