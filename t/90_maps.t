@@ -42,7 +42,6 @@ my $q2 = dclone($queue);
 my @o  = $q2->objs;
 
 $q2->retag; # necessary after a Clone::clone(), Storable::dclone(), or Storable::thaw()
-
 $q2->add( dude => @loc );
 
 ok( $q2->distance( dude => $o[0] ) ); # 1
