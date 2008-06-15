@@ -1162,9 +1162,8 @@ sub objs {
 
     for my $row ( 0 .. $this->{ym} ) {
         for my $col ( 0 .. $this->{xm} ) {
-            my $rhs = [ $col, $row ];
 
-            push @ret, @{ $this->{c}[ $rhs->[1] ][ $rhs->[0] ] || [] };
+            push @ret, @{ $this->{c}[ $row ][ $col ] || [] };
         }
     }
 
