@@ -647,6 +647,8 @@ sub _ignorable_cover {
     my $this = shift;
     my ($lhs, $rhs) = @_;
 
+    warn "ignorable cover isn't actually calculated";
+
     return 0;
 }
 # }}}
