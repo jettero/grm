@@ -1015,7 +1015,7 @@ sub ldistance {
     croak "the last two arguments to ldistance() do not appear to form a sane map location"  unless $this->_check_loc(\@rhs);
 
     if( $_[4] ) {
-        my @r = ($this->_ldistance($lhs, $rhs), $this->_line_of_sight($lhs, $rhs));
+        my @r = ($this->_ldistance(\@lhs, \@rhs), $this->_line_of_sight(\@lhs, \@rhs));
         return (wantarray ? @r : \@r);
     }
 
