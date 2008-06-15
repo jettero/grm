@@ -329,6 +329,7 @@ sub save_file_as {
            $fname .= ".xml" unless $fname =~ m/\.xml\z/i;
 
         $this->[FNAME] = $fname;
+        $this->[WINDOW]->set_title("GRM Editor: $fname");
 
 
         $file_chooser->destroy;
@@ -413,6 +414,7 @@ sub read_file {
     $pulser->('destroy');
 
     $this->[FNAME] = $file;
+    $this->[WINDOW]->set_title("GRM Editor: $file");
     $this->draw_map;
 }
 # }}}
@@ -1289,6 +1291,7 @@ sub blank_map {
     # Later, we'll have a generate_map() that has all kinds of configuations options.
 
     $this->[FNAME] = undef;
+    $this->[WINDOW]->set_title("GRM Editor");
 
     my $map = $this->[MAP] = new Games::RolePlay::MapGen({
         tile_size    => 10,
@@ -1535,6 +1538,7 @@ sub generate {
     return unless $result eq "ok";
 
     $this->[FNAME] = undef;
+    $this->[WINDOW]->set_title("GRM Editor");
 
     $generator = delete $settings->{generator};
     @plugins   = @{ delete $settings->{generator_plugins} };
