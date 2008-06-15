@@ -54,3 +54,4 @@ t/96_losxs.t
 t/97_rlos.t
 mq.xs
 MapGen/MapQueue.pm
+MapGen/MapQueue.pod
