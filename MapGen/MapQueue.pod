@@ -62,6 +62,8 @@ elsewhere on the map.
     $mq->add($pistol, (2,2) );
     $mq->add( "boring string", (2,3) );
 
+See C<is_open()> below for a function to check whether a location makes sense.
+
 =head2 remove
 
 Remove an object on the map.  It raises an error if the object isn't on the map
@@ -179,12 +181,60 @@ Predictably, it raises errors if the locations don't make sense or the direction
 is incorrect or missing.
 
 =head2 objs
-=head2 objs_at_location
-=head2 objs_in_line_of_sight
+
+Returns all the object so the map as an array.  Each element in the array is
+just the objects as they were placed on the map.
+
+    my @objs = $mq->objs;
+    my ($pistol) = grep {m/P229r/} @objs;
+
 =head2 objs_with_locations
 
+Like C<objs()>, but also returns the locations.  Each element is an array ref,
+whose first element is the location (as an arrayref) and whose second element is
+the object.
+
+    my @objs        = $mq->objs_with_locations;
+    my ($loc, $obj) = $objs[0];
+    my ($x,$y)      = @$loc;
+
+=head2 objs_at_location
+
+Like C<objs()>, but only returns objects at a specific location C<($x,$y)>.
+
+    my @objs = $mq->objs_at_location($x,$y);
+
+The function raises errors if the location doesn't make sense.
+
+=head2 objs_in_line_of_sight
+
+Like C<objs()>, but only returns objects with a clear line of sight from C<($x,$y)>.
+
+    my @objs = $mq->objs_in_line_of_sight($x,$y);
+
+The function raises errors if the location doesn't make sense.
+
 =head2 all_open_locations
+
+Returns all the locations on the map.
+
+    my @locs = $mq->all_open_locations;
+    my ($x,$y) = @{ $locs[0] };
+
+It will optionally return the array as an arrayref:
+
+    my $locs = $mq->all_open_locations;
+    my ($x,$y) = @{ $locs->[0] };
+
 =head2 random_open_location
+
+Returns a single random open location from the map.
+
+    my ($x,$y) = $mq->random_open_location;
+
+It will optionally return the location as an array:
+
+    my @xy = $mq->random_open_location;
 
 =head2 locations_in_path
 =head2 locations_in_line_of_sight
@@ -195,13 +245,44 @@ is incorrect or missing.
 =head2 ignorable_cover
 
 =head2 is_open
-=head2 is_door_open
+
+Takes a standard C<($x,$y)> pair as arguments.  Returns a boolean indicating
+whether a location is an open tile (true) or a wall tile (false).  This is
+actually the function you can use to see if a location "makes sense" as first
+described in C<add()>.
+
 =head2 is_door
+
+Takes a semi-standard C<($x,$y,$d)> triplet as arguments (where C<$d> is 'C<n>',
+'C<e>', 'C<s>', or 'C<w>').  Returns a boolean indicating whether a closure is a
+door.  Raises an error if the location doesn't make sense.
+
+=head2 is_door_open
+
+Takes a semi-standard C<($x,$y,$d)> triplet as arguments (where C<$d> is 'C<n>',
+'C<e>', 'C<s>', or 'C<w>').  Returns a boolean indicating whether a door is
+closed.  Raises errors if the location doesn't make sense or there isn't a door
+there.
+
 =head2 open_door
+
+Takes a C<($x,$y,$d)> closure triplet as arguments.  Raises errors if the
+location doesn't make sense, there isn't a door, or the door is already open.
+
 =head2 close_door
 
+Takes a C<($x,$y,$d)> closure triplet as arguments.  Raises errors if the
+location doesn't make sense, there isn't a door, or the door is already closed.
+
 =head2 map_range
+
+Returns either the position of the last column of the map (rather like
+C<$#array>) or an array of all the columns on the map (like C<0 .. $#array>).
+
 =head2 map_domain
+
+Returns either the position of the last row of the map (rather like
+C<$#array>) or an array of all the rows on the map (like C<0 .. $#array>).
 
 =head1 AUTHOR
 
