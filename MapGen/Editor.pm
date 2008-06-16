@@ -25,6 +25,7 @@ use Storable qw(freeze thaw);
 use Data::Dump qw(dump);
 use POSIX qw(ceil);
 
+use Games::RolePlay::MapGen::MapQueue;
 use Games::RolePlay::MapGen::Editor::_MForm qw(make_form $default_restore_defaults);
 use Games::RolePlay::MapGen::Tools qw( roll choice _door _group );
 
