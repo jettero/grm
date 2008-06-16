@@ -1,3 +1,4 @@
+# vi:syntax=perl:
 
 package Games::RolePlay::MapGen::Editor;
 
@@ -41,7 +42,7 @@ use constant {
     FNAME => $x++, MAREA  => $x++, VP_DIM    => $x++, STAT   => $x++,
     MP    => $x++, O_LT   => $x++, O_DR      => $x++, S_ARG  => $x++,
     RCCM  => $x++, SEL_S  => $x++, SELECTION => $x++, SEL_E  => $x++,
-    SEL_W => $x++,
+    SEL_W => $x++, MQ     => $x++,
 };
 
 1;
@@ -409,7 +410,10 @@ sub read_file {
     my $file = shift;
 
     my $pulser = $this->pulser( "Reading $file ...", "File I/O" );
-    eval { $this->[MAP] = Games::RolePlay::MapGen->import_xml( $file, t_cb => $pulser ) };
+    eval {
+        $this->[MAP] = my $map = Games::RolePlay::MapGen->import_xml( $file, t_cb => $pulser );
+        $this->[MQ]  = new Games::RolePlay::MapGen::MapQueue( $map );
+    };
     $this->error($@) if $@;
     $pulser->('destroy');
 
@@ -1299,6 +1303,8 @@ sub blank_map {
         bounding_box => "25x25",
     });
 
+    $this->[MQ] = new Games::RolePlay::MapGen::MapQueue( $map );
+
     $map->set_generator("Blank");
     $map->generate; 
 
@@ -1551,6 +1557,8 @@ sub generate {
             $map->set_generator($generator);
             $map->add_generator_plugin( $_ ) for @plugins;
             $map->generate( %$settings, t_cb => $pulser ); 
+
+            $this->[MQ] = new Games::RolePlay::MapGen::MapQueue( $map );
         };
 
         $pulser->('destroy');

@@ -1,3 +1,5 @@
+# vi:syntax=perl:
+
 package Games::RolePlay::MapGen::MapQueue;
 
 use strict;
