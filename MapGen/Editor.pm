@@ -232,7 +232,7 @@ sub new {
         $this->marea_button_release_event(@_);
     });
 
-    $eb->signal_connect ('button-press-event' => sub {
+    $eb->signal_connect ( button_press_event => sub {
         my ($widget, $event) = @_;
 
         if( $event->button == 3 ) {
@@ -241,6 +241,8 @@ sub new {
 
         } else {
             $this->marea_button_press_event(@_);
+            $this->double_click_map(@_)
+                if $event->type eq '2button-press';
         }
 
         return FALSE; # returning true prevents other events from firing
