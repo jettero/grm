@@ -1,0 +1,13 @@
+
+inserting and editing
+ 1. double clicks will bring up the living/item dialog
+ 2. only one living per tile for now
+ 3. dragging will move livings, but not items and is meaningless to tiles
+
+saving 
+ 1. need to give mapqueues a way to save xml, which will simply call the
+    mapgen exporter and then add items ex post facto, maybe.
+    kindof a shitty problem...
+
+    Maybe it's better to each the xml_exporter about {item} and {living}s
+    in the node?
