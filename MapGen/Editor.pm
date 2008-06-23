@@ -243,6 +243,9 @@ sub new {
             $this->marea_button_press_event(@_);
             $this->double_click_map(@_)
                 if $event->type eq '2button-press';
+
+                # tried using >= and * (see Glib under flags), but this
+                # seems to return boring strings
         }
 
         return FALSE; # returning true prevents other events from firing
@@ -473,8 +476,7 @@ sub draw_map {
        $map = $this->[MAP] = $this->blank_map unless $map;
 
     # clear out any selections or cursors that probably nolonger apply
-    $this->[SEL_S] = $this->[SEL_E] = $this->[SELECTION] = $this->[O_DR] = $this->[S_ARG] = undef;
-    @{$this->[O_LT]}=();
+    $this->marea_clear_selection;
 
     $map->set_exporter( "BasicImage" );
     my $image = $map->export( -retonly );
@@ -567,7 +569,7 @@ sub draw_map_w_cursor {
 # }}}
 # double_click_map {{{
 sub double_click_map {
-    my ($this, $ebox, $ebut) = @_;
+    my ($this, $widget, $event) = @_;
 
     my $options = [[ # column 1
 
@@ -587,6 +589,10 @@ sub double_click_map {
               matches  => [qr/\w/] }, 1 .. 8)),
 
     ]];
+
+    # For some reason, double clicking trips a selection.
+    # rather than carefully figuring that out, just clear it.
+    $this->marea_clear_selection;
 
     my ($result, $o) = make_form($this->[WINDOW], {}, $options);
     if( $result eq "ok" ) {
@@ -677,6 +683,14 @@ sub marea_button_release_event {
             }}
         }
     }
+}
+# }}}
+# marea_clear_selection {{{
+sub marea_clear_selection {
+    my $this = shift;
+
+    $this->[SEL_S] = $this->[SEL_E] = $this->[SELECTION] = $this->[O_DR] = $this->[S_ARG] = undef;
+    @{$this->[O_LT]}=();
 }
 # }}}
 # marea_selection_handler {{{
