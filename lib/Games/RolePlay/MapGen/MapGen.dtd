@@ -6,7 +6,10 @@
 <!ELEMENT closure EMPTY>
 <!ELEMENT map (row*)>
 <!ELEMENT row (tile*)>
-<!ELEMENT tile (closure*)>
+<!ELEMENT tile (contents?|closure*)>
+<!ELEMENT contents (item|humanoid)*>
+<!ELEMENT item EMPTY>
+<!ELEMENT living EMPTY>
 
 <!ATTLIST row ypos CDATA #REQUIRED>
 <!ATTLIST tile xpos CDATA #REQUIRED>
@@ -27,3 +30,7 @@
 <!ATTLIST closure secret         (yes|no) #IMPLIED>
 <!ATTLIST closure major_open_dir (north|east|south|west) #IMPLIED>
 <!ATTLIST closure minor_open_dir (north|east|south|west) #IMPLIED>
+
+<!ATTLIST item   name CDATA #REQUIRED>
+<!ATTLIST living name CDATA #REQUIRED>
+<!ATTLIST living pass CDATA #IMPLIED>
