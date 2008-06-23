@@ -1,4 +1,4 @@
-# vi:syntax=perl:
+# vi:filetype=perl:
 
 package Games::RolePlay::MapGen::Editor;
 
@@ -565,8 +565,8 @@ sub draw_map_w_cursor {
     $this->[MAREA]->set_from_pixbuf($pb);
 }
 # }}}
-# double_click_event {{{
-sub double_click_event {
+# double_click_map {{{
+sub double_click_map {
     my ($this, $ebox, $ebut) = @_;
 
     my $options = [[ # column 1
@@ -575,13 +575,24 @@ sub double_click_event {
           type     => "text",
           desc     => "the name of the living you wish to add to the map",
           name     => 'lname',
-          default  => 10, # NOTE: fixes and matches must exist and must be arrrefs
-          fixes    => [], # [sub { $_[0] =~ s/\s+//g }],
+          default  => '',
           matches  => [qr/\w/] },
 
-    my ($result, $o) = make_form($this->[WINDOW], $i, $options);
+        (map(
+            { mnemonic => "Item #_$_: ",
+              type     => "text",
+              desc     => "the name of an item at this location",
+              name     => "item$_",
+              default  => '',
+              matches  => [qr/\w/] }, 1 .. 8)),
+
+    ]];
+
+    my ($result, $o) = make_form($this->[WINDOW], {}, $options);
     if( $result eq "ok" ) {
-        # add living
+
+        use Data::Dump qw(dump);
+        warn "should add things to the mapqueue here:\n\$o=" . dump($o);
     }
 }
 # }}}
