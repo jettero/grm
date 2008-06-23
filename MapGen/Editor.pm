@@ -565,6 +565,26 @@ sub draw_map_w_cursor {
     $this->[MAREA]->set_from_pixbuf($pb);
 }
 # }}}
+# double_click_event {{{
+sub double_click_event {
+    my ($this, $ebox, $ebut) = @_;
+
+    my $options = [[ # column 1
+
+        { mnemonic => "_Living Name: ",
+          type     => "text",
+          desc     => "the name of the living you wish to add to the map",
+          name     => 'lname',
+          default  => 10, # NOTE: fixes and matches must exist and must be arrrefs
+          fixes    => [], # [sub { $_[0] =~ s/\s+//g }],
+          matches  => [qr/\w/] },
+
+    my ($result, $o) = make_form($this->[WINDOW], $i, $options);
+    if( $result eq "ok" ) {
+        # add living
+    }
+}
+# }}}
 # marea_button_press_event {{{
 sub marea_button_press_event {
     my ($this, $ebox, $ebut) = @_;
