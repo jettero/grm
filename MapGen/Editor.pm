@@ -39,11 +39,26 @@ our @FILTERS                   = (qw( BasicDoors FiveSplit ClearDoors ));
 
 use vars qw($x); # like our, but at compile time so these constants work
 use constant {
-    MAP   => $x++, WINDOW => $x++, SETTINGS  => $x++, MENU   => $x++,
-    FNAME => $x++, MAREA  => $x++, VP_DIM    => $x++, STAT   => $x++,
-    MP    => $x++, O_LT   => $x++, O_DR      => $x++, S_ARG  => $x++,
-    RCCM  => $x++, SEL_S  => $x++, SELECTION => $x++, SEL_E  => $x++,
-    SEL_W => $x++, MQ     => $x++,
+    # the per-object index constants {{{
+    MAP       => $x++, # the Games::RolePlay::MapGen object, the actual map arrays are in [MAP]{_the_map}
+    MQ        => $x++, # the Games::RolePlay::MapGen::MapQueue object
+    WINDOW    => $x++, # the Gtk2 window (Gtk2::Window)
+    MENU      => $x++, # the main menubar (Gtk2::Ex::Simple::Menu)
+    MAREA     => $x++, # the map area Gtk2::Image
+    VP_DIM    => $x++, # the current dimensions (changes on resizes and things) of the Gtk2::Viewport holding the [MAREA]
+    SETTINGS  => $x++, # a tied DB_File hashref full of settings
+    FNAME     => $x++, # the current file name or undef
+    STAT      => $x++, # the statusbar (Gtk2::Statusbar)
+    MP        => $x++, # the current map pixbufs, cell size, and pixbuf dimensions
+    RCCM      => $x++, # the right click context menus (there are two: [RCCM][0] for tiles and [RCCM][1] for closures)
+    O_LT      => $x++, # the tile location currently moused-overed
+    SEL_S     => $x++, #
+    SEL_E     => $x++, #
+    SEL_W     => $x++, #
+    SELECTION => $x++, #
+    O_DR      => $x++, #
+    S_ARG     => $x++, #
+    # }}}
 };
 
 1;
@@ -473,7 +488,7 @@ sub pulser {
 # }}}
 
 # DRAWING 
-# draw_map {{{
+# draw_map (initial draw after a new mapload, sets up the MP pixbufs, etc) {{{
 sub draw_map {
     my $this = shift;
 
