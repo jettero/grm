@@ -193,6 +193,11 @@ sub new {
     my $s_up = sub {
         $sb->pop(1); return unless @_;
 
+        if( not ref $_[0] ) {
+            my @c = caller;
+            warn "caller=(@c)";
+        }
+
         my $tile  = shift; my $type = pop @$tile if @$tile == 3;
         my $group = shift;
         my $door  = shift;
@@ -476,7 +481,8 @@ sub draw_map {
        $map = $this->[MAP] = $this->blank_map unless $map;
 
     # clear out any selections or cursors that probably nolonger apply
-    $this->marea_clear_selection;
+    $this->[SEL_S] = $this->[SEL_E] = $this->[SELECTION] = $this->[O_DR] = $this->[S_ARG] = undef;
+    @{$this->[O_LT]}=(); # this clears the pointer whole-tile highlight
 
     $map->set_exporter( "BasicImage" );
     my $image = $map->export( -retonly );
@@ -571,6 +577,14 @@ sub draw_map_w_cursor {
 sub double_click_map {
     my ($this, $widget, $event) = @_;
 
+    # For some reason, double clicking trips a selection.
+    # rather than carefully figuring that out, just clear it.
+    $this->[SEL_S] = $this->[SEL_E] = $this->[SELECTION] = undef;
+
+    my @o_lt = @{$this->[O_LT]};
+    my $tile = $this->[MAP]{_the_map}[ $o_lt[1] ][ $o_lt[0] ];
+    return unless defined $tile->{type};
+
     my $options = [[ # column 1
 
         { mnemonic => "_Living Name: ",
@@ -589,10 +603,6 @@ sub double_click_map {
               matches  => [qr/\w/] }, 1 .. 8)),
 
     ]];
-
-    # For some reason, double clicking trips a selection.
-    # rather than carefully figuring that out, just clear it.
-    $this->marea_clear_selection;
 
     my ($result, $o) = make_form($this->[WINDOW], {}, $options);
     if( $result eq "ok" ) {
@@ -683,14 +693,6 @@ sub marea_button_release_event {
             }}
         }
     }
-}
-# }}}
-# marea_clear_selection {{{
-sub marea_clear_selection {
-    my $this = shift;
-
-    $this->[SEL_S] = $this->[SEL_E] = $this->[SELECTION] = $this->[O_DR] = $this->[S_ARG] = undef;
-    @{$this->[O_LT]}=();
 }
 # }}}
 # marea_selection_handler {{{
