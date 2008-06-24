@@ -608,11 +608,12 @@ sub double_click_map {
 
     my $options = [[ # column 1
 
-        { mnemonic => "_Living Name: ",
+        { mnemonic => "_Living: ",
           type     => "text",
           desc     => "the name of the living you wish to add to the map",
           name     => 'lname',
           default  => '',
+          fixes    => [sub { $_[0] =~ s/^\s+//; $_[0] =~ s/\s+$//; }],
           matches  => [qr/\w/] },
 
         (map(
@@ -621,15 +622,16 @@ sub double_click_map {
               desc     => "the name of an item at this location",
               name     => "item$_",
               default  => '',
+              fixes    => [sub { $_[0] =~ s/^\s+//; $_[0] =~ s/\s+$//; }],
               matches  => [qr/\w/] }, 1 .. 8)),
 
     ]];
 
     my ($result, $o) = make_form($this->[WINDOW], {}, $options);
     if( $result eq "ok" ) {
-
-        use Data::Dump qw(dump);
-        warn "should add things to the mapqueue here:\n\$o=" . dump($o);
+        while( my ($k,$v) = each %$o) {
+            $this->[MQ]->replace( $v => @o_lt ) if $v;
+        }
     }
 }
 # }}}
