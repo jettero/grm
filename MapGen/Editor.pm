@@ -51,7 +51,8 @@ use constant {
     STAT      => $x++, # the statusbar (Gtk2::Statusbar)
     MP        => $x++, # the current map pixbufs, cell size, and pixbuf dimensions
     RCCM      => $x++, # the right click context menus (there are two: [RCCM][0] for tiles and [RCCM][1] for closures)
-    O_LT      => $x++, # the tile location currently moused-overed
+    O_LT      => $x++, # the tile location currently moused-overed, O_ is for old, during the motion-notify, O_LT is the
+                       # old location and LT is the new one, although, LT isn't a constant
     SEL_S     => $x++, #
     SEL_E     => $x++, #
     SEL_W     => $x++, #
