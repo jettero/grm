@@ -53,9 +53,10 @@ use constant {
     RCCM      => $x++, # the right click context menus (there are two: [RCCM][0] for tiles and [RCCM][1] for closures)
     O_LT      => $x++, # the tile location currently moused-overed, O_ is for old, during the motion-notify, O_LT is the
                        # old location and LT is the new one, although, LT isn't a constant
-    SEL_S     => $x++, #
-    SEL_E     => $x++, #
-    SEL_W     => $x++, #
+    SEL_S     => $x++, # the selection start, set to O_LT when a button is pressed
+    SEL_E     => $x++, # set to the end of the selection being dragged during the selection handler. really only used in
+                       # the button release event to (possibly) select a single square when shift-clicking
+    SEL_W     => $x++, # the currently "working" select rectangle, used to pop the end of SELECTION while *still* dragging
     SELECTION => $x++, # the current selection rectangles [ [x1,y1,x2,y2], [...], ... ]
     O_DR      => $x++, #
     S_ARG     => $x++, #
@@ -721,10 +722,8 @@ sub marea_selection_handler {
 
     $this->[SEL_E] = $lt;
 
-    # 1. if we're holding control, we should subtract rectangles
+    # 1. TODO: if we're holding control, we should subtract rectangles
     # 2. if we're hodling shift, we should add rectangles
-    # 3. for now, you can only select one rectangle, we will nontheless
-    #    prepare for more than one rectangle by storing a list of lists
 
     my $a = [@$s_sel, @$lt];
     my $w = $this->[SEL_W];
