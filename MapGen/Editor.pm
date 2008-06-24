@@ -55,7 +55,7 @@ use constant {
     SEL_S     => $x++, #
     SEL_E     => $x++, #
     SEL_W     => $x++, #
-    SELECTION => $x++, #
+    SELECTION => $x++, # the current selection rectangles [ [x1,y1,x2,y2], [...], ... ]
     O_DR      => $x++, #
     S_ARG     => $x++, #
     # }}}
@@ -642,7 +642,7 @@ sub marea_button_release_event {
 
     unless( $this->[SEL_E] ) {
         my @state = $ebut->device->get_state( $this->[MAREA]->get_parent_window );
-        my $shift = $state[0] * 'shift-mask'; # see Glib under flgas for reasons this makes sense
+        my $shift = $state[0] * 'shift-mask'; # see Glib under flags for reasons this makes sense
         if( $shift ) {
             # NOTE: pretend we just selected this one tile with motion, so it adds to the current selection:
             $this->marea_selection_handler( $this->[O_LT], $this->[O_LT], $ebut );
