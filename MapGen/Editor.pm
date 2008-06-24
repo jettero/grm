@@ -1310,10 +1310,12 @@ sub right_click_map {
 
     my @a;
     if( my $s = $this->[SELECTION] ) {
+        my %already;
         for my $r (@$s) {
             for my $x ($r->[0] .. $r->[2]) {
             for my $y ($r->[1] .. $r->[3]) {
-                push @a, [$x,$y];
+                next if $already{$x,$y};
+                $already{$x,$y} = push @a, [$x,$y];
             }}
         }
 
