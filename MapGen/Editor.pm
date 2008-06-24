@@ -52,14 +52,18 @@ use constant {
     MP        => $x++, # the current map pixbufs, cell size, and pixbuf dimensions
     RCCM      => $x++, # the right click context menus (there are two: [RCCM][0] for tiles and [RCCM][1] for closures)
     O_LT      => $x++, # the tile location currently moused-overed, O_ is for old, during the motion-notify, O_LT is the
-                       # old location and LT is the new one, although, LT isn't a constant
+                       #  old location and LT is the new one, although, LT isn't a constant
     SEL_S     => $x++, # the selection start, set to O_LT when a button is pressed
     SEL_E     => $x++, # set to the end of the selection being dragged during the selection handler. really only used in
-                       # the button release event to (possibly) select a single square when shift-clicking
+                       #  the button release event to (possibly) select a single square when shift-clicking
     SEL_W     => $x++, # the currently "working" select rectangle, used to pop the end of SELECTION while *still* dragging
     SELECTION => $x++, # the current selection rectangles [ [x1,y1,x2,y2], [...], ... ]
-    O_DR      => $x++, #
-    S_ARG     => $x++, #
+    S_ARG     => $x++, # the status-bar arguments: the current tile location (LT), tile type, and door info
+                       #  [@lt, $tile->{type}, undef]; $sarg->[1] (type) is replaced with [$g->name, $g->desc] when
+                       #  $tile has a group... door info starts out as undef and changes to [dir=>desc] when there is a door
+                       #  moused-overed
+    O_DR      => $x++, # door info, [dir => desc], called O_DR since it's the "old" door.  really only used to invoke a 
+                       #  reddraw of the cursors when there *was* a door (O_DR) and there *nolonger* is one
     # }}}
 };
 
