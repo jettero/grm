@@ -636,7 +636,7 @@ sub double_click_map {
             my $type = substr $k, 0, 1;
 
             if( $type eq "i" ) {
-                my $c = ++ $this->[ITEM_C}{$v};
+                my $c = ++ $this->[ITEM_C]{$v};
 
                 $this->[MQ]->add( "$v #$c" => @o_lt );
 
