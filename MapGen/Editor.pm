@@ -64,7 +64,7 @@ use constant {
                        #  moused-overed
     O_DR      => $x++, # door info, [dir => desc], called O_DR since it's the "old" door.  really only used to invoke a 
                        #  reddraw of the cursors when there *was* a door (O_DR) and there *nolonger* is one
-    ITEM_C    => $x++, # we keep a careful count of all the items, which are assumed to not be unique
+    NAME_C    => $x++, # we keep a careful count of all non-unique mqueue names
     # }}}
 };
 
@@ -625,7 +625,19 @@ sub double_click_map {
               default  => '',
               fixes    => [sub { $_[0] =~ s/^\s+//; $_[0] =~ s/\s+$//; }],
               matches  => [qr/\w/] }, 1 .. 8)),
+    ],[
+        { mnemonic => "unique: ",
+          type     => "bool",
+          desc     => "whether this living is uniquely named",
+          name     => 'ulname',
+          default  => 0 },
 
+        (map(
+            { mnemonic => "unique: ",
+              type     => "bool",
+              desc     => "whether this living is uniquely named",
+              name     => "uitem$_",
+              default  => 1 }, 1 .. 8)),
     ]];
 
     my ($result, $o) = make_form($this->[WINDOW], {}, $options);
@@ -633,12 +645,18 @@ sub double_click_map {
         while( my ($k,$v) = each %$o) {
             next unless $v =~ m/[\w\d]/;
 
-            my $type = substr $k, 0, 1;
+            my $unique = $o->{'u'.$k};
+            if( $unique ) {
+                my ($o, $c) = $v =~ m/^(.+?)\s*\#\s*(\d+)\s*$/;
 
-            if( $type eq "i" ) {
-                my $c = ++ $this->[ITEM_C]{$v};
+                if($c) {
+                    $this->[NAME_C]{$v} = $c if ;
+                    $this->[MQ]->replace( $v => @o_lt );
 
-                $this->[MQ]->add( "$v #$c" => @o_lt );
+                } else {
+                    $c = ++ $this->[NAME_C]{$v};
+                    $this->[MQ]->add( "$v #$c" => @o_lt );
+                }
 
             } else {
                 $this->[MQ]->replace( $v => @o_lt );
