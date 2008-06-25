@@ -614,7 +614,6 @@ sub double_click_map {
           desc     => "the name of the living you wish to add to the map",
           name     => 'lname',
           default  => '',
-          fixes    => [sub { $_[0] =~ s/^\s+//; $_[0] =~ s/\s+$//; }],
           matches  => [qr/\w/] },
 
         (map(
@@ -623,43 +622,42 @@ sub double_click_map {
               desc     => "the name of an item at this location",
               name     => "item$_",
               default  => '',
-              fixes    => [sub { $_[0] =~ s/^\s+//; $_[0] =~ s/\s+$//; }],
               matches  => [qr/\w/] }, 1 .. 8)),
     ],[
         { mnemonic => "unique: ",
           type     => "bool",
           desc     => "whether this living is uniquely named",
           name     => 'ulname',
-          default  => 0 },
+          disable  => { lname => sub { $_[0] =~ m/^(.+?)\s*\#\s*(\d+)\s*$/ } },
+          default  => 1 },
 
         (map(
             { mnemonic => "unique: ",
               type     => "bool",
               desc     => "whether this living is uniquely named",
               name     => "uitem$_",
-              default  => 1 }, 1 .. 8)),
+              disable  => { "item$_" => sub { $_[0] =~ m/^(.+?)\s*\#\s*(\d+)\s*$/ } },
+              default  => 0 }, 1 .. 8)),
     ]];
 
     my ($result, $o) = make_form($this->[WINDOW], {}, $options);
     if( $result eq "ok" ) {
         while( my ($k,$v) = each %$o) {
             next unless $v =~ m/[\w\d]/;
+            $v =~ s/^\s+//;
+            $v =~ s/\s+$//;
 
-            my $unique = $o->{'u'.$k};
+            my ($o, $c) = $v =~ m/^(.+?)\s*\#\s*(\d+)\s*$/;
+
+            $this->[NAME_C]{$o} = $c if $c and (not defined($this->[NAME_C]{$o}) or $c > $this->[NAME_C]{$o});
+
+            my $unique = $c || $o->{'u'.$k};
             if( $unique ) {
-                my ($o, $c) = $v =~ m/^(.+?)\s*\#\s*(\d+)\s*$/;
-
-                if($c) {
-                    $this->[NAME_C]{$v} = $c if ;
-                    $this->[MQ]->replace( $v => @o_lt );
-
-                } else {
-                    $c = ++ $this->[NAME_C]{$v};
-                    $this->[MQ]->add( "$v #$c" => @o_lt );
-                }
+                $this->[MQ]->replace( $v => @o_lt );
 
             } else {
-                $this->[MQ]->replace( $v => @o_lt );
+                $c = ++ $this->[NAME_C]{$v};
+                $this->[MQ]->add( "$v #$c" => @o_lt );
             }
         }
     }
