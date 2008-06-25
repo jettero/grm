@@ -4,9 +4,11 @@ inserting and editing
  2. only one living per tile for now
  3. dragging will move livings, but not items and is meaningless to tiles
 
+<strike comment="this was solved with uniqueness checkboxes.">
 insert problems
  1. there can only be one living named joe... replace(joe=>($x,$y))
  2. there can be one billion arrows replace()? what?
+</strike>
 
 saving 
  1. need to give mapqueues a way to save xml, which will simply call the
