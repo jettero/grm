@@ -640,24 +640,33 @@ sub double_click_map {
               default  => 0 }, 1 .. 8)),
     ]];
 
-    my ($result, $o) = make_form($this->[WINDOW], {}, $options);
+    my $i = {};
+    for my $o ($this->[MQ]->objects_at_location(@o_lt)) {
+        my ($k, $v) = $o =~ m/^(lname|item\d+):(.+)/;
+
+        warn "found $k: $v for \"$o\"";
+        $i->{$k} = $v;
+    }
+
+    my ($result, $o) = make_form($this->[WINDOW], $i, $options);
     if( $result eq "ok" ) {
-        while( my ($k,$v) = each %$o) {
+        for my $k (sort keys %$o) {
+            my $v = $o->{$k};
             next unless $v =~ m/[\w\d]/;
             $v =~ s/^\s+//;
             $v =~ s/\s+$//;
 
-            my ($o, $c) = $v =~ m/^(.+?)\s*\#\s*(\d+)\s*$/;
+            my ($n, $c) = $v =~ m/^(.+?)\s*\#\s*(\d+)\s*$/;
 
-            $this->[NAME_C]{$o} = $c if $c and (not defined($this->[NAME_C]{$o}) or $c > $this->[NAME_C]{$o});
+            $this->[NAME_C]{$n} = $c if $c and (not defined($this->[NAME_C]{$n}) or $c > $this->[NAME_C]{$o});
 
             my $unique = $c || $o->{'u'.$k};
             if( $unique ) {
-                $this->[MQ]->replace( $v => @o_lt );
+                $this->[MQ]->replace( "$k:$v" => @o_lt );
 
             } else {
                 $c = ++ $this->[NAME_C]{$v};
-                $this->[MQ]->add( "$v #$c" => @o_lt );
+                $this->[MQ]->add( "$k:$v #$c" => @o_lt );
             }
         }
     }

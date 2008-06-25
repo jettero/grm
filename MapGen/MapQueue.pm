@@ -1145,6 +1145,7 @@ sub objs_at_location {
 
     return $this->_objs_at_location( $loc );
 }
+*objects_at_location = *objs_at_location;
 # }}}
 # objs_in_line_of_sight {{{
 sub objs_in_line_of_sight {
