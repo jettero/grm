@@ -64,6 +64,7 @@ use constant {
                        #  moused-overed
     O_DR      => $x++, # door info, [dir => desc], called O_DR since it's the "old" door.  really only used to invoke a 
                        #  reddraw of the cursors when there *was* a door (O_DR) and there *nolonger* is one
+    ITEM_C    => $x++, # we keep a careful count of all the items, which are assumed to not be unique
     # }}}
 };
 
@@ -630,7 +631,18 @@ sub double_click_map {
     my ($result, $o) = make_form($this->[WINDOW], {}, $options);
     if( $result eq "ok" ) {
         while( my ($k,$v) = each %$o) {
-            $this->[MQ]->replace( $v => @o_lt ) if $v;
+            next unless $v =~ m/[\w\d]/;
+
+            my $type = substr $k, 0, 1;
+
+            if( $type eq "i" ) {
+                my $c = ++ $this->[ITEM_C}{$v};
+
+                $this->[MQ]->add( "$v #$c" => @o_lt );
+
+            } else {
+                $this->[MQ]->replace( $v => @o_lt );
+            }
         }
     }
 }
