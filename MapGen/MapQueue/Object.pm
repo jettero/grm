@@ -17,6 +17,14 @@ sub desc {
     return $r;
 }
 
+sub attr {
+    my $this = shift;
+    my $that = shift;
+
+    $this->{a} = $that if $that;
+    $this->{a};
+}
+
 sub q {
     my $this = shift;
 
