@@ -613,7 +613,7 @@ sub double_click_map {
           type     => "text",
           desc     => "the name of the living you wish to add to the map",
           name     => 'lname',
-          default  => '' }
+          default  => '' },
 
         (map(
             { mnemonic => "Item #_$_: ",
@@ -651,6 +651,10 @@ sub double_click_map {
     if( $result eq "ok" ) {
 
         for my $k (grep {!m/^u/} sort keys %$o) {
+            if( my $k = delete $o_i{$k} ) {
+                $this->[MQ]->remove( $_ ) for @$k;
+            }
+
             my $v = $o->{$k};
             next unless $v =~ m/[\w\d]/;
             $v =~ s/^\s+//;
@@ -672,10 +676,6 @@ sub double_click_map {
 
             } elsif( not $unique ) {
                 $ob->nonunique;
-            }
-
-            if( my $k = delete $o_i{$k} ) {
-                $this->remove( $_ ) for @$k;
             }
 
             $this->[MQ]->replace( $ob => @o_lt );
