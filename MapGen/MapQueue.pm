@@ -1117,12 +1117,7 @@ sub remove {
     my @loc = @{ delete $this->{l}{$tag} };
     my $itm = $this->{c}[ $loc[1] ][ $loc[0] ];
 
-    if( ref $that ) {
-        @$itm = ( grep {$_ != $that} @$itm );
-
-    } else {
-        @$itm = ( grep {$_ ne $tag} @$itm );
-    }
+    @$itm = ( grep {$_ ne $tag} @$itm );
 }
 # }}}
 # replace {{{
