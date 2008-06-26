@@ -24,10 +24,3 @@ sub quantity { my $this = shift; $this->{q} = shift }
 
 our %item_counts;
 sub nonunique { my $this = shift; $this->{c} = push @{$item_counts{$this->{v}}}, $this; }
-sub DESTROY {
-    my $this = shift;
-
-    warn "we don't see this, unless you commented out one of the two lines";
-
-    delete $item_counts{$this->{v}}[$this->{c}] if exists $this->{c};
-}
