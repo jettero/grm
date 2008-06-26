@@ -55,3 +55,5 @@ t/97_rlos.t
 mq.xs
 MapGen/MapQueue.pm
 MapGen/MapQueue.pod
+MapGen/MapQueue/Object.pm
+t/99_mqo.t

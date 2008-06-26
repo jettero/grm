@@ -1,4 +1,4 @@
-# vi:syntax=perl:
+# vi:filetype=perl:
 
 package Games::RolePlay::MapGen::MapQueue;
 

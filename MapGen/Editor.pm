@@ -644,13 +644,12 @@ sub double_click_map {
     for my $o ($this->[MQ]->objects_at_location(@o_lt)) {
         my ($k, $v) = $o =~ m/^(lname|item\d+):(.+)/;
 
-        warn "found $k: $v for \"$o\"";
         $i->{$k} = $v;
     }
 
     my ($result, $o) = make_form($this->[WINDOW], $i, $options);
     if( $result eq "ok" ) {
-        for my $k (sort keys %$o) {
+        for my $k (grep {!m/^u/} sort keys %$o) {
             my $v = $o->{$k};
             next unless $v =~ m/[\w\d]/;
             $v =~ s/^\s+//;
@@ -658,7 +657,7 @@ sub double_click_map {
 
             my ($n, $c) = $v =~ m/^(.+?)\s*\#\s*(\d+)\s*$/;
 
-            $this->[NAME_C]{$n} = $c if $c and (not defined($this->[NAME_C]{$n}) or $c > $this->[NAME_C]{$o});
+            $this->[NAME_C]{$n} = $c if $c and (not defined($this->[NAME_C]{$n}) or $c > $this->[NAME_C]{$n});
 
             my $unique = $c || $o->{'u'.$k};
             if( $unique ) {
