@@ -6,7 +6,7 @@ use Games::RolePlay::MapGen::MapQueue::Object;
 my $s7 = new Games::RolePlay::MapGen::MapQueue::Object(7);
 my $st = new Games::RolePlay::MapGen::MapQueue::Object("test");
 
-plan tests => 19;
+plan tests => 21;
 
 $s7->attr("number");
 $st->attr("word");
@@ -43,6 +43,14 @@ ok($st->desc, "test (7) #30");
 my $st1 = new Games::RolePlay::MapGen::MapQueue::Object("test");
    $st1->nonunique;
 ok($st1, "test #31");
+
+my $st2 = new Games::RolePlay::MapGen::MapQueue::Object("test");
+   $st2->nonunique(50);
+ok($st2, "test #50");
+
+my $st3 = new Games::RolePlay::MapGen::MapQueue::Object("test");
+   $st3->nonunique;
+ok($st3, "test #51");
 
 ok($s7->attr, 'number');
 ok($st->attr, 'word');

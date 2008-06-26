@@ -59,14 +59,19 @@ sub me {
 my %item_counts;
 sub quantity  { my $this = shift; my $q = shift; $this->{q}=$q if defined $q; $this->{q} }
 sub    unique { my $this = shift; $this->{u}=1; }
-sub nonunique { my $this = shift; $this->{u}=0;
-    unless( exists $this->{c} ) {
-        $this->{c} = ++ $item_counts{$this->{v}};
+sub nonunique { my $this = shift; $this->{u}=0; my $num = shift;
+    if( defined $num ) {
+        $this->set_item_number($num);
+
+    } else {
+        unless( exists $this->{c} ) {
+            $this->{c} = ++ $item_counts{$this->{v}};
+        }
     }
 }
 sub set_item_number {
     my $this = shift;
-    my $num  = shift;
+    my $num  = 0+shift;
 
     $item_counts{$this->{v}} = $num if not exists $item_counts{$this->{v}} or $num > $item_counts{$this->{v}};
     $this->{c} = $num;
@@ -134,6 +139,20 @@ less sense.
     my $arrow = new Games::RolePlay::MapGen::MapQueue::Object("arrow");
        $arrow->nonunique;
 
+For nonunique items, the item id that trails the name in the tag (and
+description) is a monotonically increasing integer.  You can set the id for an
+object (which will increment the id counter if it's higher than the current
+counter) by using this method:
+
+    $arrow->set_item_number(30);
+
+This arrow will now be "arrow #30" and the next non-unique object named "arrow"
+will be #31.
+
+Optionally, you can pass a number to C<nonunique()>.  This will call
+C<set_item_number()> for you and it will do it before C<nonunique()> increments
+the item id counter.
+
 =head2 QUANTITY
 
 Suppose you have a pile of 30 arrows.  It makes little sense to drop 30 arrow
@@ -158,18 +177,6 @@ When the C<$arrow> is mutated with C<+=> or C<-=>, it will update the quantity.
 
 WARNING: ... other mutators will not work correctly.  They will flatten your
 object reference to a number.
-
-=head2 ITEM IDS
-
-For nonunique items, the item id that trails the name in the tag (and
-description) is a monotonically increasing integer.  You can set the id for an
-object (which will increment the id counter if it's higher than the current
-counter) by using this method:
-
-    $arrow->set_item_number(30);
-
-This arrow will now be "arrow #30" and the next non-unique object named "arrow"
-will be #31.
 
 =head2 ATTR
 
