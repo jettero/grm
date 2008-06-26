@@ -25,6 +25,7 @@ use Storable qw(freeze thaw);
 use Data::Dump qw(dump);
 use POSIX qw(ceil);
 
+use Games::RolePlay::MapGen::MapQueue::Object;
 use Games::RolePlay::MapGen::MapQueue;
 use Games::RolePlay::MapGen::Editor::_MForm qw(make_form $default_restore_defaults);
 use Games::RolePlay::MapGen::Tools qw( roll choice _door _group );
@@ -64,7 +65,6 @@ use constant {
                        #  moused-overed
     O_DR      => $x++, # door info, [dir => desc], called O_DR since it's the "old" door.  really only used to invoke a 
                        #  reddraw of the cursors when there *was* a door (O_DR) and there *nolonger* is one
-    NAME_C    => $x++, # we keep a careful count of all non-unique mqueue names
     # }}}
 };
 
@@ -613,16 +613,14 @@ sub double_click_map {
           type     => "text",
           desc     => "the name of the living you wish to add to the map",
           name     => 'lname',
-          default  => '',
-          matches  => [qr/\w/] },
+          default  => '' }
 
         (map(
             { mnemonic => "Item #_$_: ",
               type     => "text",
               desc     => "the name of an item at this location",
               name     => "item$_",
-              default  => '',
-              matches  => [qr/\w/] }, 1 .. 8)),
+              default  => '' }, 1 .. 8)),
     ],[
         { mnemonic => "unique: ",
           type     => "bool",
@@ -641,14 +639,17 @@ sub double_click_map {
     ]];
 
     my $i = {};
+    my %o_i;
     for my $o ($this->[MQ]->objects_at_location(@o_lt)) {
-        my ($k, $v) = $o =~ m/^(lname|item\d+):(.+)/;
+        my $k = $o->attr;
 
-        $i->{$k} = $v;
+        push @{$o_i{$k}}, $o;
+        $i->{$k} = $o->desc;
     }
 
     my ($result, $o) = make_form($this->[WINDOW], $i, $options);
     if( $result eq "ok" ) {
+
         for my $k (grep {!m/^u/} sort keys %$o) {
             my $v = $o->{$k};
             next unless $v =~ m/[\w\d]/;
@@ -657,16 +658,27 @@ sub double_click_map {
 
             my ($n, $c) = $v =~ m/^(.+?)\s*\#\s*(\d+)\s*$/;
 
-            $this->[NAME_C]{$n} = $c if $c and (not defined($this->[NAME_C]{$n}) or $c > $this->[NAME_C]{$n});
+            $n = $v unless defined $n;
 
-            my $unique = $c || $o->{'u'.$k};
-            if( $unique ) {
-                $this->[MQ]->replace( "$k:$v" => @o_lt );
+            my $unique = $o->{'u'.$k};
+            my $qty    = $1 if $n =~ s/\s*\(\s*(\d+)\s*\)\s*$//;
 
-            } else {
-                $c = ++ $this->[NAME_C]{$v};
-                $this->[MQ]->add( "$k:$v #$c" => @o_lt );
+            my $ob = new Games::RolePlay::MapGen::MapQueue::Object($n||$v);
+               $ob->quantity($qty) if defined $qty;
+               $ob->attr($k);
+
+            if( $c ) {
+                $ob->nonunique($c);
+
+            } elsif( not $unique ) {
+                $ob->nonunique;
             }
+
+            if( my $k = delete $o_i{$k} ) {
+                $this->remove( $_ ) for @$k;
+            }
+
+            $this->[MQ]->replace( $ob => @o_lt );
         }
     }
 }
