@@ -61,18 +61,15 @@ sub quantity  { my $this = shift; my $q = shift; $this->{q}=$q if defined $q; $t
 sub    unique { my $this = shift; $this->{u}=1; }
 sub nonunique { my $this = shift; $this->{u}=0;
     unless( exists $this->{c} ) {
-        $this->{c} = push @{$item_counts{$this->{v}}},
-        7
-      # $this;
-      # NOTE: see small.pl from ceae10e for the program that was sent to 'perlbug'
-      # essentially, pushing $this into the array enables/causes the segmentation fault...
-      # we'll wait on features like finding a certain object by number...
+        $this->{c} = ++ $item_counts{$this->{v}};
     }
 }
-sub DESTROY {
+sub set_item_number {
     my $this = shift;
+    my $num  = shift;
 
-    delete $item_counts{$this->{v}}[$this->{c}] if exists $this->{c};
+    $item_counts{$this->{v}} = $num if not exists $item_counts{$this->{v}} or $num > $item_counts{$this->{v}};
+    $this->{c} = $num;
 }
 
 "I like GD::Graph.";
@@ -161,6 +158,18 @@ When the C<$arrow> is mutated with C<+=> or C<-=>, it will update the quantity.
 
 WARNING: ... other mutators will not work correctly.  They will flatten your
 object reference to a number.
+
+=head2 ITEM IDS
+
+For nonunique items, the item id that trails the name in the tag (and
+description) is a monotonically increasing integer.  You can set the id for an
+object (which will increment the id counter if it's higher than the current
+counter) by using this method:
+
+    $arrow->set_item_number(30);
+
+This arrow will now be "arrow #30" and the next non-unique object named "arrow"
+will be #31.
 
 =head2 ATTR
 
