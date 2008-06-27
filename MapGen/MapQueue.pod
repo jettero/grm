@@ -207,11 +207,12 @@ just the objects as they were placed on the map.
 
 Like C<objs()>, but also returns the locations.  Each element is an array ref,
 whose first element is the location (as an arrayref) and whose second element is
-the object.
+an arrayref of objects.
 
-    my @objs        = $mq->objs_with_locations;
-    my ($loc, $obj) = $objs[0];
-    my ($x,$y)      = @$loc;
+    my @objs      = $mq->objs_with_locations;
+    my ($loc, $a) = $objs[0];
+    my ($x,$y)    = @$loc; # the location
+    my @objs_a    = @$a;   # the objects at the location
 
 =head2 objs_at_location
 

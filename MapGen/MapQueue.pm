@@ -1154,6 +1154,7 @@ sub objs_in_line_of_sight {
 
     return @ret;
 }
+*objects_in_line_of_sight = *objs_in_line_of_sight;
 # }}}
 # objs {{{
 sub objs {
@@ -1169,6 +1170,7 @@ sub objs {
 
     return @ret;
 }
+*objects = *objs;
 # }}}
 # objs_with_locations {{{
 sub objs_with_locations {
@@ -1187,6 +1189,7 @@ sub objs_with_locations {
 
     return @ret;
 }
+*objects_with_locations = *objs_with_locations;
 # }}}
 
 # random_open_location {{{

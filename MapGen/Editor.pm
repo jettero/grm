@@ -495,6 +495,45 @@ sub pulser {
 # }}}
 
 # DRAWING 
+# draw_mapqueue_objects {{{
+sub draw_mapqueue_objects {
+    my ($this, $image) = @_;
+
+    my $humanoid = $image->colorAllocate(100, 100, 255);
+    my $outline  = $image->colorAllocate(0, 0, 0);
+
+    my @cs = split('x', $this->[MAP]{cell_size});
+    my @hs = map {$_ / 2.555555555555} @cs; # humanoid size
+    my @is = map {$_ / 4.6}            @cs; # item size
+    my @of = map {int($_/2)}           @cs; # offset
+
+    for my $owl ($this->[MQ]->objects_with_locations) {
+        my ($x, $y, @o) = map {@$_} @$owl;
+
+        $x = $cs[0]*$x + $of[0];
+        $y = $cs[1]*$y + $of[1];
+
+        for my $o (@o) {
+
+            if( $o->attr =~ m/^l/ ) {
+              $image->filledEllipse ( $x, $y, @hs, $humanoid );
+              $image->ellipse       ( $x, $y, @hs, $outline  );
+
+            } else {
+              # my $c = 0 + $taken{$x,$y}; $taken{$x,$y}++;
+
+              # if( $c <= 7 ) {
+              #     my $ax = $x + 5 * cos $c;
+              #     my $ay = $y + 5 * sin $c;
+
+              #     $image->filledEllipse ( $ax, $ay, 7, 7, ($p == $e ? $colors{$m->{t}} : $colors{moved}) );
+              #     $image->ellipse       ( $ax, $ay, 7, 7, $outline );
+              # }
+            }
+        }
+    }
+}
+# }}}
 # draw_map (initial draw after a new mapload, sets up the MP pixbufs, etc) {{{
 sub draw_map {
     my $this = shift;
@@ -508,6 +547,8 @@ sub draw_map {
 
     $map->set_exporter( "BasicImage" );
     my $image = $map->export( -retonly );
+
+    $this->draw_mapqueue_objects( $image );
 
     my $loader = Gtk2::Gdk::PixbufLoader->new;
        $loader->write($image->png);
@@ -680,6 +721,8 @@ sub double_click_map {
 
             $this->[MQ]->replace( $ob => @o_lt );
         }
+
+        $this->draw_map; # draw the map from scratch with the new objects
     }
 }
 # }}}
