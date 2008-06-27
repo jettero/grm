@@ -499,13 +499,15 @@ sub pulser {
 sub draw_mapqueue_objects {
     my ($this, $image) = @_;
 
+    my $item     = $image->colorAllocate(255, 255, 0);
     my $humanoid = $image->colorAllocate(100, 100, 255);
     my $outline  = $image->colorAllocate(0, 0, 0);
 
     my @cs = split('x', $this->[MAP]{cell_size});
     my @hs = map {$_ / 2.555555555555} @cs; # humanoid size
-    my @is = map {$_ / 4.6}            @cs; # item size
-    my @of = map {int($_/2)}           @cs; # offset
+    my @of = map {int($_/2)}           @cs; # humanoid offset
+    my @is = map {$_ / 3.285714}       @cs; # item size
+    my @if = map {$_ / 4.6}            @cs; # item offset
 
     for my $owl ($this->[MQ]->objects_with_locations) {
         my ($x, $y, @o) = map {@$_} @$owl;
@@ -514,21 +516,19 @@ sub draw_mapqueue_objects {
         $y = $cs[1]*$y + $of[1];
 
         for my $o (@o) {
+            my $var = $o->attr('var');
 
-            if( $o->attr =~ m/^l/ ) {
-              $image->filledEllipse ( $x, $y, @hs, $humanoid );
-              $image->ellipse       ( $x, $y, @hs, $outline  );
+            if( $var =~ m/^l/ ) {
+                $image->filledEllipse ( $x, $y, @hs, $humanoid );
+                $image->ellipse       ( $x, $y, @hs, $outline  );
 
-            } else {
-              # my $c = 0 + $taken{$x,$y}; $taken{$x,$y}++;
+            } elsif( my ($in) = $var =~ m/item(\d+)/ ) {
+                my $c  = 2*3.1415926 * ($in/8);
+                my $ax = $x + $if[0] * cos $c;
+                my $ay = $y + $if[1] * sin $c;
 
-              # if( $c <= 7 ) {
-              #     my $ax = $x + 5 * cos $c;
-              #     my $ay = $y + 5 * sin $c;
-
-              #     $image->filledEllipse ( $ax, $ay, 7, 7, ($p == $e ? $colors{$m->{t}} : $colors{moved}) );
-              #     $image->ellipse       ( $ax, $ay, 7, 7, $outline );
-              # }
+                $image->filledEllipse ( $ax, $ay, @is, $item );
+                $image->ellipse       ( $ax, $ay, @is, $outline );
             }
         }
     }
@@ -682,7 +682,7 @@ sub double_click_map {
     my $i = {};
     my %o_i;
     for my $o ($this->[MQ]->objects_at_location(@o_lt)) {
-        my $k = $o->attr;
+        my $k = $o->attr('var');
 
         push @{$o_i{$k}}, $o;
         $i->{$k} = $o->desc;
@@ -710,7 +710,7 @@ sub double_click_map {
 
             my $ob = new Games::RolePlay::MapGen::MapQueue::Object($n||$v);
                $ob->quantity($qty) if defined $qty;
-               $ob->attr($k);
+               $ob->attr(var => $k);
 
             if( $c ) {
                 $ob->nonunique($c);
