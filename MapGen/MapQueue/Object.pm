@@ -19,10 +19,13 @@ sub desc {
 
 sub attr {
     my $this = shift;
+    my $name = shift;
     my $that = shift;
 
-    $this->{a} = $that if $that;
-    $this->{a};
+    return undef unless $name;
+
+    $this->{a}{$name} = $that if defined $that;
+    $this->{a}{$name};
 }
 
 sub q {
@@ -90,7 +93,7 @@ Games::RolePlay::MapGen::MapQueue::Object - adds special string interpolation su
 =head1 SYNOPSIS
 
     my $ob = new Games::RolePlay::MapGen::MapQueue::Object("test");
-       $ob->attr('var2');
+       $ob->attr(var => 'var2');
        $ob->quantity(7);
        $ob->nonunique;
 
@@ -117,7 +120,7 @@ By default, you're making a unique object, quantity 1, with no attributes.
 
     my $ob = new Games::RolePlay::MapGen::MapQueue::Object("Test");
 
-    print "yeah, undef\n" if not defined $ob->attr;
+    print "yeah, undef\n" if not defined $ob->attr('var');
     print "quantity: ", $ob->quantity, "\n"; # 1
     print "tag: $ob\n";
     print "desc: ", $ob->desc, "\n";
@@ -184,8 +187,10 @@ Sometimes it's convenient to keep track of slots or field names in the object it
 For example, suppose you have eight fields in a database, item1, item2, ...
 You can use this to set the field name the item is currently slotted in.
 
-    $ob->attr("field1");
-    print "attr: ", $ob->attr, "\n";
+    $ob->attr(field_name => "field1");
+    $ob->attr(something  => "hrm, test");
+    print "field_name: ", $ob->attr('field_name'), "\n";
+    print "something:  ", $ob->attr('something'), "\n";
 
 There are problem other uses for C<attr()>.  Then main thing to realize is that
 it is otherwise unused metadata.
