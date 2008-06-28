@@ -499,8 +499,6 @@ sub pulser {
 sub draw_mapqueue_objects {
     my ($this, $image) = @_;
 
-    my $item     = $image->colorAllocate(255, 255, 0);
-    my $humanoid = $image->colorAllocate(100, 100, 255);
     my $outline  = $image->colorAllocate(0, 0, 0);
 
     my @cs = split('x', $this->[MAP]{cell_size});
@@ -508,6 +506,8 @@ sub draw_mapqueue_objects {
     my @of = map {int($_/2)}           @cs; # humanoid offset
     my @is = map {$_ / 3.285714}       @cs; # item size
     my @if = map {$_ / 4.6}            @cs; # item offset
+
+    my %colors;
 
     for my $owl ($this->[MQ]->objects_with_locations) {
         my ($x, $y, @o) = map {@$_} @$owl;
@@ -517,9 +517,15 @@ sub draw_mapqueue_objects {
 
         for my $o (@o) {
             my $var = $o->attr('var');
+            my $col = $o->attr('color');
+            my $icl = $colors{@$col};
+
+            unless( defined $icl ) {
+                $icl = $colors{@$col} = $image->colorAllocate(@$col);
+            }
 
             if( $var =~ m/^l/ ) {
-                $image->filledEllipse ( $x, $y, @hs, $humanoid );
+                $image->filledEllipse ( $x, $y, @hs, $icl );
                 $image->ellipse       ( $x, $y, @hs, $outline  );
 
             } elsif( my ($in) = $var =~ m/item(\d+)/ ) {
@@ -527,7 +533,7 @@ sub draw_mapqueue_objects {
                 my $ax = $x + $if[0] * cos $c;
                 my $ay = $y + $if[1] * sin $c;
 
-                $image->filledEllipse ( $ax, $ay, @is, $item );
+                $image->filledEllipse ( $ax, $ay, @is, $icl );
                 $image->ellipse       ( $ax, $ay, @is, $outline );
             }
         }
@@ -649,7 +655,6 @@ sub double_click_map {
     return unless defined $tile->{type};
 
     my $options = [[ # column 1
-
         { mnemonic => "_Living: ",
           type     => "text",
           desc     => "the name of the living you wish to add to the map",
@@ -677,21 +682,39 @@ sub double_click_map {
               name     => "uitem$_",
               disable  => { "item$_" => sub { $_[0] =~ m/^(.+?)\s*\#\s*(\d+)\s*$/ } },
               default  => 0 }, 1 .. 8)),
+    ],[
+        { mnemonic => "color: ",
+          type     => "text",
+          desc     => "the color (as an html hex 6-touple)",
+          name     => 'clname',
+          match    => qr/^\#?[A-Fa-f]{6}$/, 
+          default  => '#6464ff' },
+
+        (map(
+            { mnemonic => "color: ",
+              type     => "text",
+              desc     => "the color (as an html hex 6-touple)",
+              name     => "citem$_",
+              match    => qr/^\#?[A-Fa-f]{6}$/, 
+              default  => '#ffff00' }, 1 .. 8)),
     ]];
 
     my $i = {};
     my %o_i;
     for my $o ($this->[MQ]->objects_at_location(@o_lt)) {
         my $k = $o->attr('var');
+        my $c = $o->attr('color');
+        my $C = sprintf('#%02x%02x%02x', @$c);
 
         push @{$o_i{$k}}, $o;
         $i->{$k} = $o->desc;
+        $i->{'c' . $k} = $C;
     }
 
     my ($result, $o) = make_form($this->[WINDOW], $i, $options);
     if( $result eq "ok" ) {
 
-        for my $k (grep {!m/^u/} sort keys %$o) {
+        for my $k (grep {!m/^[uc]/} sort keys %$o) {
             if( my $k = delete $o_i{$k} ) {
                 $this->[MQ]->remove( $_ ) for @$k;
             }
@@ -705,12 +728,14 @@ sub double_click_map {
 
             $n = $v unless defined $n;
 
+            my $color  = $o->{'c'.$k};
             my $unique = $o->{'u'.$k};
             my $qty    = $1 if $n =~ s/\s*\(\s*(\d+)\s*\)\s*$//;
 
             my $ob = new Games::RolePlay::MapGen::MapQueue::Object($n||$v);
                $ob->quantity($qty) if defined $qty;
                $ob->attr(var => $k);
+               $ob->attr(color => [ map { hex $_ } $color =~ m/([\d\w]{2})/g ]);
 
             if( $c ) {
                 $ob->nonunique($c);
