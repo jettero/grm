@@ -8,8 +8,8 @@ my $st = new Games::RolePlay::MapGen::MapQueue::Object("test");
 
 plan tests => 21;
 
-$s7->attr("number");
-$st->attr("word");
+$s7->attr(t=>"number");
+$st->attr(t=>"word");
 
 ok($s7+0, 1);
 ok($s7+2, 3);
@@ -52,5 +52,5 @@ my $st3 = new Games::RolePlay::MapGen::MapQueue::Object("test");
    $st3->nonunique;
 ok($st3, "test #51");
 
-ok($s7->attr, 'number');
-ok($st->attr, 'word');
+ok($s7->attr('t'), 'number');
+ok($st->attr('t'), 'word');
