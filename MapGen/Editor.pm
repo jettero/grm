@@ -518,10 +518,10 @@ sub draw_mapqueue_objects {
         for my $o (@o) {
             my $var = $o->attr('var');
             my $col = $o->attr('color');
-            my $icl = $colors{@$col};
+            my $icl = $colors{"@$col"};
 
             unless( defined $icl ) {
-                $icl = $colors{@$col} = $image->colorAllocate(@$col);
+                $icl = $colors{"@$col"} = $image->colorAllocate(@$col);
             }
 
             if( $var =~ m/^l/ ) {
@@ -684,18 +684,16 @@ sub double_click_map {
               default  => 0 }, 1 .. 8)),
     ],[
         { mnemonic => "color: ",
-          type     => "text",
-          desc     => "the color (as an html hex 6-touple)",
+          type     => "color",
+          desc     => "the color of the living marker",
           name     => 'clname',
-          match    => qr/^\#?[A-Fa-f]{6}$/, 
           default  => '#6464ff' },
 
         (map(
             { mnemonic => "color: ",
-              type     => "text",
-              desc     => "the color (as an html hex 6-touple)",
+              type     => "color",
+              desc     => "the color of the item #$_ marker",
               name     => "citem$_",
-              match    => qr/^\#?[A-Fa-f]{6}$/, 
               default  => '#ffff00' }, 1 .. 8)),
     ]];
 
