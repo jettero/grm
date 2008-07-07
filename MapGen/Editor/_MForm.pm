@@ -119,42 +119,14 @@ sub make_form {
 
                 $attach = $widget = new Gtk2::Button;
                 $widget->set_label($d);
-
                 $widget->set_tooltip_text( $item->{desc} ) if exists $item->{desc};
-                $
 
-                ### $widget->signal_connect(changed => sub {
-                ###     my $text = $widget->get_text;
-                ###     my $chg = 0;
-                ###     for my $fix (@{ $item->{fixes} }) {
-                ###         $chg ++ if $fix->($text);
-                ###     }
-                ###     $widget->set_text($text) if $chg;
-                ###     $req[$my_req] = 1;
-                ###     for my $match (@{ $item->{matches} }) {
-                ###         my $r = ref $match;
-                ###         if( $r eq "CODE" ) {
-                ###             $req[$my_req] = 0 unless $match->($text);
-
-                ###         } elsif( $r eq "Regexp" ) {
-                ###             $req[$my_req] = 0 unless $text =~ $match;
-
-                ###         } else {
-                ###             warn "bad match element for $item->{name}: $match";
-                ###         }
-                ###     }
-
-                ###     $dialog->set_response_sensitive( ok => (@req == grep {$_} @req) );
-                ### });
-
-                ### if( $item->{convert} ) {
-                ###     $item->{extract} = sub { $item->{convert}->( $widget->get_text ) };
-
-                ### } else {
-                ###     $item->{extract} = sub { $widget->get_text };
-                ### }
-
-              # $widget->signal_connect(changed => sub { warn "test!"; }); # [WORKS FINE]
+                $widget->signal_connect( clicked => sub {
+                    my $cp = new Gtk2::ColorSelectionDialog("test color");
+                       $cp->set_default_response("ok");
+                       $cp->colorsel->set_current_color(Gtk2::Gdk::Color->new(map {(hex $_)*257} $button->get_label =~ m/([\d\w]{2})/g));
+                       $cp->show;
+                });
 
             } elsif( $IT eq "choice" ) {
                 $attach = $widget = Gtk2::ComboBox->new_text;

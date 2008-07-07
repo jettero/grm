@@ -18,7 +18,6 @@ my $button = Gtk2::Button->new_with_label($def_color);
        my $cp = new Gtk2::ColorSelectionDialog("test color");
           $cp->set_default_response("ok");
           $cp->colorsel->set_current_color(Gtk2::Gdk::Color->new(map {(hex $_)*257} $button->get_label =~ m/([\d\w]{2})/g));
-          $cp->show;
 
        my $res = $cp->run;
 
