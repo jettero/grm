@@ -116,17 +116,33 @@ sub make_form {
             } elsif( $IT eq "color" ) {
                 my $d = exists $i->{$item->{name}} ? $i->{$item->{name}} : $item->{default};
                    $d = $item->{trevnoc}->($d) if ref $d and exists $item->{trevnoc};
+                   $d = sprintf '#%02x%02x%02x' map {hex $_} $d =~ m/([a-fA-F\d]{2})/g unless $d =~ m/^\#[a-fA-F\d]{6}\z/;
 
                 $attach = $widget = new Gtk2::Button;
                 $widget->set_label($d);
                 $widget->set_tooltip_text( $item->{desc} ) if exists $item->{desc};
 
                 $widget->signal_connect( clicked => sub {
-                    my $cp = new Gtk2::ColorSelectionDialog("test color");
+                    my $cp = new Gtk2::ColorSelectionDialog("$item->{name} chooser");
                        $cp->set_default_response("ok");
                        $cp->colorsel->set_current_color(Gtk2::Gdk::Color->new(map {(hex $_)*257} $button->get_label =~ m/([\d\w]{2})/g));
                        $cp->show;
+
+                    my $res = $cp->run;
+                    if( $res eq "ok" ) {
+                        my $c = $cp->colorsel->get_current_color;
+                        my @rgb = map {int( $c->$_() / 257 )} qw(red green blue);
+
+                        $button->set_label( sprintf '#%02x%02x%02x', @rgb );
+                    }
                 });
+
+                if( $item->{convert} ) {
+                    $item->{extract} = sub { $item->{convert}->( $widget->get_label ) };
+
+                } else {
+                    $item->{extract} = sub { $widget->get_label };
+                }
 
             } elsif( $IT eq "choice" ) {
                 $attach = $widget = Gtk2::ComboBox->new_text;
