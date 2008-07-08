@@ -102,11 +102,11 @@ sub genmap {
         for my $j (0 .. $jend) {
             my $tile = $opts->{_the_map}[$i][$j];
 
-            $opts->{t_cb}->() if exists $opts->{t_cb};
-
+            my $h;
             if( my $t = $tile->{type} ) {
                 my $closures = [];
-                my $h = $ah->(
+
+                $h = $ah->(
                     xpos => $j,
                     type => $tile->{type},
                 );
@@ -137,8 +137,10 @@ sub genmap {
                 push @{ $row->{tile} }, $h;
 
             } else {
-                push @{ $row->{tile} }, {xpos=>$j, type=>"wall"}; # this didn't used to be here... it made parsing craptastic
+                push @{ $row->{tile} }, $h = {xpos=>$j, type=>"wall"}; # this didn't used to be here... it made parsing craptastic
             }
+
+            $opts->{t_cb}->( ($j,$i), $h) if exists $opts->{t_cb};
         }
 
         push @$map, $row if int @{$row->{tile}}
