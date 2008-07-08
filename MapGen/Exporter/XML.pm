@@ -140,7 +140,7 @@ sub genmap {
                 push @{ $row->{tile} }, $h = {xpos=>$j, type=>"wall"}; # this didn't used to be here... it made parsing craptastic
             }
 
-            $opts->{t_cb}->( ($j,$i), $h) if exists $opts->{t_cb};
+            $opts->{t_cb}->( ($j,$i), $h ) if exists $opts->{t_cb};
         }
 
         push @$map, $row if int @{$row->{tile}}
