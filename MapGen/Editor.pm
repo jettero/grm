@@ -340,13 +340,24 @@ sub save_file {
     my $file   = $this->[FNAME];
     my $pulser = $this->pulser( "Saving $file ...", "File I/O", 175 );
     my $map    = $this->[MAP];
-    my %mqo    = (map {("@$_[0,1]" => $_->[2])} $this->[MQ]->objects_with_locations);
-    use Data::Dump qw(dump);
-    die dump(\%mqo);
+    my %mqo    = (map {("@{$_->[0]}" => $_->[1])} $this->[MQ]->objects_with_locations);
     eval {
         $map->set_exporter( "XML" );
         $map->export( fname => $this->[FNAME], t_cb => sub {
             my (($x,$y), $h) = @_;
+
+            local $" = ",";
+
+            for my $o (@{$mqo{"$x $y"}}) {
+                push @{$h->{contents}{item}}, {
+                    name=> $o->{v}, unique => ($o->{u}?'true':'false'), qty=> $o->{q}, id=>$o->{c},
+                    attr=>[
+                        map  { {name=>$_->[0], value=>(ref($_->[1]) ? "@{$_->[1]}" : $_->[1])} }
+                        map  { [$_, $o->{a}{$_}] }
+                        keys %{$o->{a}}
+                    ],
+                };
+            }
 
             $pulser->();
         });
