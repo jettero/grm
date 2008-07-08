@@ -714,6 +714,13 @@ sub double_click_map {
     my $tile = $this->[MAP]{_the_map}[ $o_lt[1] ][ $o_lt[0] ];
     return unless defined $tile->{type};
 
+    $this->edit_items_at_location( $tile, @o_lt );
+}
+# }}}
+# edit_items_at_location {{{
+sub edit_items_at_location {
+    my ($this, $tile, @o_lt) = @_;
+
     my $options = [[ # column 1
         { mnemonic => "_Living: ",
           type     => "text",
