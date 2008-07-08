@@ -1179,11 +1179,11 @@ sub objs_with_locations {
 
     for my $row ( 0 .. $this->{ym} ) {
         for my $col ( 0 .. $this->{xm} ) {
-            my $rhs = [ $col, $row ];
+            my $loc = [ $col, $row ];
 
-            my @junk = @{ $this->{c}[ $rhs->[1] ][ $rhs->[0] ] || [] };
+            my @junk = @{ $this->{c}[ $loc->[1] ][ $loc->[0] ] || [] };
 
-            push @ret, [ $rhs => \@junk ] if @junk;
+            push @ret, [ $loc => \@junk ] if @junk;
         }
     }
 
