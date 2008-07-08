@@ -140,7 +140,7 @@ sub genmap {
                 push @{ $row->{tile} }, $h = {xpos=>$j, type=>"wall"}; # this didn't used to be here... it made parsing craptastic
             }
 
-            $opts->{t_cb}->( ($j,$i), $h ) if exists $opts->{t_cb};
+            $opts->{t_cb}->( ($j+1,$i+1), $h ) if exists $opts->{t_cb};
         }
 
         push @$map, $row if int @{$row->{tile}}
@@ -151,13 +151,6 @@ sub genmap {
         tile_group => $groups,
         'map'      => { row => $map },
     );
-
-    ## DEBUG ## our $c; $c = 1 unless defined $c; $c ++;
-    ## DEBUG ## open my $out, ">lol.$c";
-    ## DEBUG ## use Data::Dumper; $Data::Dumper::Indent = $Data::Dumper::Sortkeys = 1;
-    ## DEBUG ## print $out Dumper(\%main), "\n";
-    ## DEBUG ## close $out;
-    ## DEBUG ## warn "eff dude (lol.$c)";
 
     return XMLout(\%main, 
         RootName => "MapGen",

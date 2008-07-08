@@ -139,7 +139,7 @@ sub genmap {
                 }
             }
 
-            $opts->{t_cb}->(($x_pos,$y_pos), $tile) if exists $opts->{t_cb};
+            $opts->{t_cb}->(($x_pos+1,$y_pos+1), $tile) if exists $opts->{t_cb};
         }
     }
 

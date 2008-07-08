@@ -350,7 +350,7 @@ sub save_file {
 
             for my $o (@{$mqo{"$x $y"}}) {
                 push @{$h->{contents}{item}}, {
-                    name=> $o->{v}, unique => ($o->{u}?'true':'false'), qty=> $o->{q}, id=>$o->{c},
+                    name=> $o->{v}, unique => ($o->{u}?'true':'false'), qty=> $o->{q}, ($o->{c} ? (id=>$o->{c}) :()),
                     attr=>[
                         map  { {name=>$_->[0], value=>(ref($_->[1]) ? "@{$_->[1]}" : $_->[1])} }
                         map  { [$_, $o->{a}{$_}] }
@@ -462,8 +462,50 @@ sub read_file {
 
     my $pulser = $this->pulser( "Reading $file ...", "File I/O" );
     eval {
-        $this->[MAP] = my $map = Games::RolePlay::MapGen->import_xml( $file, t_cb => $pulser );
-        $this->[MQ]  = new Games::RolePlay::MapGen::MapQueue( $map );
+        my %mqo;
+        $this->[MAP] = my $map = Games::RolePlay::MapGen->import_xml( $file, t_cb => sub {
+            if( my ($x,$y, $txp) = @_ ) {
+
+                my $items = $txp->find('contents/item');
+                for my $item ($items->get_nodelist) {
+                    my $name = $item->findvalue( '@name'   )->value;
+                    my $uniq = $item->findvalue( '@unique' )->value;
+                    my $qty  = $item->findvalue( '@qty'    )->value;
+                    my $id   = $item->findvalue( '@id'     )->value;
+
+                    my $attrs = $item->find('attr');
+                    my %a;
+                    for my $attr ($attrs->get_nodelist) {
+                        my $var = $attr->findvalue( '@name'  )->value;
+                        my $val = $attr->findvalue( '@value' )->value;
+
+                        $a{$var} = $val;
+                    }
+
+                    my $ob = new Games::RolePlay::MapGen::MapQueue::Object($name);
+                       $ob->nonunique($id) unless $uniq and $uniq eq "true";
+                       $ob->quantity($qty) if $qty;
+
+                    for my $k (keys %a) {
+                        my $v = $a{$k};
+                           $v = [ split ",", $v ] if $k eq "color";
+
+                        $ob->attr($k => $v);
+                    }
+
+                    push @{$mqo{$x}{$y}}, $ob;
+                }
+            }
+
+            $pulser->();
+        });
+
+        $this->[MQ] = my $mq = new Games::RolePlay::MapGen::MapQueue( $map );
+        for my $x (keys %mqo) {
+        for my $y (keys %{ $mqo{$x} }) {
+        for my $o (@{$mqo{$x}{$y}}) {
+            $mq->replace( $o => ($x,$y) );
+        }}}
     };
     $this->error($@) if $@;
     $pulser->('destroy');
