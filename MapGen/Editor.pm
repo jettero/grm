@@ -455,7 +455,7 @@ sub save_text_as {
     $file_chooser->destroy;
 }
 # }}}
-# read_file {{{
+# read_file (aka load_file) {{{
 sub read_file {
     my $this = shift;
     my $file = shift;

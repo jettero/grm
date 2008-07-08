@@ -82,8 +82,6 @@ sub genmap {
             my $x_pos = $xp->findvalue( '@xpos' => $tile )->value;
             my $type  = $xp->findvalue( '@type' => $tile )->value;
 
-            $opts->{t_cb}->() if exists $opts->{t_cb};
-
             my $t = &_tile( x=>$x_pos, y=>$y_pos );
 
             if( $type eq "wall" ) {
@@ -140,6 +138,8 @@ sub genmap {
                     die "hrm: closure type=$type";
                 }
             }
+
+            $opts->{t_cb}->(($x_pos,$y_pos), $tile) if exists $opts->{t_cb};
         }
     }
 
