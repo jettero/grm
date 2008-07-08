@@ -7,7 +7,7 @@
 <!ELEMENT map (row*)>
 <!ELEMENT row (tile*)>
 <!ELEMENT tile (contents?|closure*)>
-<!ELEMENT contents (item|living)*>
+<!ELEMENT contents (item*)>
 
 <!ATTLIST row ypos CDATA #REQUIRED>
 <!ATTLIST tile xpos CDATA #REQUIRED>
@@ -29,9 +29,14 @@
 <!ATTLIST closure major_open_dir (north|east|south|west) #IMPLIED>
 <!ATTLIST closure minor_open_dir (north|east|south|west) #IMPLIED>
 
-<!ELEMENT item EMPTY>
-<!ELEMENT living EMPTY>
-<!ATTLIST item   name   CDATA #REQUIRED>
-<!ATTLIST item   unique CDATA #IMPLIED>
-<!ATTLIST living name   CDATA #REQUIRED>
-<!ATTLIST living pass   CDATA #IMPLIED>
+<!ELEMENT item (attr*)>
+<!ELEMENT attr EMPTY>
+
+<!ATTLIST item name   CDATA #REQUIRED> <!-- v   => "b" -->
+<!ATTLIST item unique CDATA #IMPLIED>  <!-- u   => 0   -->
+<!ATTLIST item qty    CDATA #IMPLIED>  <!-- "q" => 1   -->
+<!ATTLIST item id     CDATA #IMPLIED>  <!-- c   => 1   -->
+
+<!-- a   => { color => [255, 255, 0], var => "item1" } -->
+<!ATTLIST attr var CDATA #REQUIRED>
+<!ATTLIST attr val CDATA #REQUIRED>
