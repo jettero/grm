@@ -230,25 +230,26 @@ sub new {
     my $s_up = sub {
         $sb->pop(1); return unless @_;
 
-        # @_ is just like $this->[S_ARG], but (stuff) instead of [stuff]
-
         if( not ref $_[0] ) {
             my @c = caller;
             warn "caller=(@c)";
         }
 
-        my $tile  = shift; my $type = pop @$tile if @$tile == 3;
+        # @_ is just like $this->[S_ARG], but (stuff) instead of [stuff]
+
+        my $loc   = shift; # so this is (x,y), not a tile object from the actual map
+        my $type  = pop @$loc if @$loc == 3;
         my $group = shift;
         my $door  = shift;
         my $txt   = '';
 
-        if( $tile ) {
-            $txt .= "tile: " . ($type ? "$type " : ''). sprintf('[%d,%d]', @$tile);
+        if( $loc ) {
+            $txt .= "tile: " . ($type ? "$type " : ''). sprintf('[%d,%d]', @$loc);
             $txt .= ":$door->[0] (@{$door->[1]})" if $door;
             $txt .= " \x{2014} group: @$group" if $group;
 
         } else {
-            $tile = $group = $door = undef;
+            $loc = $group = $door = undef;
         }
 
         $sb->push(1, $txt);
