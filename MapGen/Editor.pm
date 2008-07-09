@@ -60,9 +60,24 @@ use constant {
     SEL_W     => $x++, # the currently "working" select rectangle, used to pop the end of SELECTION while *still* dragging
     SELECTION => $x++, # the current selection rectangles [ [x1,y1,x2,y2], [...], ... ]
     S_ARG     => $x++, # the status-bar arguments: the current tile location (LT), tile type, and door info
-                       #  [@lt, $tile->{type}, undef]; $sarg->[1] (type) is replaced with [$g->name, $g->desc] when
+                       #  [\@lt, $tile->{type}, undef]; $sarg->[1] (type) is replaced with [$g->name, $g->desc] when
                        #  $tile has a group... door info starts out as undef and changes to [dir=>desc] when there is a door
-                       #  moused-overed
+                       #  moused-overed.  Perhaps the best way to describe it is this huge block of examples:
+                       #    [[11, 9, "corridor"], undef, undef]
+                       #    [[12, 9, "corridor"], undef, ["s", ["wall"]]]
+                       #    [[6, 4, "room"], ["Room #1", "(4, 3) 10x8"], undef]
+                       #    [[6, 3, "room"], ["Room #1", "(4, 3) 10x8"], ["w", ["opening"]]]
+                       #    [[5, 5], ["Room #1", "(4, 3) 10x8"], undef]
+                       #    [[5, 5], ["Room #1", "(4, 3) 10x8"], ["e", ["opening"]]]
+                       #    [[6, 5, "room"], ["Room #1", "(4, 3) 10x8"], undef]
+                       #    [[6, 6, "room"], ["Room #1", "(4, 3) 10x8"], undef]
+                       #    [[6, 6], ["Room #1", "(4, 3) 10x8"], ["s", ["opening"]]]
+                       #    [[6, 7, "room"], ["Room #1", "(4, 3) 10x8"], ["n", ["opening"]]]
+                       #    [[6, 7], ["Room #1", "(4, 3) 10x8"], undef]
+                       #    [[6, 7], ["Room #1", "(4, 3) 10x8"], ["s", ["wall"]]]
+                       #    [[6, 8, "corridor"], undef, ["n", ["wall"]]]
+                       #    [[7, 8], undef, ["n", ["ordinary", "door"]]]
+                       #    [ [7, 7, "room"], ["Room #1", "(4, 3) 10x8"], ["s", ["ordinary", "door"]], ]
     O_DR      => $x++, # door info, [dir => desc], called O_DR since it's the "old" door.  really only used to invoke a 
                        #  reddraw of the cursors when there *was* a door (O_DR) and there *nolonger* is one
     # }}}
@@ -214,6 +229,8 @@ sub new {
 
     my $s_up = sub {
         $sb->pop(1); return unless @_;
+
+        # @_ is just like $this->[S_ARG], but (stuff) instead of [stuff]
 
         if( not ref $_[0] ) {
             my @c = caller;
