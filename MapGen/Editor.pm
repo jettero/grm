@@ -707,19 +707,32 @@ sub double_click_map {
     my ($this, $widget, $event) = @_;
 
     # For some reason, double clicking trips a selection.
-    # rather than carefully figuring that out, just clear it.
+    # rather than carefully figuring that out, we'll just clear it.
     $this->[SEL_S] = $this->[SEL_E] = $this->[SELECTION] = undef;
 
     my @o_lt = @{$this->[O_LT]};
     my $tile = $this->[MAP]{_the_map}[ $o_lt[1] ][ $o_lt[0] ];
     return unless defined $tile->{type};
 
-    $this->edit_items_at_location( $tile, @o_lt );
+    if( my $s2 = @{$this->[S_ARG]}[2] ) {
+        my $d  = $s2->[0];
+        my $od = $tile->{od}{$d};
+
+        if( ref $od ) {
+            $this->closure_door_properties( [$tile, $d] );
+
+        } else {
+            goto PFFT;
+        }
+
+    } else {
+        PFFT: $this->edit_items_at_location( $tile, @o_lt );
+    }
 }
 # }}}
 # edit_items_at_location {{{
 sub edit_items_at_location {
-    my ($this, $tile, @o_lt) = @_;
+    my ($this, $tile, $x,$y ) = @_;
 
     my $options = [[ # column 1
         { mnemonic => "_Living: ",
@@ -766,7 +779,7 @@ sub edit_items_at_location {
 
     my $i = {};
     my %o_i;
-    for my $o ($this->[MQ]->objects_at_location(@o_lt)) {
+    for my $o ($this->[MQ]->objects_at_location($x,$y)) {
         my $k = $o->attr('var');
         my $c = $o->attr('color');
         my $C = sprintf('#%02x%02x%02x', @$c);
@@ -809,7 +822,7 @@ sub edit_items_at_location {
                 $ob->nonunique;
             }
 
-            $this->[MQ]->replace( $ob => @o_lt );
+            $this->[MQ]->replace( $ob => $x,$y );
         }
 
         $this->draw_map; # draw the map from scratch with the new objects
