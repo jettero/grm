@@ -48,10 +48,11 @@ our $default_restore_defaults = sub {
     };
 
 sub make_form {
-    my ($parent_window, $i, $options, $extra_buttons) = @_;
+    my ($parent_window, $i, $options, $title, $extra_buttons) = @_;
 
-    my $dialog = new Gtk2::Dialog("Map Generation Options", $parent_window, [], 'gtk-cancel' => "cancel", 'gtk-ok' => "ok");
     my $table = Gtk2::Table->new(scalar @{$options->[0]}*2, scalar @$options, FALSE);
+    my $dialog = new Gtk2::Dialog(($title||"Data Required"), $parent_window, [], 'gtk-cancel' => "cancel", 'gtk-ok' => "ok");
+       $dialog->set_default_response('ok');
 
     my $reref = {};
 

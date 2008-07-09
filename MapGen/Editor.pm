@@ -789,7 +789,7 @@ sub edit_items_at_location {
         $i->{'c' . $k} = $C;
     }
 
-    my ($result, $o) = make_form($this->[WINDOW], $i, $options);
+    my ($result, $o) = make_form($this->[WINDOW], $i, $options, "Objects at Location");
     if( $result eq "ok" ) {
 
         for my $k (grep {!m/^[uc]/} sort keys %$o) {
@@ -1198,7 +1198,7 @@ sub closure_door_properties {
             { mnemonic => "M_inor Direction: ", type => "choice", choices => $min, name => '_open_dir_minor', desc => "The final direction of the door swing.",   },
         ]];
 
-        my ($result, $o) = make_form($this->[WINDOW], $i, $options);
+        my ($result, $o) = make_form($this->[WINDOW], $i, $options, "Door Properties");
         next unless $result eq "ok";
         $c ++;
         $od->{$_} = $o->{$_} for qw(open locked secret stuck);
@@ -1793,7 +1793,7 @@ sub get_generate_opts {
         ],
     ];
 
-    my ($result, $o) = make_form($this->[WINDOW], $i, $options, $extra_buttons);
+    my ($result, $o) = make_form($this->[WINDOW], $i, $options, "Generate Map", $extra_buttons);
     if( $result eq "ok" ) {
         $i->{$_} = $o->{$_} for keys %$o;
         $this->[SETTINGS]{GENERATE_OPTS} = freeze $i;
@@ -1860,7 +1860,7 @@ sub render_settings {
        $i = thaw $i if $i;
        $i = {} unless $i;
 
-    my ($result, $o) = make_form($this->[WINDOW], $i, $options);
+    my ($result, $o) = make_form($this->[WINDOW], $i, $options, "Render Settings");
     return unless $result eq "ok";
 
     if($o->{cell_size} ne $i->{cell_size}) {
@@ -1897,7 +1897,7 @@ sub preferences {
           default  => 1 },
     ]];
 
-    my ($result, $o) = make_form($this->[WINDOW], $i, $options);
+    my ($result, $o) = make_form($this->[WINDOW], $i, $options, "Preferences");
     return unless $result eq "ok";
     $this->[SETTINGS]{$_} = $o->{$_} for keys %$o;
 }
