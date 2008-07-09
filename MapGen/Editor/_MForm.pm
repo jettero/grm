@@ -79,6 +79,7 @@ sub make_form {
 
                 $attach = $widget = new Gtk2::Entry;
                 $widget->set_text($d);
+                $widget->set_activates_default(TRUE);
 
                 $widget->set_tooltip_text( $item->{desc} ) if exists $item->{desc};
                 $widget->signal_connect(changed => sub {
