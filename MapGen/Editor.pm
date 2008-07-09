@@ -1052,7 +1052,11 @@ sub tileconvert_to_wall_tiles {
 
     # NOTE: The @_ passed to us is prefiltered by our {enable} from the context menu
 
+    my $mq = $this->[MQ];
+
     for my $tile (@_) {
+        $mq->remove( $_ ) for $mq->objects_at_location(@$tile{qw(x y)});
+
         delete $tile->{group};
         delete $tile->{type};
 
