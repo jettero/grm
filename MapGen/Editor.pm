@@ -505,7 +505,7 @@ sub read_file {
         for my $y (keys %{ $mqo{$x} }) {
         for my $o (@{$mqo{$x}{$y}}) {
             $mq->replace( $o => ($x,$y) );
-        }}}
+        }} }
     };
     $this->error($@) if $@;
     $pulser->('destroy');
