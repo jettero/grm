@@ -221,9 +221,27 @@ sub new {
     my $al    = Gtk2::Alignment->new(0.5,0.5,0,0);
     my $eb    = Gtk2::EventBox->new;
 
+    $eb->set_has_tooltip(TRUE);
+    $eb->signal_connect( query_tooltip => sub {
+        my ($widget, $x, $y, $keyboard_mode, $tooltip) = @_;
+
+        my @cs = split('x', $this->[MAP]{cell_size});
+        my @tc = (int($x/$cs[0]), int($y/$cs[1]));
+
+        return FALSE unless $this->[MQ]->_check_loc(\@tc);
+
+        my @o  = $this->[MQ]->objects_at_location(@tc);
+
+        return FALSE unless @o;
+
+        $tooltip->set_text("lawl: " . @o);
+
+        return TRUE;
+    });
+
     # This is so we can later determin the size of the viewport.
     $this->[VP_DIM] = my $dim = [];
-    $vp->signal_connect( 'size-allocate' => sub { my $r = $_[1]; $dim->[0] = $r->width; $dim->[1] = $r->height; 0; });
+    $vp->signal_connect( size_allocate => sub { my $r = $_[1]; $dim->[0] = $r->width; $dim->[1] = $r->height; 0; });
 
     my $sb = $this->[STAT] = new Gtk2::Statusbar; $sb->push(1,'');
 
