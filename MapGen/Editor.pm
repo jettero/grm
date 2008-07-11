@@ -2043,6 +2043,8 @@ sub run {
         $this->read_file($f) if -f $f;
     }
 
+    Glib::Idle->add(sub { warn "supz" });
+
     Gtk2->main;
 }
 # }}}
