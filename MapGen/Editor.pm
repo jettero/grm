@@ -25,6 +25,10 @@ use Storable qw(freeze thaw);
 use Data::Dump qw(dump);
 use POSIX qw(ceil);
 
+use POE::Component::Server::HTTP;
+use POE::Kernel {loop => "Glib"};
+use HTTP::Status;
+
 use Games::RolePlay::MapGen::MapQueue::Object;
 use Games::RolePlay::MapGen::MapQueue;
 use Games::RolePlay::MapGen::Editor::_MForm qw(make_form $default_restore_defaults);
@@ -2043,8 +2047,7 @@ sub run {
         $this->read_file($f) if -f $f;
     }
 
-    Glib::Idle->add(sub { warn "supz" });
-
+    POE::Kernel->run;
     Gtk2->main;
 }
 # }}}
