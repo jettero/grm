@@ -234,7 +234,11 @@ sub new {
 
         return FALSE unless @o;
 
-        $tooltip->set_text("lawl: " . @o);
+        $tooltip->set_text(
+            join("\n",
+             map { my $d = $_->[0]->desc; my $v = ($_->[1]=~ s/(\d+)$/ $1/ ? $_->[1] : "living"); "$v: $d" }
+            sort {$a->[-1] <=> $b->[-1] || $a->[1] cmp $b->[1] }
+             map {my $x= [$_, $_->attr('var')]; push @$x, ($x->[1]=~m/^l/?0:1); $x} @o) );
 
         return TRUE;
     });
@@ -2038,6 +2042,8 @@ sub run {
     if( $this->[SETTINGS]{LOAD_LAST} and my $f = $this->[SETTINGS]{LAST_FNAME} ) {
         $this->read_file($f) if -f $f;
     }
+
+    Glib::Idle->add(sub { warn "supz" });
 
     Gtk2->main;
 }
