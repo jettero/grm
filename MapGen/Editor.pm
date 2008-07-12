@@ -2050,6 +2050,9 @@ sub run {
     POE::Session->create(inline_states=>{_start=>sub{}}); # if this session doesn't exist, ...
     POE::Kernel->run; # ... we don't finish the POE run ...
     Gtk2->main; # ... so we never get here and the Gtk2->main_quit will generate an error
-    # also, we may possibly use the inline sessions for things at some point
+
+    # NOTE: is it smarter to let the POE::Kernel think it's finished and run under Gtk2->main?
+    # or is it smarter to leave the Kernel running and never call the Gtk2->main?
+    # Currently, we let the Kernel finish and run under Gtk2.
 }
 # }}}
