@@ -84,6 +84,7 @@ use constant {
                        #    [ [7, 7, "room"], ["Room #1", "(4, 3) 10x8"], ["s", ["ordinary", "door"]], ]
     O_DR      => $x++, # door info, [dir => desc], called O_DR since it's the "old" door.  really only used to invoke a 
                        #  reddraw of the cursors when there *was* a door (O_DR) and there *nolonger* is one
+    SERVER    => $x++, # the map server (if applicable) [port, PoCo::HTTPD, $ContentHandlerHashref]
     # }}}
 };
 
@@ -180,8 +181,11 @@ sub new {
                     callback    => sub { warn "forced redraw"; $this->draw_map; $this->draw_map_w_cursor },
                     accelerator => '<ctrl>R',
                 },
-                'Render _Settings'=> {
+                'R_ender Settings'=> {
                     callback    => sub { $this->render_settings },
+                },
+                'Server _Settings'=> {
+                    callback    => sub { $this->server_settings },
                 },
                 Separator => {
                     item_type => '<Separator>',
@@ -1843,8 +1847,11 @@ sub get_generate_opts {
 
     my ($result, $o) = make_form($this->[WINDOW], $i, $options, "Generate Map", $extra_buttons);
     if( $result eq "ok" ) {
-        $i->{$_} = $o->{$_} for keys %$o;
-        $this->[SETTINGS]{GENERATE_OPTS} = freeze $i;
+        # why?
+        # $i->{$_} = $o->{$_} for keys %$o;
+        # $this->[SETTINGS]{GENERATE_OPTS} = freeze $i;
+
+        $this->[SETTINGS]{GENERATE_OPTS} = freeze $o;
     }
 
     return ($result, $o);
@@ -1913,12 +1920,80 @@ sub render_settings {
 
     if($o->{cell_size} ne $i->{cell_size}) {
         $i->{cell_size} = $o->{cell_size};
-        $this->[SETTINGS]{GENERATE_OPTS} = freeze $i;
+        $this->[SETTINGS]{GENERATE_OPTS} = freeze $i; # here, we freeze $i because it has many more options than $o
     }
 
     if($o->{cell_size} ne $this->[MAP]{cell_size}) {
         $this->[MAP]{$_} = $i->{$_} = $o->{$_} for keys %$o;
         $this->draw_map;
+    }
+}
+# }}}
+# server_settings {{{
+sub server_settings {
+    my $this = shift;
+
+    my $options = [[
+        { mnemonic => "Enabled: ",
+          type     => "bool",
+          desc     => "Whether to listen.",
+          name     => 'listen',
+          default  => $this->[SERVER] ? 1:0,
+          matches  => [qr/^\d+$/] },
+        { mnemonic => "Server Port: ",
+          type     => "text",
+          desc     => "The port on which your server runs.",
+          name     => 'port',
+          default  => '4000',
+          matches  => [qr/^\d+$/] },
+
+        # TODO: We'll eventually want the bind port and default url as options
+    ]];
+
+    my $i = $this->[SETTINGS]{SERVER_OPTIONS};
+       $i = thaw $i if $i;
+       $i = {} unless $i;
+
+    my ($result, $o) = make_form($this->[WINDOW], $i, $options, "Server Settings");
+    return unless $result eq "ok";
+
+    my $diff = 0;
+    for my $k (keys %$o) {
+        next if $k eq "listen";
+        $diff ++ if $o->{$k} ne $i->{$k};
+    }
+    my $listen = delete $o->{'listen'};
+
+    $this->[SETTINGS]{SERVER_OPTIONS} = freeze $o if $diff;
+
+    if( $listen ) {
+        my $to_start = 1;
+        if( my $s = $this->[SERVER] ) {
+            if( $s->[0] ne $o->{port} ) {
+                POE::Kernel->call($s->[1]{httpd}, "shutdown");
+                delete $this->[SERVER];
+
+            } else {
+                $to_start = 0;
+            }
+        }
+
+        if( $to_start ) {
+            my $s = $this->[SERVER] = [
+                POE::Component::Server::HTTP->new(
+                    Port => $o->{port},
+                    Headers => { Server => 'My Server' },
+                    ContentHandler => (my $h = { '/' => sub { $this->http_root_handler }}))
+            ];
+
+            $s->[2] = $h;
+        }
+
+    } else {
+        if( my $s = $this->[SERVER] ) {
+            POE::Kernel->call($s->[1]{httpd}, "shutdown");
+            delete $this->[SERVER];
+        }
     }
 }
 # }}}
