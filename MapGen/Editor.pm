@@ -2047,7 +2047,9 @@ sub run {
         $this->read_file($f) if -f $f;
     }
 
-    POE::Kernel->run;
-    Gtk2->main;
+    POE::Session->create(inline_states=>{_start=>sub{}}); # if this session doesn't exist, ...
+    POE::Kernel->run; # ... we don't finish the POE run ...
+    Gtk2->main; # ... so we never get here and the Gtk2->main_quit will generate an error
+    # also, we may possibly use the inline sessions for things at some point
 }
 # }}}
