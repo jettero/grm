@@ -1986,9 +1986,9 @@ sub server_settings {
                     Port => $o->{port},
                     Headers => { Server => 'GRM Server' },
                     ContentHandler => ({
-                        '/'   => sub { $this->http_root_handler($s->[3], @_) },
-                        '/s/' => sub { $this->http_status_handler($s->[3], @_) },
-                        '/c/' => sub { $this->http_comment_handler($s->[3], @_) },
+                        '/'   => sub {warn "wtf?1"; $this->http_root_handler($s->[2], @_) },
+                        '/s/' => sub {warn "wtf?1"; $this->http_status_handler($s->[2], @_) },
+                        '/c/' => sub {warn "wtf?1"; $this->http_comment_handler($s->[2], @_) },
                         })
                 ),
                 my $w = Gtk2::Window->new('toplevel'),
@@ -2063,6 +2063,53 @@ sub preferences {
     my ($result, $o) = make_form($this->[WINDOW], $i, $options, "Preferences");
     return unless $result eq "ok";
     $this->[SETTINGS]{$_} = $o->{$_} for keys %$o;
+}
+# }}}
+
+# SERVER FUNCTIONS
+# http_root_handler {{{
+sub http_root_handler {
+    my ($this, $l, $request, $response) = @_;
+
+    my $uri  = $request->uri; # request is an HTTP::Request (and a little more)
+    my $path = $uri->path;    # uri is an URI object
+
+    $l->("request for $path");
+
+    $response->code(RC_OK);
+    $response->content("Hi, you fetched $uri\n");
+
+    return RC_OK;   
+}
+# }}}
+# http_status_handler {{{
+sub http_status_handler {
+    my ($this, $l, $request, $response) = @_;
+
+    my $uri  = $request->uri; # request is an HTTP::Request (and a little more)
+    my $path = $uri->path;    # uri is an URI object
+
+    $l->("request for $path");
+
+    $response->code(RC_OK);
+    $response->content("Hi, you fetched $uri\n");
+
+    return RC_OK;   
+}
+# }}}
+# http_comment_handler {{{
+sub http_comment_handler {
+    my ($this, $l, $request, $response) = @_;
+
+    my $uri  = $request->uri; # request is an HTTP::Request (and a little more)
+    my $path = $uri->path;    # uri is an URI object
+
+    $l->("request for $path");
+
+    $response->code(RC_OK);
+    $response->content("Hi, you fetched $uri\n");
+
+    return RC_OK;   
 }
 # }}}
 
