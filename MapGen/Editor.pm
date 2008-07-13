@@ -1986,9 +1986,9 @@ sub server_settings {
                     Port => $o->{port},
                     Headers => { Server => 'GRM Server' },
                     ContentHandler => ({
-                        '/'   => sub {warn "wtf?1"; $this->http_root_handler($s->[2], @_) },
-                        '/s/' => sub {warn "wtf?1"; $this->http_status_handler($s->[2], @_) },
-                        '/c/' => sub {warn "wtf?1"; $this->http_comment_handler($s->[2], @_) },
+                        '/'   => sub { $this->http_root_handler($s->[2], @_) },
+                        '/s/' => sub { $this->http_status_handler($s->[2], @_) },
+                        '/c/' => sub { $this->http_comment_handler($s->[2], @_) },
                         })
                 ),
                 my $w = Gtk2::Window->new('toplevel'),
@@ -2007,6 +2007,7 @@ sub server_settings {
             $tv->set_wrap_mode("none");
             $tv->set_cursor_visible(FALSE);
 
+            my $vsa = $scwin->get_vscrollbar;
             my $b = $tv->get_buffer;
             my $l = sub {
                 my $ent = shift;
@@ -2015,6 +2016,8 @@ sub server_settings {
                    $ent .= "\n";
 
                 $b->insert($b->get_end_iter, localtime() . ": $ent");
+                my $u = $vsa->get_adjustment->upper;
+                $vsa->set_value($u);
             };
             push @$s, $l;
 
