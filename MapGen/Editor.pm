@@ -1981,14 +1981,14 @@ sub server_settings {
         }
 
         if( $to_start ) {
-            my $s = $this->[SERVER] = [
+            my $s; $s = $this->[SERVER] = [
                 POE::Component::Server::HTTP->new(
                     Port => $o->{port},
                     Headers => { Server => 'GRM Server' },
                     ContentHandler => ({
-                        '/'   => sub { $this->http_root_handler(@_) },
-                        '/s/' => sub { $this->http_status_handler(@_) },
-                        '/c/' => sub { $this->http_comment_handler(@_) },
+                        '/'   => sub { $this->http_root_handler($s->[3], @_) },
+                        '/s/' => sub { $this->http_status_handler($s->[3], @_) },
+                        '/c/' => sub { $this->http_comment_handler($s->[3], @_) },
                         })
                 ),
                 my $w = Gtk2::Window->new('toplevel'),
@@ -2001,8 +2001,30 @@ sub server_settings {
             $w->add(my $vbox = Gtk2::VBox->new);
             $vbox->add(my $scwin = Gtk2::ScrolledWindow->new);
             $scwin->set_policy('automatic', 'automatic');
-            # NOTE: add something here, duh...
+            $scwin->add(my $tv = Gtk2::TextView->new);
 
+            $tv->set_editable(FALSE);
+            $tv->set_wrap_mode("none");
+            $tv->set_cursor_visible(FALSE);
+
+            my $b = $tv->get_buffer;
+            my $l = sub {
+                my $ent = shift;
+                   $ent =~ s/[\r\n]/ /g;
+                   $ent =~ s/\s{2,}/ /g;
+                   $ent .= "\n";
+
+                $b->insert($b->get_end_iter, localtime() . ": $ent");
+            };
+            push @$s, $l;
+
+            $l->("server started on port $o->{port}");
+
+            $w->signal_connect( delete_event => sub {
+                POE::Kernel->call($s->[1]{httpd}, "shutdown");
+                delete $this->[SERVER];
+                FALSE; # this apparently can't return true
+            });
             $w->show_all;
         }
 
