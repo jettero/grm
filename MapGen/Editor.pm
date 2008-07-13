@@ -84,7 +84,7 @@ use constant {
                        #    [ [7, 7, "room"], ["Room #1", "(4, 3) 10x8"], ["s", ["ordinary", "door"]], ]
     O_DR      => $x++, # door info, [dir => desc], called O_DR since it's the "old" door.  really only used to invoke a 
                        #  reddraw of the cursors when there *was* a door (O_DR) and there *nolonger* is one
-    SERVER    => $x++, # the map server (if applicable) [port, PoCo::HTTPD, $ContentHandlerHashref]
+    SERVER    => $x++, # the map server (if applicable) [port, PoCo::HTTPD]
     # }}}
 };
 
@@ -186,6 +186,7 @@ sub new {
                 },
                 'Server _Settings'=> {
                     callback    => sub { $this->server_settings },
+                    accelerator => '<ctrl>T',
                 },
                 Separator => {
                     item_type => '<Separator>',
@@ -1971,6 +1972,7 @@ sub server_settings {
         if( my $s = $this->[SERVER] ) {
             if( $s->[0] ne $o->{port} ) {
                 POE::Kernel->call($s->[1]{httpd}, "shutdown");
+                $s->[2]->destroy;
                 delete $this->[SERVER];
 
             } else {
@@ -1982,16 +1984,32 @@ sub server_settings {
             my $s = $this->[SERVER] = [
                 POE::Component::Server::HTTP->new(
                     Port => $o->{port},
-                    Headers => { Server => 'My Server' },
-                    ContentHandler => (my $h = { '/' => sub { $this->http_root_handler }}))
+                    Headers => { Server => 'GRM Server' },
+                    ContentHandler => ({
+                        '/'   => sub { $this->http_root_handler(@_) },
+                        '/s/' => sub { $this->http_status_handler(@_) },
+                        '/c/' => sub { $this->http_comment_handler(@_) },
+                        })
+                ),
+                my $w = Gtk2::Window->new('toplevel'),
             ];
+          # $w->set_destroy_with_parent(TRUE);
+          # $w->set_transient_for($this->[WINDOW]);
+            $w->set_title("GRM Server");
+            $w->set_size_request(500,200);
+            $w->set_position('center');
+            $w->add(my $vbox = Gtk2::VBox->new);
+            $vbox->add(my $scwin = Gtk2::ScrolledWindow->new);
+            $scwin->set_policy('automatic', 'automatic');
+            # NOTE: add something here, duh...
 
-            $s->[2] = $h;
+            $w->show_all;
         }
 
     } else {
         if( my $s = $this->[SERVER] ) {
             POE::Kernel->call($s->[1]{httpd}, "shutdown");
+            $s->[2]->destroy;
             delete $this->[SERVER];
         }
     }
