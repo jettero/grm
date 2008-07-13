@@ -1999,15 +1999,14 @@ sub server_settings {
             $w->set_size_request(500,200);
             $w->set_position('center');
             $w->add(my $vbox = Gtk2::VBox->new);
-            $vbox->add(my $scwin = Gtk2::ScrolledWindow->new);
-            $scwin->set_policy('automatic', 'automatic');
+            $vbox->add(my $scwin = Gtk2::ScrolledWindow->new); # ($tv->get_focus_hadjustment, $tv->get_focus_vadjustment)
             $scwin->add(my $tv = Gtk2::TextView->new);
+            $scwin->set_policy('automatic', 'automatic');
 
             $tv->set_editable(FALSE);
             $tv->set_wrap_mode("none");
             $tv->set_cursor_visible(FALSE);
 
-            my $vsa = $scwin->get_vscrollbar;
             my $b = $tv->get_buffer;
             my $l = sub {
                 my $ent = shift;
@@ -2016,8 +2015,7 @@ sub server_settings {
                    $ent .= "\n";
 
                 $b->insert($b->get_end_iter, localtime() . ": $ent");
-                my $u = $vsa->get_adjustment->upper;
-                $vsa->set_value($u);
+                $tv->scroll_to_iter($b->get_end_iter, FALSE,FALSE, 0,0);
             };
             push @$s, $l;
 
