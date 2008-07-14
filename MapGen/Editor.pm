@@ -1972,7 +1972,7 @@ sub server_settings {
         if( my $s = $this->[SERVER] ) {
             if( $s->[0] ne $o->{port} ) {
                 POE::Kernel->call($s->[1]{httpd}, "shutdown");
-                $s->[2]->destroy;
+                $s->[1]->destroy;
                 delete $this->[SERVER];
 
             } else {
@@ -2014,8 +2014,9 @@ sub server_settings {
                    $ent =~ s/\s{2,}/ /g;
                    $ent .= "\n";
 
-                $b->insert($b->get_end_iter, localtime() . ": $ent");
                 $tv->scroll_to_iter($b->get_end_iter, FALSE,FALSE, 0,0);
+                Gtk2->main_iteration while Gtk2->events_pending;
+                $b->insert($b->get_end_iter, localtime() . ": $ent");
             };
             push @$s, $l;
 
@@ -2032,7 +2033,7 @@ sub server_settings {
     } else {
         if( my $s = $this->[SERVER] ) {
             POE::Kernel->call($s->[1]{httpd}, "shutdown");
-            $s->[2]->destroy;
+            $s->[1]->destroy;
             delete $this->[SERVER];
         }
     }
