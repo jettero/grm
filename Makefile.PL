@@ -19,12 +19,36 @@ unless( -f "xmllint.res" ) {
     print "and the test just isn't that important anyway. (Skipping.)\n\n";
 }
 
+my @editor_prereqs = (
+    'Gtk2'                         => 0,
+    'Gtk2::Ex::Dialogs'            => 0,
+    'Gtk2::Ex::Simple::Menu'       => 0,
+    Storable                       => 0,
+    'Data::Dump'                   => 0,
+    'HTTP::Status'                 => 0,
+    POE                            => 0,
+    'POE::Component::Server::HTTP' => 0,
+    GD                             => 0,
+);
+
+my $include_editor_prereqs = 1;
+
+unless( -f "MANIFEST.SKIP" ) {
+    print "Include pre-reqs for the Editor (Gtk2, POE, GD, et al) [N/y]? ";
+    my $res = <STDIN>;
+    $include_editor_prereqs = 0 unless $res =~ m/[Yy]/;
+}
+
+@editor_prereqs = () unless $include_editor_prereqs;
+
 WriteMakefile(
     'NAME'         => 'Games::RolePlay::MapGen',
     'VERSION_FROM' => 'MapGen.pm',
 
     'PREREQ_PM'     => { 
         'version' => 0,
+
+        @editor_prereqs,
 
         'Software::License::LGPL_2_1' => 0,
         'Math::Round' => 0,
