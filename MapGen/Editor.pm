@@ -1967,13 +1967,15 @@ sub server_settings {
 
     $this->[SETTINGS]{SERVER_OPTIONS} = freeze $o if $diff;
 
+    our @__old_servers;
+
     if( $listen ) {
         my $to_start = 1;
         if( my $s = $this->[SERVER] ) {
             if( $s->[0] ne $o->{port} ) {
                 POE::Kernel->call($s->[1]{httpd}, "shutdown");
                 $s->[1]->destroy;
-                delete $this->[SERVER];
+                push @__old_servers, delete $this->[SERVER];
 
             } else {
                 $to_start = 0;
@@ -2024,7 +2026,7 @@ sub server_settings {
 
             $w->signal_connect( delete_event => sub {
                 POE::Kernel->call($s->[1]{httpd}, "shutdown");
-                delete $this->[SERVER];
+                push @__old_servers, delete $this->[SERVER];
                 FALSE; # this apparently can't return true
             });
             $w->show_all;
@@ -2034,7 +2036,7 @@ sub server_settings {
         if( my $s = $this->[SERVER] ) {
             POE::Kernel->call($s->[1]{httpd}, "shutdown");
             $s->[1]->destroy;
-            delete $this->[SERVER];
+            push @__old_servers, delete $this->[SERVER];
         }
     }
 }
