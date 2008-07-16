@@ -186,6 +186,10 @@ Games::RolePlay::MapGen::Generator::XMLImport - Slurp up XML map data into MapGe
     $map->set_generator( "XMLImport" );
     $map->generate( xml_input_file => "map.xml" );
 
+The MapGen base object also knows a shortcut to perform the above:
+
+    my $map = Games::RolePlay::MapGen->import_xml("map.xml"); 
+
 =head1 SEE ALSO
 
 Games::RolePlay::MapGen
