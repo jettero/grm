@@ -16,6 +16,19 @@ sub genmap {
     my $map    = [];
     my $groups = [];
 
+    my @X = ( sort {$a<=>$b} ($opts->{upper_left}[0], $opts->{lower_right}[0]) );
+    my @Y = ( sort {$a<=>$b} ($opts->{upper_left}[1], $opts->{lower_right}[1]) );
+
+    for my $x ( 0 .. $X[1]+2 ) {
+        my $y = 0;       $map->[ $y ][ $x ] = &_tile( x=>$x, y=>$y, type=>'fog' );
+           $y = $Y[1]+2; $map->[ $y ][ $x ] = &_tile( x=>$x, y=>$y, type=>'fog' );
+    }
+
+    for my $y ( 1 .. $Y[1]+1 ) {
+        my $x = 0;       $map->[ $y ][ $x ] = &_tile( x=>$x, y=>$y, type=>'fog' );
+           $x = $X[1]+2; $map->[ $y ][ $x ] = &_tile( x=>$x, y=>$y, type=>'fog' );
+    }
+
     return ($map, $groups);
 }
 

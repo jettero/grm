@@ -269,7 +269,19 @@ sub import_xml {
 
     $this->set_generator( "XMLImport" );
     $this->generate( xml_input_file => $that, @_ ); 
+    $this;
+}
+# }}}
+# sub_map {{{
+sub sub_map {
+    my $this = shift;
+    my $that = shift; croak "that's not a map" unless ref $map;
+    my $ul   = shift; croak "upper left should be an arrayref two tuple" unless 2==eval {@$ul};
+    my $lr   = shift; croak "lower right should be an arrayref two tuple" unless 2==eval {@$lr};
 
+    $this = $this->new unless ref $this;
+    $this->set_generator( "SubMap" );
+    $this->generate( map_input => $that, upper_left=>$ul, lower_right=>$lr );
     $this;
 }
 # }}}
