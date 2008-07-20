@@ -145,10 +145,19 @@ sub genmap {
 
             } elsif( $t->{type} eq "fog" ) {
                 my ($_xm, $_ym) = (0,0);
-                $_xm -- if $t->{nb}{w}{type} and $t->{nb}{w}{type} eq "fog";
-                $_ym -- if $t->{nb}{n}{type} and $t->{nb}{n}{type} eq "fog";
+                my ($_Xm, $_Ym) = (0,0);
 
-                $gd->filledRectangle( $xp+$B+$_xm, $yp+$B+$_ym => $Xp-$B, $Yp-$B, $fog_tile_color );
+                $_xm -- if (my $wf = ($t->{nb}{w}{type} and $t->{nb}{w}{type} eq "fog"));
+                $_ym -- if (my $nf = ($t->{nb}{n}{type} and $t->{nb}{n}{type} eq "fog"));
+                            my $ef = ($t->{nb}{e}{type} and $t->{nb}{e}{type} eq "fog");
+                            my $sf = ($t->{nb}{s}{type} and $t->{nb}{s}{type} eq "fog");
+
+                $_xm += 3 if not $wf and $t->{od}{w};
+                $_ym += 3 if not $nf and $t->{od}{n};
+                $_Xm -= 3 if not $ef and $t->{od}{e};
+                $_Ym -= 3 if not $sf and $t->{od}{s};
+
+                $gd->filledRectangle( $xp+$B+$_xm, $yp+$B+$_ym => $Xp-$B+$_Xm, $Yp-$B+$_Ym, $fog_tile_color );
 
             } elsif( $t->{type} eq "corridor" ) {
                 $gd->filledRectangle( $xp+$B, $yp+$B => $Xp-$B, $Yp-$B, $corridor_color );
