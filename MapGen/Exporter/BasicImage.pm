@@ -78,6 +78,7 @@ sub genmap {
     my $door_arc_color     = $lgrey;
     my $door_color         = $brown;
     my $wall_color         = $black;
+    my $fog_tile_color     = $lgrey;  # fog-tile color
     my $wall_tile_color    = $dgrey;  # wall-tile color
     my $corridor_color     = $white;  # corridor-tile color
     my $open_color1        = $elgrey; # tile edges
@@ -141,8 +142,15 @@ sub genmap {
 
             if( not $t->{type} ) {
                 $gd->filledRectangle( $xp+$B, $yp+$B => $Xp-$B, $Yp-$B, $wall_tile_color );
-            }
-            elsif( $t->{type} eq "corridor" ) {
+
+            } elsif( $t->{type} eq "fog" ) {
+                my ($_xm, $_ym) = (0,0);
+                $_xm -- if $t->{nb}{w}{type} and $t->{nb}{w}{type} eq "fog";
+                $_ym -- if $t->{nb}{n}{type} and $t->{nb}{n}{type} eq "fog";
+
+                $gd->filledRectangle( $xp+$B+$_xm, $yp+$B+$_ym => $Xp-$B, $Yp-$B, $fog_tile_color );
+
+            } elsif( $t->{type} eq "corridor" ) {
                 $gd->filledRectangle( $xp+$B, $yp+$B => $Xp-$B, $Yp-$B, $corridor_color );
             }
 

@@ -67,19 +67,6 @@ sub genmap {
     }}
 
     $map = new Games::RolePlay::MapGen::_interconnected_map( $map );
-     
-    for my $row (@$map) {
-        for my $tile (@$row) {
-            next unless $tile and exists $tile->{type} and $tile->{type} eq "fog";
-            for my $d (qw(n w)) {
-                if( my $n = $tile->{nb}{$d} ) {
-                    next unless $n and exists $n->{type} and $n->{type} eq "fog";
-                    my $o = $Games::RolePlay::MapGen::opp{$d};
-                    $n->{od}{$o} = $tile->{od}{$d} = 1;
-                }
-            }
-        }
-    }
 
     return ($map, $groups);
 }
