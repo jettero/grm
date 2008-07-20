@@ -275,7 +275,7 @@ sub import_xml {
 # sub_map {{{
 sub sub_map {
     my $this = shift;
-    my $that = shift; croak "that's not a map" unless ref $map;
+    my $that = shift; croak "that's not a map" unless ref $that;
     my $ul   = shift; croak "upper left should be an arrayref two tuple" unless 2==eval {@$ul};
     my $lr   = shift; croak "lower right should be an arrayref two tuple" unless 2==eval {@$lr};
 
