@@ -1,4 +1,3 @@
-# vi:tw=0 syntax=perl:
 
 package Games::RolePlay::MapGen::Exporter::PNG;
 
