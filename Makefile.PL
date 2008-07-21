@@ -19,6 +19,11 @@ unless( -f "xmllint.res" ) {
     print "and the test just isn't that important anyway. (Skipping.)\n\n";
 }
 
+my @image_exporters = (
+    GD        => 0,
+    'GD::SVG' => 0,
+);
+
 my @editor_prereqs = (
     'Gtk2'                         => 0,
     'Gtk2::Ex::Dialogs'            => 0,
@@ -28,18 +33,21 @@ my @editor_prereqs = (
     'HTTP::Status'                 => 0,
     POE                            => 0,
     'POE::Component::Server::HTTP' => 0,
-    GD                             => 0,
+    @image_exporters,
 );
 
-my $include_editor_prereqs = 1;
+my @to_add;
+unless( -f "MANIFEST.SKIP" ) {
+    print "Include pre-reqs for the Image Exporters (GD, GD::SVG, etc) [N/y]? ";
+    my $res = <STDIN>;
+    push @to_add, @image_exporters if $res =~ m/[Yy]/;
+}
 
 unless( -f "MANIFEST.SKIP" ) {
     print "Include pre-reqs for the Editor (Gtk2, POE, GD, et al) [N/y]? ";
     my $res = <STDIN>;
-    $include_editor_prereqs = 0 unless $res =~ m/[Yy]/;
+    push @to_add, @editor_prereqs if $res =~ m/[Yy]/;
 }
-
-@editor_prereqs = () unless $include_editor_prereqs;
 
 WriteMakefile(
     'NAME'         => 'Games::RolePlay::MapGen',
@@ -48,7 +56,7 @@ WriteMakefile(
     'PREREQ_PM'     => { 
         'version' => 0,
 
-        @editor_prereqs,
+        @to_add,
 
         'Software::License::LGPL_2_1' => 0,
         'Math::Round' => 0,
