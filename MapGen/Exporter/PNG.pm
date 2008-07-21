@@ -59,7 +59,7 @@ sub genmap {
 
     $this->gen_cell_size($opts);
 
-    my $gd    = new GD::Image(1+($opts->{x_size} * @{$map->[0]}), 1+($opts->{y_size} * @$map));
+    my $gd     = new GD::Image(1+($opts->{x_size} * @{$map->[0]}), 1+($opts->{y_size} * @$map));
 
     my $white  = $gd->colorAllocate(0xff, 0xff, 0xff);
     my $black  = $gd->colorAllocate(0x00, 0x00, 0x00);
