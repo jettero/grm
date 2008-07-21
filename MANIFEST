@@ -26,6 +26,7 @@ MapGen/GeneratorPlugin/BasicDoors.pm
 MapGen/Generator.pm
 MapGen/Exporter/Text.pm
 MapGen/Exporter/PNG.pm
+MapGen/Exporter/SVG.pm
 MapGen/Exporter/XML.pm
 t/08_interconnects.t
 t/08_xmlinter.t

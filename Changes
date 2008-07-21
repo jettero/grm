@@ -1,5 +1,7 @@
 1.3.4: Sun Jul 20 20:20:03 EDT 2008
    - I created the new sub-map generator
+   - I renamed BasicImage to PNG
+   - I created the SVG exporter.
 
 1.3.3: Mon Jul 14th
    - I got the preliminary POE HTTP server
