@@ -1,6 +1,6 @@
 # vi:tw=0 syntax=perl:
 
-package Games::RolePlay::MapGen::Exporter::BasicImage;
+package Games::RolePlay::MapGen::Exporter::PNG;
 
 use strict;
 use Carp;
@@ -354,7 +354,7 @@ __END__
 
 =head1 NAME
 
-Games::RolePlay::MapGen::Exporter::BasicImage - A pure text mapgen exporter.
+Games::RolePlay::MapGen::Exporter::PNG - A pure text mapgen exporter.
 
 =head1 SYNOPSIS
 

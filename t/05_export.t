@@ -28,7 +28,7 @@ if( $@ ) {
     ok( 1 ); # this should probably be a skip() instead... meh
 
 } else {
-    set_exporter $map("BasicImage");
+    set_exporter $map("PNG");
     export $map("map.png"); 
     ok( -f "map.png" );
 }

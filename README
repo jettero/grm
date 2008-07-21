@@ -15,5 +15,5 @@ SYNOPSIS
     $map->add_generator_plugin("BasicDoors"); # however, you must add the doors.
     generate $map("map.txt");                 # It'll generate a text map by default.
 
-    $map->set_exporter( "BasicImage" );       # But a graphical map is probably more useful.
+    $map->set_exporter( "PNG" );              # But a graphical map is probably more useful.
     export $map("map.png");

@@ -10,10 +10,10 @@ Games::RolePlay::MapGen - The base object for generating dungeons and maps
     $map->add_generator_plugin("BasicDoors"); # however, you must add the doors.
     $map->generate("map.txt");                # It'll generate a text map by default.
 
-    $map->set_exporter( "BasicImage" );       # But a graphical map is probably more useful.
+    $map->set_exporter( "PNG" );              # But a graphical map is probably more useful.
     $map->export("map.png");
 
-Here are some screenshots of the BasicImage and XML exporters:
+Here are some screenshots of the PNG and XML exporters:
 
 L<http://voltar.org/PerlModules/vis1.map.png>
 
@@ -98,7 +98,7 @@ This means you can have a wall between two open tiles, making the text output
 difficult to draw and to interpret.  Fortunately, we can set the exporter to
 dump in png format.
   
-  $map->set_exporter( "BasicImage" );
+  $map->set_exporter( "PNG" );
   $map->export( "map.png" );
 
 The png exports should be a lot easier to read.  But there's one more way to

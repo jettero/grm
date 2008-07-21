@@ -18,7 +18,7 @@ $map->generate;
 plan tests => ( 3*4 * $x*$y );
 
 if( 0 ) {
-    $map->set_exporter( "BasicImage" );
+    $map->set_exporter( "PNG" );
     $map->export("map.png");
     print STDERR " saved map.png\n";
 }

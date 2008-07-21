@@ -461,7 +461,7 @@ sub save_image_as {
         my $pulser = $this->pulser( "Saving $fname ...", "File I/O", 150 );
         my $map = $this->[MAP];
         eval {
-            $map->set_exporter( "BasicImage" );
+            $map->set_exporter( "PNG" );
             $map->export( fname => $fname, t_cb => $pulser );
         };
         $this->error($@) if $@;
@@ -660,7 +660,7 @@ sub draw_map {
     $this->[SEL_S] = $this->[SEL_E] = $this->[SELECTION] = $this->[O_DR] = $this->[S_ARG] = undef;
     @{$this->[O_LT]}=(); # this clears the pointer whole-tile highlight
 
-    $map->set_exporter( "BasicImage" );
+    $map->set_exporter( "PNG" );
     my $image = $map->export( -retonly );
 
     $this->draw_mapqueue_objects( $image );
