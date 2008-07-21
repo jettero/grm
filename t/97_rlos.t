@@ -4,7 +4,7 @@ use Test;
 use Games::RolePlay::MapGen;
 use Games::RolePlay::MapGen::MapQueue;
 
-print STDERR " [xml]";
+print STDERR "        [xml]       ";
 my $map   = Games::RolePlay::MapGen->import_xml( "vis1.map.xml" ); 
 my $queue = Games::RolePlay::MapGen::MapQueue->new( $map );
 
