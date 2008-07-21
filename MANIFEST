@@ -58,3 +58,4 @@ MapGen/MapQueue.pod
 MapGen/MapQueue/Object.pm
 t/99_mqo.t
 MapGen/Generator/SubMap.pm
+t/a0_submap.t
