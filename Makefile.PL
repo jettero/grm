@@ -37,17 +37,19 @@ my @editor_prereqs = (
 );
 
 my @to_add;
-unless( -f "MANIFEST.SKIP" ) {
-    print "Include pre-reqs for the Image Exporters (GD, GD::SVG, etc) [N/y]? ";
-    my $res = <STDIN>;
+    my $res = "y";
+    unless( -f "MANIFEST.SKIP" ) {
+        print "Include pre-reqs for the Image Exporters (GD, GD::SVG, etc) [N/y]? ";
+        $res = <STDIN>;
+    }
     push @to_add, @image_exporters if $res =~ m/[Yy]/;
-}
 
-unless( -f "MANIFEST.SKIP" ) {
-    print "Include pre-reqs for the Editor (Gtk2, POE, GD, et al) [N/y]? ";
-    my $res = <STDIN>;
+    my $res = "y";
+    unless( -f "MANIFEST.SKIP" ) {
+        print "Include pre-reqs for the Editor (Gtk2, POE, GD, et al) [N/y]? ";
+        $res = <STDIN>;
+    }
     push @to_add, @editor_prereqs if $res =~ m/[Yy]/;
-}
 
 WriteMakefile(
     'NAME'         => 'Games::RolePlay::MapGen',
