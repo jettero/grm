@@ -13,6 +13,8 @@ if( (system(@cmd, 'xmllint.test/map.xml') == 0) and (system(@cmd, 'xmllint.test/
 }
 open STDERR, ">&OLDERR" or die "unable to reopen STDERR: $!";
 
+system(bash => "make_svg") and die if -f "make_svg";
+
 unless( -f "xmllint.res" ) {
 
     print "\n\nYour xmllint doesn't seem to work quite like the author's\n";
