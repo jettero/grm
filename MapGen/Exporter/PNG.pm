@@ -1,3 +1,4 @@
+# vi:set filetype=perl:
 
 package Games::RolePlay::MapGen::Exporter::PNG;
 
