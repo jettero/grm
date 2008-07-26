@@ -104,6 +104,26 @@ sub genmap {
 
     $gd->interlaced('true');
 
+    GRID: {
+        my $x = @{$map->[0]}*$opts->{x_size};
+        my $y;
+
+        for my $i (0 .. @$map) {
+            $y = $i*$opts->{y_size};
+
+            $gd->line( (0, $y) => ($x, $y) => $wall_color );
+        }
+
+        $y = @$map*$opts->{y_size};
+        for my $i (0 .. @{$map->[0]}) {
+            $x = $i*$opts->{x_size};
+
+            my $r = $gd->line( ($x, 0) => ($x, $y) => $wall_color );
+        }
+
+        return $gd;
+    }
+
     for my $i (0 .. $#$map) {
         my $jend = $#{$map->[$i]};
 
