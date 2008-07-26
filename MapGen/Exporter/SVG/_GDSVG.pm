@@ -1,6 +1,9 @@
+# vi:filetype=perl:
+
 package Games::RolePlay::MapGen::Exporter::SVG::_GDSVG;
 
 # NOTE: ALL of this code is ripped from GD::SVG v0.28
+# - I removed all the font placement code, the exporters, and various constants
 
 use strict;
 use Carp;
@@ -94,7 +97,7 @@ sub new {
   # black This, for the most part, works for Bio::Graphics. This
   # certainly needs to be fixed...
   $this->{foreground} = $this->colorAllocate(0,0,0);
-  $this->{debug} = ($debug) ? $debug : Games::RolePlay::MapGen::Exporter::SVG::_GDSVG::DEBUG;
+  $this->{debug} = 0;
   return $this;
 }
 
@@ -695,63 +698,11 @@ sub _transform_coords {
   return ($newx,$newy);
 }
 
-
-
 ##################################################
 # Image Transformation Methods
 ##################################################
 
 # None implemented
-
-##################################################
-# Character And String Drawing
-##################################################
-sub string {
-  my ($self,$font_obj,$x,$y,$text,$color_index) = @_;
-  my $img = $self->{img};
-  my $id = $self->_create_id($x,$y);
-  my $formatting = $font_obj->formatting();
-  my $color = $self->_get_color($color_index);
-  my $result =
-    $img->text(
-	       id=>$id,
-	       x=>$x,
-	       y=>$y + $font_obj->{height} - Games::RolePlay::MapGen::Exporter::SVG::_GDSVG::TEXT_KLUDGE,
-	       %$formatting,
-	       fill      => $color,
-	      )->cdata($text);
-  return $result;
-}
-
-sub stringUp {
-  my ($self,$font_obj,$x,$y,$text,$color_index) = @_;
-  my $img = $self->{img};
-  my $id = $self->_create_id($x,$y);
-  my $formatting = $font_obj->formatting();
-  my $color = $self->_get_color($color_index);
-  $x += $font_obj->height;
-  my $result =
-    $img->text(
-	       id=>$id,
-	       %$formatting,
-	       'transform' => "translate($x,$y) rotate(-90)",
-	       fill      => $color,
-	      )->cdata($text);
-}
-
-sub char {
-  my ($self,@rest) = @_;
-  $self->string(@rest);
-}
-
-sub charUp {
-  my ($self,@rest) = @_;
-  $self->stringUp(@rest);
-}
-
-# Replicating the TrueType handling
-#sub Games::RolePlay::MapGen::Exporter::SVG::_GDImage::stringFT { shift->_error('stringFT'); }
-
 
 ##################################################
 # Alpha Channels
@@ -938,18 +889,11 @@ sub formatting {
   return \%format;
 }
 
-sub Tiny  { return Games::RolePlay::MapGen::Exporter::SVG::_GDSVG::gdTinyFont; }
-sub Small { return Games::RolePlay::MapGen::Exporter::SVG::_GDSVG::gdSmallFont; }
-sub MediumBold { return Games::RolePlay::MapGen::Exporter::SVG::_GDSVG::gdMediumBoldFont; }
-sub Large { return Games::RolePlay::MapGen::Exporter::SVG::_GDSVG::gdLargeFont; }
-sub Giant { return Games::RolePlay::MapGen::Exporter::SVG::_GDSVG::gdGiantFont; }
-
 sub _error {
   my ($self,$method) = @_;
   Games::RolePlay::MapGen::Exporter::SVG::_GDSVG::Image->_error($method);
 }
 
 sub DESTROY { }
-
 
 1;
