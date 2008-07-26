@@ -102,8 +102,6 @@ sub genmap {
     my $or = deg2rad( $do );
     my $sr = sin( $or ); # we'll be using this, kthx...
 
-    $gd->interlaced('true');
-
     GRID: {
         my $x = @{$map->[0]}*$opts->{x_size};
         my $y;
