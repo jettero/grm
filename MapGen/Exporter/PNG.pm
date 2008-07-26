@@ -123,14 +123,7 @@ sub genmap {
 
             $opts->{t_cb}->() if exists $opts->{t_cb};
 
-            $gd->line( $xp, $yp => $Xp, $yp, $wall_color );
-            $gd->line( $xp, $Yp => $Xp, $Yp, $wall_color );
-            $gd->line( $Xp, $yp => $Xp, $Yp, $wall_color );
-            $gd->line( $xp, $yp => $xp, $Yp, $wall_color );
-
             $gd->line( $xp+$L, $yp     => $Xp-$L, $yp,    $open_color1 ) if $t->{od}{n} == 1; # == 1 doesn't match doors...
-            $gd->line( $xp+$L, $Yp     => $Xp-$L, $Yp,    $open_color1 ) if $t->{od}{s} == 1;
-            $gd->line( $Xp,    $yp+$L, => $Xp,    $Yp-$L, $open_color1 ) if $t->{od}{e} == 1;
             $gd->line( $xp,    $yp+$L, => $xp,    $Yp-$L, $open_color1 ) if $t->{od}{w} == 1;
 
             if( $t->{od}{n} == 1 and $t->{od}{w} == 1 ) { # == 1 doesn't match doors
@@ -163,17 +156,11 @@ sub genmap {
                 $gd->filledRectangle( $xp+$B, $yp+$B => $Xp-$B, $Yp-$B, $corridor_color );
             }
 
-            for my $dir (qw(n s e w)) {
+            # NOTE: we never need to draw s and e doors, that just duplicates efforts
+            for my $dir (qw(n w)) {
                 if( ref(my $door = $t->{od}{$dir}) ) {
-                    my @q1 = ( $dir eq "n" ? ($xp+$dM, $yp-$dm) :
-                               $dir eq "s" ? ($xp+$dM, $Yp-$dm) :
-                               $dir eq "e" ? ($Xp-$dm, $yp+$dM) :
-                                             ($xp-$dm, $yp+$dM) );
-
-                    my @q2 = ( $dir eq "n" ? ($Xp-$dM, $yp+$dm) :
-                               $dir eq "s" ? ($Xp-$dM, $Yp+$dm) :
-                               $dir eq "e" ? ($Xp+$dm, $Yp-$dM) :
-                                             ($xp+$dm, $Yp-$dM) );
+                    my @q1 = ( $dir eq "n" ? ($xp+$dM, $yp-$dm) : ($xp-$dm, $yp+$dM) );
+                    my @q2 = ( $dir eq "n" ? ($Xp-$dM, $yp+$dm) : ($xp+$dm, $Yp-$dM) );
 
                     unless( $door->{secret} ) {
                         # Regular old unlocked, open, unstock, unhidden doors are these cute little rectangles.
@@ -187,6 +174,7 @@ sub genmap {
 
                     # Here, we draw the diagonal line and arc indicating how the door opens.
                     my $oi = "$dir$door->{open_dir}{major}$door->{open_dir}{minor}";
+
                     # draw the door line/arcs ... sadly, this is a 8 part if-else block {{{
                     if( $oi eq "nne" ) {  # same as above, but $Yp changes to $yp
                         $gd->arc(  $Xp-$dM, $yp-$am, $wx, $wy, 180, 180+$oa, $door_arc_color );
@@ -289,29 +277,15 @@ sub genmap {
 
                     unless( $door->{'open'} ) {
                         if( $door->{locked} ) {
-                            my @l1 = ( $dir eq "n" ? ($xp+$sM, $yp-$sm) :
-                                       $dir eq "s" ? ($xp+$sM, $Yp-$sm) :
-                                       $dir eq "e" ? ($Xp-$sm, $yp+$sM) :
-                                                     ($xp-$sm, $yp+$sM) );
-
-                            my @l2 = ( $dir eq "n" ? ($xp+$sM, $yp+$sm) :
-                                       $dir eq "s" ? ($xp+$sM, $Yp+$sm) :
-                                       $dir eq "e" ? ($Xp+$sm, $yp+$sM) :
-                                                     ($xp+$sm, $yp+$sM) );
+                            my @l1 = ( $dir eq "n" ? ($xp+$sM, $yp-$sm) : ($xp-$sm, $yp+$sM) );
+                            my @l2 = ( $dir eq "n" ? ($xp+$sM, $yp+$sm) : ($xp+$sm, $yp+$sM) );
 
                             $gd->line( @l1 => @l2 => $red );
                         }
 
                         if( $door->{stuck} ) {
-                            my @l1 = ( $dir eq "n" ? ($Xp-$sM, $yp-$sm) :
-                                       $dir eq "s" ? ($Xp-$sM, $Yp-$sm) :
-                                       $dir eq "e" ? ($Xp-$sm, $Yp-$sM) :
-                                                     ($xp-$sm, $Yp-$sM) );
-
-                            my @l2 = ( $dir eq "n" ? ($Xp-$sM, $yp+$sm) :
-                                       $dir eq "s" ? ($Xp-$sM, $Yp+$sm) :
-                                       $dir eq "e" ? ($Xp+$sm, $Yp-$sM) :
-                                                     ($xp+$sm, $Yp-$sM) );
+                            my @l1 = ( $dir eq "n" ? ($Xp-$sM, $yp-$sm) : ($xp-$sm, $Yp-$sM) );
+                            my @l2 = ( $dir eq "n" ? ($Xp-$sM, $yp+$sm) : ($xp+$sm, $Yp-$sM) );
 
                             $gd->line( @l1 => @l2 => $blue );
                         }
