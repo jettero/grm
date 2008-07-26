@@ -118,8 +118,6 @@ sub genmap {
 
             my $r = $gd->line( ($x, 0) => ($x, $y) => $wall_color );
         }
-
-        return $gd;
     }
 
     for my $i (0 .. $#$map) {
