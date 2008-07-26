@@ -58,6 +58,8 @@ sub line {
 
     my ($img, $id) = $this->_prep($x1, $y1);
     my $style      = $this->_build_style($id, $color_index, $color_index);
+       $style->{'stroke-linecap'} = 'square';
+
     my $result     = $img->line(
         x1    => $x1, y1=>$y1, 
         x2    => $x2, y2=>$y2, 
@@ -66,6 +68,52 @@ sub line {
     );
 
     return $result;
+}
+# }}}
+# rectangle {{{
+sub rectangle {
+    my ($this, $x1, $y1, $x2, $y2, $color_index, $fill) = @_;
+
+    my ($img, $id) = $this->_prep($x1, $y1);
+    my $style      = $this->_build_style($id, $color_index, $fill);
+
+    $img->rectangle( x => $x1, y => $y1, width => $x2-$x1, height => $y2-$y1, id => $id, style => $style );
+}
+# }}}
+# filledRectangle {{{
+sub filledRectangle {
+    my ($this, $x1, $y1, $x2, $y2, $color) = @_;
+
+    $this->rectangle($x1, $y1, $x2, $y2, $color, $color);
+}
+# }}}
+# arc {{{
+sub arc {
+    my ($this, $cx, $cy, $width, $height, $start, $end, $color_index, $fill) = @_;
+
+    return $this->ellipse($cx, $cy, $width, $height, $color_index, $fill)
+        if ($start == 0 and $end == 360) or ($end == 360 and $start == 0);
+
+    my ($img, $id)                              = $this->_prep($cy, $cx);
+    my ($nstart, $nend, $large, $sweep, $a, $b) = _calculate_arc_params($start, $end, $width, $height);
+    my ($startx, $starty)                       = _calculate_point_coords($cx, $cy, $width, $height, $nstart);
+    my ($endx, $endy)                           = _calculate_point_coords($cx, $cy, $width, $height, $nend);
+
+    my $style = $this->_build_style($id, $color_index, $fill);
+
+    return $img->path( d => "M$startx, $starty A$a, $b 0 $large, $sweep $endx, $endy", style => $style );
+}
+# }}}
+# ellipse {{{
+sub ellipse {
+    my ($this, $x1, $y1, $width, $height, $color_index, $fill) = @_;
+    my ($img, $id) = $this->_prep($x1, $y1);
+    my $style = $this->_build_style($id, $color_index, $fill);
+
+    $width  =  $width / 2;
+    $height = $height / 2;
+
+    return $img->ellipse( cx => $x1, cy => $y1, rx => $width, ry => $height, id => $id, style => $style, );
 }
 # }}}
 
