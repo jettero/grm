@@ -152,7 +152,7 @@ sub genmap {
 
                 $gd->filledRectangle( $xp+$B+$_xm, $yp+$B+$_ym => $Xp-$B+$_Xm, $Yp-$B+$_Ym, $fog_tile_color );
 
-            } elsif( $t->{type} eq "corridor" ) {
+            } elsif( $t->{type} eq "corridor" and $corridor_color != $white ) {
                 $gd->filledRectangle( $xp+$B, $yp+$B => $Xp-$B, $Yp-$B, $corridor_color );
             }
 
@@ -162,14 +162,10 @@ sub genmap {
                     my @q1 = ( $dir eq "n" ? ($xp+$dM, $yp-$dm) : ($xp-$dm, $yp+$dM) );
                     my @q2 = ( $dir eq "n" ? ($Xp-$dM, $yp+$dm) : ($xp+$dm, $Yp-$dM) );
 
-                    unless( $door->{secret} ) {
+                    if( not $door->{secret} and not $door->{'open'} ) {
                         # Regular old unlocked, open, unstock, unhidden doors are these cute little rectangles.
 
                         $gd->filledRectangle( @q1 => @q2, $door_color );
-                    }
-
-                    if( $door->{'open'} ) {
-                        $gd->filledRectangle( @q1 => @q2, $white );
                     }
 
                     # Here, we draw the diagonal line and arc indicating how the door opens.
