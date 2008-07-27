@@ -140,19 +140,13 @@ sub _prep {
 # _build_style {{{
 sub _build_style {
     my ($this, $id, $color, $fill, $stroke_opacity) = @_;
-    my $thickness    = 1; # $this->_get_thickness() || 1;
     my $fill_opacity = ($fill) ? '1.0' : 0;
 
     $fill = defined $fill ? $this->_get_color($fill) : 'none';
-    $stroke_opacity ||= '1.0';
-
     return {
-         stroke          => $this->_get_color($color), 
+         stroke          => $this->_get_color($color),
          opacity         => 1,
-       #'stroke-opacity' => $stroke_opacity, 
-       #'stroke-width'   => $thickness, 
-         fill            => $fill, 
-       #'fill-opacity'   => $fill_opacity, 
+         fill            => $fill,
     };
 }
 # }}}
