@@ -184,6 +184,10 @@ sub genmap {
                         $gd->filledRectangle( @q1 => @q2, $door_color );
                     }
 
+                    if( $door->{'open'} ) {
+                        $gd->filledRectangle( @q1 => @q2, $white );
+                    }
+
                     # Here, we draw the diagonal line and arc indicating how the door opens.
                     my $oi = "$dir$door->{open_dir}{major}$door->{open_dir}{minor}";
 
