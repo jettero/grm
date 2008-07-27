@@ -41,7 +41,10 @@ sub new {
 sub svg {
     my $this = shift;
 
-    $this->{img}->xmlify(-pubid => "-//W3C//DTD SVG 1.0//EN", -inline => 1);
+    $this->{img}->xmlify(
+        -standalone => 'no',
+             -sysid => "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd",
+             -pubid => "-//W3C//DTD SVG 1.1//EN" );
 }
 # }}}
 # colorAllocate {{{

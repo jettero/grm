@@ -5,6 +5,8 @@
      anti-aliases all the lines ...  I mean to run one of the
      files though a validator though.  Perhaps I'm just reading
      the standard incorrectly.
+   - validates fine (after adding the doctype, which was only a
+     warning...)   http://validator.w3.org/
 
 1.3.4: Sun Jul 20 20:20:03 EDT 2008
    - I created the new sub-map generator
