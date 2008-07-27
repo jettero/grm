@@ -64,13 +64,14 @@ sub line {
 
     my ($img, $id) = $this->_prep($x1, $y1);
     my $style      = $this->_build_style($id, $color_index, $color_index);
-       $style->{'stroke-linecap'} = 'square';
+       $style->{'stroke-linecap'}  = 'square';
+       $style->{'shape-rendering'} = 'crispEdges';
 
     my $result     = $img->line(
         x1    => $x1, y1=>$y1, 
         x2    => $x2, y2=>$y2, 
         id    => $id, 
-        style => $style, 
+        _flatten_hash($style),
     );
 
     return $result;
@@ -82,6 +83,7 @@ sub rectangle {
 
     my ($img, $id) = $this->_prep($x1, $y1);
     my $style      = $this->_build_style($id, $color_index, $fill);
+       $style->{'shape-rendering'} = 'crispEdges';
 
     $img->rectangle( x => $x1, y => $y1, width => $x2-$x1, height => $y2-$y1, id => $id, style => $style );
 }
@@ -143,12 +145,14 @@ sub _build_style {
 
     $fill = defined $fill ? $this->_get_color($fill) : 'none';
     $stroke_opacity ||= '1.0';
+
     return {
          stroke          => $this->_get_color($color), 
-        'stroke-opacity' => $stroke_opacity, 
-        'stroke-width'   => $thickness, 
+         opacity         => 1,
+       #'stroke-opacity' => $stroke_opacity, 
+       #'stroke-width'   => $thickness, 
          fill            => $fill, 
-        'fill-opacity'   => $fill_opacity, 
+       #'fill-opacity'   => $fill_opacity, 
     };
 }
 # }}}
@@ -261,6 +265,14 @@ sub _calculate_point_coords {
     my $y = ( $sinT[$angle % 360] * $height) / (2 * 1024) + $cy;
 
     return ($x, $y);
+}
+# }}}
+
+# _flatten_hash {{{
+sub _flatten_hash {
+    my $hash = shift;
+
+    map {($_=>$hash->{$_})} keys %$hash;
 }
 # }}}
 
