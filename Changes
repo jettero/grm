@@ -1,3 +1,11 @@
+1.3.4: Sun Jul 27 06:42:04 EDT 2008
+   - I finished the SVG exporter.  I don't think enough things do
+     SVG correctly for it to matter though.  I was testing in eog
+     (eye of gnome) and it thinks it's a transparent image and
+     anti-aliases all the lines ...  I mean to run one of the
+     files though a validator though.  Perhaps I'm just reading
+     the standard incorrectly.
+
 1.3.4: Sun Jul 20 20:20:03 EDT 2008
    - I created the new sub-map generator
    - I renamed BasicImage to PNG
