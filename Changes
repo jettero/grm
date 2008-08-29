@@ -3,6 +3,8 @@
    - cleaned up the makefile quite a bit
    - use prompt() instead of <STDIN> in makefile, to keep from
      causing cpan testers to chase me down with pitchfork
+   - taught t/05_export to skip XML tests when broken XML::Simple
+     and/or broken XML::SAX are encountered.
 
 1.3.4: Sun Jul 27 06:42:04 EDT 2008
    - I finished the SVG exporter.  I don't think enough things do
