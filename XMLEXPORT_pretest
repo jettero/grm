@@ -6,10 +6,14 @@ use XML::Simple;
 
 my %main; tie %main, "Tie::IxHash", (
     this => { isa => "test" },
-    "I'm somewhat tired" => [ qw( of my tests "failing" because of XML::Parser and XML::SAX ) ],
+    somewhat_tired => [ qw( of my tests "failing" because of XML::Parser and XML::SAX ) ],
 );
 
-print "", XMLout(\%main,
+my $string = XMLout(\%main,
     RootName => "WORKED",
     NoSort   => 1, # IxHash does this, please don't help me, kthx
 );
+
+print "$string\n";
+
+my $perl = XMLin($string);
