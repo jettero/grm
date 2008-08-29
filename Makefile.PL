@@ -4,6 +4,9 @@ use 5.008;
 use Cwd;
 use ExtUtils::MakeMaker;
 
+&test_xmllint;
+&test_xmlpasersaxsimple;
+
 open OLDERR, ">&", \*STDERR or die "unable to dup: $!";
 open STDERR, ">/dev/null" or die "unable to close STDERR: $!";
 unlink "xmllint.res";
@@ -58,8 +61,6 @@ WriteMakefile(
     'VERSION_FROM' => 'MapGen.pm',
 
     'PREREQ_PM'     => { 
-        'version' => 0,
-
         @to_add,
 
         'Software::License::LGPL_2_1' => 0,
