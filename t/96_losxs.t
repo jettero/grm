@@ -1,7 +1,7 @@
 use strict;
 use Test;
 
-my $max = $ENV{LOSMAX} || 300; print STDERR " LOSMAX=$max, higher for more tests!";
+my $max = $ENV{LOSMAX} || 300; print STDERR "           LOSMAX=$max, higher for more tests!";
 
 # queue and c setup {{{
 use Games::RolePlay::MapGen;
