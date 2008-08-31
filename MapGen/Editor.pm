@@ -28,7 +28,7 @@ use POSIX qw(ceil);
 use POE::Component::Server::HTTP;
 use POE::Kernel {loop => "Glib"};
 use HTTP::Status;
-use CGI;
+use CGI qw(escapeHTML);
 
 use Games::RolePlay::MapGen::MapQueue::Object;
 use Games::RolePlay::MapGen::MapQueue;
@@ -86,7 +86,6 @@ use constant {
     O_DR      => $x++, # door info, [dir => desc], called O_DR since it's the "old" door.  really only used to invoke a 
                        #  reddraw of the cursors when there *was* a door (O_DR) and there *nolonger* is one
     SERVER    => $x++, # the map server (if applicable) [port, PoCo::HTTPD]
-    CGI       => $x++, # we keep a CGI object for things like escapeHTML()
     # }}}
 };
 
@@ -2081,10 +2080,9 @@ sub http_root_handler {
     $l->("request for $path");
 
     my @o = $this->[MQ]->objects;
-    use Data::Dump qw(dump);
 
     $response->code(RC_OK);
-    $response->content("Hi, you fetched $uri\n" . "<pre>" . );
+    $response->content("Hi, you fetched $uri\n" . "<pre>" . escapeHTML(dump(\@o)) . "</pre>");
 
     return RC_OK;   
 }
