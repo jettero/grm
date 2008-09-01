@@ -2082,6 +2082,7 @@ sub http_root_handler {
     my @o = $this->[MQ]->objects;
 
     $response->code(RC_OK);
+    $response->header( content_type => "text/html" );
     $response->content("Hi, you fetched $uri\n" . "<pre>" . escapeHTML(dump(\@o)) . "</pre>");
 
     return RC_OK;   
