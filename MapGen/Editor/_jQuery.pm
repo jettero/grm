@@ -1,3 +1,23 @@
+
+package Games::RolePlay::MapGen::Editor::_jQuery;
+
+use strict;
+use Fcntl qw(:seek);
+
+sub print {
+    seek DATA, 0, SEEK_SET;
+
+    my $buf;
+    while( read DATA, $buf, 1024 ) {
+		print $buf;
+	}
+
+	print "\n";
+}
+
+1;
+
+__DATA__
 /*
  * jQuery 1.2.6 - New Wave Javascript
  *

@@ -62,4 +62,4 @@ MapGen/Generator/SubMap.pm
 t/a0_submap.t
 MapGen/Exporter/SVG/_GDSVG.pm
 XMLEXPORT_pretest
-lib/Games/RolePlay/MapGen/Editor/jquery-1.2.6.pack.js
+MapGen/Editor/_jQuery.pm
