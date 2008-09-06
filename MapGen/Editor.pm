@@ -1981,15 +1981,19 @@ sub server_settings {
             }
         }
 
+        unless( eval "require Games::RolePlay::MapGen::Editor::_jQuery; 1" ) {
+            warn "ERROR loading jquery: $@";
+            return;
+        }
+
         if( $to_start ) {
             my $s; $s = $this->[SERVER] = [
                 POE::Component::Server::HTTP->new(
                     Port => $o->{port},
                     Headers => { Server => 'GRM Server' },
                     ContentHandler => ({
-                        '/'   => sub { $this->http_root_handler($s->[2], @_) },
-                        '/s/' => sub { $this->http_status_handler($s->[2], @_) },
-                        '/c/' => sub { $this->http_comment_handler($s->[2], @_) },
+                        '/'        => sub { $this->http_root_handler($s->[2], @_) },
+                        '/jquery/' => sub { $this->http_jquery_handler($s->[2], @_) },
                         })
                 ),
                 my $w = Gtk2::Window->new('toplevel'),
@@ -2088,8 +2092,8 @@ sub http_root_handler {
     return RC_OK;   
 }
 # }}}
-# http_status_handler {{{
-sub http_status_handler {
+# http_jquery_handler {{{
+sub http_jquery_handler {
     my ($this, $l, $request, $response) = @_;
 
     my $uri  = $request->uri; # request is an HTTP::Request (and a little more)
@@ -2098,22 +2102,8 @@ sub http_status_handler {
     $l->("request for $path");
 
     $response->code(RC_OK);
-    $response->content("Hi, you fetched $uri\n");
-
-    return RC_OK;   
-}
-# }}}
-# http_comment_handler {{{
-sub http_comment_handler {
-    my ($this, $l, $request, $response) = @_;
-
-    my $uri  = $request->uri; # request is an HTTP::Request (and a little more)
-    my $path = $uri->path;    # uri is an URI object
-
-    $l->("request for $path");
-
-    $response->code(RC_OK);
-    $response->content("Hi, you fetched $uri\n");
+    $response->header( content_type => "text/javascript" );
+    $response->content( Games::RolePlay::MapGen::Editor::_jQuery::as_string() );
 
     return RC_OK;   
 }
