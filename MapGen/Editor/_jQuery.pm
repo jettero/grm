@@ -4,15 +4,13 @@ package Games::RolePlay::MapGen::Editor::_jQuery;
 use strict;
 use Fcntl qw(:seek);
 
-sub print {
-    seek DATA, 0, SEEK_SET;
+our $top = tell DATA;
 
-    my $buf;
-    while( read DATA, $buf, 1024 ) {
-		print $buf;
-	}
+sub as_string {
+    seek DATA, $top, SEEK_SET;
+    local $/;
 
-	print "\n";
+    scalar <DATA>;
 }
 
 1;
