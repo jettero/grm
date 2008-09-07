@@ -2200,9 +2200,22 @@ sub quit {
     Gtk2->main_quit;
 }
 # }}}
+sub warning_handler {
+    my $this = shift;
+    my $err  = shift;
+
+    if( $err =~ m/(?:ERROR|WARNING)/ ) {
+        $this->error($err);
+
+    } else {
+        warn $_[0];
+    }
+}
 # run {{{
 sub run {
     my $this = shift;
+
+    local $SIG{__WARN__} = sub { $this->warning_handler(@_) };
 
     if( $this->[SETTINGS]{REMEMBER_SP} and my $sp = $this->[SETTINGS]{MAIN_SIZE_POS} ) {
         my ($w,$h,$x,$y) = @{thaw $sp};
