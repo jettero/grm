@@ -32,14 +32,15 @@ t/08_interconnects.t
 t/08_xmlinter.t
 t/10_groups.t
 t/11_groups_a5s.t
-MapGen.pod
+lib/Games/RolePlay/MapGen.pod
+lib/Games/RolePlay/MapGen/MapQueue.pod
+lib/Games/RolePlay/MapGen/Editor.pod
 t/08_interconnects_xml.t
 MapGen/Editor.pm
 MapGen/Generator/Blank.pm
 MapGen/GeneratorPlugin/ClearDoors.pm
 MapGen/Editor/_MForm.pm
 vis1.map.xml
-MapGen/Editor.pod
 Locale_gettext.patch
 FAIL.mbox
 t/06_xml_parser_test.t
@@ -55,7 +56,6 @@ t/96_losxs.t
 t/97_rlos.t
 mq.xs
 MapGen/MapQueue.pm
-MapGen/MapQueue.pod
 MapGen/MapQueue/Object.pm
 t/99_mqo.t
 MapGen/Generator/SubMap.pm
