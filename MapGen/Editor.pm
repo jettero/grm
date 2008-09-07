@@ -2197,7 +2197,6 @@ sub quit {
     $this->[SETTINGS]{MAIN_SIZE_POS} = freeze [$w,$h,$x,$y];
     $this->[SETTINGS]{LAST_FNAME}    = $this->[FNAME];
 
-    $this->_server_control(0, {});
     Gtk2->main_quit;
 }
 # }}}
