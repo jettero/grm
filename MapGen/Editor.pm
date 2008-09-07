@@ -1967,6 +1967,11 @@ sub server_settings {
     my $listen = delete $o->{'listen'};
 
     $this->[SETTINGS]{SERVER_OPTIONS} = freeze $o if $diff;
+    $this->_server_control($listen, $o);
+}
+
+sub _server_control {
+    my ($this, $listen, $o) = @_;
 
     if( $listen ) {
         my $to_start = 1;
@@ -2084,10 +2089,19 @@ sub http_root_handler {
     $l->("request for $path");
 
     my @o = $this->[MQ]->objects;
+    my $odump = escapeHTML(dump(\@o));
 
     $response->code(RC_OK);
     $response->header( content_type => "text/html" );
-    $response->content("Hi, you fetched $uri\n" . "<pre>" . escapeHTML(dump(\@o)) . "</pre>");
+    $response->content(qq
+        <html>
+            <head><title>MapGen Server</title><script src='/jquery/'></script></head>
+            <body>
+                <p> Hi, you fetched $uri\n</p>
+                <pre>$odump</pre>
+            </body>
+        </html>
+    );
 
     return RC_OK;   
 }
@@ -2206,6 +2220,13 @@ sub run {
     }
 
     POE::Session->create(inline_states=>{_start=>sub{}}); # if this session doesn't exist, ...
+
+    if( "@ARGV" =~ m/server\s*(\d+)?/ ) {
+        my $port = $1 || 4000;
+
+        $this->_server_control(1, {port=>$port});
+    }
+
     POE::Kernel->run; # ... we don't finish the POE run ...
     Gtk2->main; # ... so we never get here and the Gtk2->main_quit will generate an error
 
