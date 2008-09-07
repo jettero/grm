@@ -2197,9 +2197,11 @@ sub quit {
     $this->[SETTINGS]{MAIN_SIZE_POS} = freeze [$w,$h,$x,$y];
     $this->[SETTINGS]{LAST_FNAME}    = $this->[FNAME];
 
+    $this->_server_control(0, {});
     Gtk2->main_quit;
 }
 # }}}
+# warning_handler {{{
 sub warning_handler {
     my $this = shift;
     my $err  = shift;
@@ -2208,9 +2210,13 @@ sub warning_handler {
         $this->error($err);
 
     } else {
-        warn $_[0];
+       my ($package, $filename, $line, $subroutine, $hasargs,
+           $wantarray, $evaltext, $is_require, $hints, $bitmask) = caller 1;
+
+        warn "$err at $filename line $line (in $subroutine)\n";
     }
 }
+# }}}
 # run {{{
 sub run {
     my $this = shift;
@@ -2232,19 +2238,23 @@ sub run {
         $this->read_file($f) if -f $f;
     }
 
-    POE::Session->create(inline_states=>{_start=>sub{}}); # if this session doesn't exist, ...
+    # NOTE: is it smarter to let the POE::Kernel think it's finished and run
+    # under Gtk2->main?  or is it smarter to leave the Kernel running and never
+    # call the Gtk2->main?  Currently, we let the Kernel finish and run under
+    # Gtk2.  So, we create a session that doesn't do anything, letting the
+    # session finish, so the POE->run returns and we fall through to the
+    # Gtk2->main;
+
+    POE::Session->create(inline_states=>{_start=>sub{}});
+    POE::Kernel->run;
 
     if( "@ARGV" =~ m/server\s*(\d+)?/ ) {
         my $port = $1 || 4000;
 
+        # NOTE: curiously, the above means we let the Kernel finish before we start the server session.
         $this->_server_control(1, {port=>$port});
     }
 
-    POE::Kernel->run; # ... we don't finish the POE run ...
-    Gtk2->main; # ... so we never get here and the Gtk2->main_quit will generate an error
-
-    # NOTE: is it smarter to let the POE::Kernel think it's finished and run under Gtk2->main?
-    # or is it smarter to leave the Kernel running and never call the Gtk2->main?
-    # Currently, we let the Kernel finish and run under Gtk2.
+    Gtk2->main;
 }
 # }}}
