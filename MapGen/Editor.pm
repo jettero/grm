@@ -2205,8 +2205,20 @@ sub warning_handler {
     my $this = shift;
     my $err  = shift;
 
+    our $warnings_ignore;
+    unless( $warnings_ignore ) {
+        my @ignore = (
+            qr(Use of uninitialized value in subtraction.*Glib.pm.*line),
+        );
+
+        $warnings_ignore = do { local $" = "|"; qr(@ignore) };
+    }
+
     if( $err =~ m/(?:ERROR|WARNING)/ ) {
         $this->error($err);
+
+    } elsif( $err =~ $warnings_ignore ) {
+        # ignore
 
     } else {
        my ($package, $filename, $line, $subroutine, $hasargs,
