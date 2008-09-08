@@ -2091,17 +2091,32 @@ sub http_root_handler {
     my @o = $this->[MQ]->objects;
     my $odump = escapeHTML(dump(\@o));
 
-    $response->code(RC_OK);
-    $response->header( content_type => "text/html" );
-    $response->content(qq
-        <html>
-            <head><title>MapGen Server</title><script src='/jquery/'></script></head>
-            <body>
-                <p> Hi, you fetched $uri\n</p>
-                <pre>$odump</pre>
-            </body>
-        </html>
-    );
+    if( 0 ) {
+        $response->code(RC_OK);
+        $response->header( content_type => "text/html" );
+        $response->content(qq
+            <html>
+                <head><title>MapGen Server</title><script src='/jquery/'></script></head>
+                <body>
+                    <p> Hi, you fetched $uri\n</p>
+                    <pre>$odump</pre>
+                </body>
+            </html>
+        );
+
+    } else {
+        $response->code(401);
+        $response->header( content_type => "text/html", www_authenticate => 'Basic realm="MapGen Server"' );
+        $response->content(qq
+            <html>
+                <head><title>MapGen Server</title>
+                <body>
+                    <p> 401 Authorization Required.
+                    <p> Who are you?
+                </body>
+            </html>
+        );
+    }
 
     return RC_OK;   
 }
