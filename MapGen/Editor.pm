@@ -24,6 +24,7 @@ use DB_File;
 use Storable qw(freeze thaw);
 use Data::Dump qw(dump);
 use POSIX qw(ceil);
+use MIME::Base64;
 
 use POE::Component::Server::HTTP;
 use POE::Kernel {loop => "Glib"};
@@ -2086,19 +2087,27 @@ sub http_root_handler {
     my $uri  = $request->uri; # request is an HTTP::Request (and a little more)
     my $path = $uri->path;    # uri is an URI object
 
-    $l->("request for $path");
-
-    my @o = $this->[MQ]->objects;
+    my @o     = $this->[MQ]->objects;
     my $odump = escapeHTML(dump(\@o));
+    my $auth  = $request->header("authorization");
 
-    if( 0 ) {
+    $l->("request for $path" . ($auth ? " (auth: $auth)" : ""));
+
+    my ($u, $p);
+    if( my ($mime) = $auth =~ m/Basic\s*(.+)/ ) {
+        if( (my @r = split(/:/, decode_base64($mime), 2)) == 2 ) {
+            ($u, $p) = @r;
+        }
+    }
+
+    if( 0 and ($u and $p) ) {
         $response->code(RC_OK);
         $response->header( content_type => "text/html" );
         $response->content(qq
             <html>
                 <head><title>MapGen Server</title><script src='/jquery/'></script></head>
                 <body>
-                    <p> Hi, you fetched $uri\n</p>
+                    <p> Hi $u, you fetched $uri authenticated with $p.\n</p>
                     <pre>$odump</pre>
                 </body>
             </html>
