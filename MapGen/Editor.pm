@@ -1968,10 +1968,11 @@ sub server_settings {
     my $listen = delete $o->{'listen'};
 
     $this->[SETTINGS]{SERVER_OPTIONS} = freeze $o if $diff;
-    $this->_server_control($listen, $o);
+    $this->server_control($listen, $o);
 }
-
-sub _server_control {
+# }}}
+# server_control {{{
+sub server_control {
     my ($this, $listen, $o) = @_;
 
     if( $listen ) {
@@ -2038,6 +2039,21 @@ sub _server_control {
                 delete $this->[SERVER];
                 FALSE; # this apparently can't return true
             });
+
+            my $adder = sub {
+                $vbox->add( my $hbox = Gtk2::HBox->new );
+                $hbox->add( my $ul = Gtk2::Label->new("Username: ") );
+                $hbox->add( my $ue = Gtk2::Entry->new );
+                $hbox->add( my $pl = Gtk2::Label->new("Password: ") );
+                $hbox->add( my $pe = Gtk2::Entry->new );
+                $hbox->add( my $nl = Gtk2::Label->new("Map Name: ") );
+                $hbox->add( my $ne = Gtk2::Entry->new );
+
+                $ul->set_tooltip_text( "The users login name." );
+                $pl->set_tooltip_text( "The users password (leave blank to accept any string)." );
+                $nl->set_tooltip_text( "The name of a unique item on the map to connect with.
+            };
+
             $w->show_all;
         }
 
@@ -2287,7 +2303,7 @@ sub run {
         my $port = $1 || 4000;
 
         # NOTE: curiously, the above means we let the Kernel finish before we start the server session.
-        $this->_server_control(1, {port=>$port});
+        $this->server_control(1, {port=>$port});
     }
 
     Gtk2->main;
