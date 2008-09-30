@@ -5,6 +5,7 @@ use Cwd;
 use ExtUtils::MakeMaker;
 
 my @to_add;
+my @exec;
 
 &test_xmllint;
 &prompt_more_modules;
@@ -12,10 +13,10 @@ my @to_add;
 system(bash => "make_svg") and die if -f "make_svg";
 
 WriteMakefile(
-    'NAME'         => 'Games::RolePlay::MapGen',
-    'VERSION_FROM' => 'MapGen.pm',
-
-    'PREREQ_PM'     => { 
+    NAME          => 'Games::RolePlay::MapGen',
+    VERSION_FROM  => 'MapGen.pm',
+    EXE_FILES     => [ @exec ],
+    PREREQ_PM     => { 
         @to_add,
 
         'Software::License::LGPL_2_1' => 0,
@@ -84,5 +85,10 @@ sub prompt_more_modules {
         $res = prompt("Include pre-reqs for the Editor (Gtk2, POE, GD, et al)? [N/y]", 'n');
     }
     push @to_add, @editor_prereqs if $res =~ m/[Yy]/;
+
+    unless( -f "MANIFEST.SKIP" ) {
+        $res = prompt("Install /usr/???/bin/grm_editor [N/y]", 'n');
+    }
+    push @exec, 'grm_editor' if $res =~ m/[Yy]/;
 }
 # }}}

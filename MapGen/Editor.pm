@@ -2051,8 +2051,10 @@ sub server_control {
 
                 $ul->set_tooltip_text( "The users login name." );
                 $pl->set_tooltip_text( "The users password (leave blank to accept any string)." );
-                $nl->set_tooltip_text( "The name of a unique item on the map to connect with.
+                $nl->set_tooltip_text( "The name of a unique item on the map to connect with." );
             };
+
+            $adder->();
 
             $w->show_all;
         }
