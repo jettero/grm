@@ -19,7 +19,6 @@ WriteMakefile(
     PREREQ_PM     => { 
         @to_add,
 
-        'Software::License::LGPL_2_1' => 0,
         'Math::Round' => 0,
         'Math::Trig'  => 0,
         'List::Util'  => 0,
@@ -33,6 +32,18 @@ WriteMakefile(
         'File::Slurp'     => 0, # <-- this, I could just as well have used ``...
         'Algorithm::Diff' => 0, # <-- this is used automatcially by the test harness
     },
+
+    ($ExtUtils::MakeMaker::VERSION ge '6.48'? 
+        (MIN_PERL_VERSION => 5.008,
+            META_MERGE => {
+                keywords => ['map','editor','visicalc'],
+                resources=> {
+                    repository => 'http://github.com/jettero/grm/tree',
+                },
+            },
+
+        LICENSE	=> 'lgpl2',
+    ) : ()),
 
     OBJECT => "mq.o",
 
