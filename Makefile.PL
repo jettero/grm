@@ -36,7 +36,7 @@ WriteMakefile(
     ($ExtUtils::MakeMaker::VERSION ge '6.48'? 
         (MIN_PERL_VERSION => 5.008,
             META_MERGE => {
-                keywords => ['map','editor','visicalc'],
+                keywords => ['map','editor','visicalc', 'grm'],
                 resources=> {
                     repository => 'http://github.com/jettero/grm/tree',
                 },
