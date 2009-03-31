@@ -7,7 +7,7 @@ use AutoLoader;
 use Carp;
 use Data::Dumper; $Data::Dumper::Indent = 1; $Data::Dumper::SortKeys = 1;
 
-our $VERSION = 1.4;
+our $VERSION = 1.4001;
 
 our $AUTOLOAD;
 

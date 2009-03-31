@@ -1,3 +1,9 @@
+1.4001: Tue Mar 31 08:59:51 EDT 2009
+   - added another keyword and versioned up
+
+1.4: ????
+   - added the chorny META.yml stuff
+
 1.4: Fri Aug 29 07:11:55 EDT 2008
    - lost version.pm (not worth it)
    - cleaned up the makefile quite a bit
