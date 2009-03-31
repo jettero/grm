@@ -12,7 +12,6 @@ t/05_export.t
 t/05_perfect.t
 t/05_save_load.t
 t/07_basic.t
-META.yml
 t/09_xml_export_import.t
 MapGen.pm
 MapGen/Generator/Basic.pm
