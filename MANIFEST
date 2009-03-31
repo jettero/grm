@@ -63,3 +63,4 @@ MapGen/Exporter/SVG/_GDSVG.pm
 XMLEXPORT_pretest
 MapGen/Editor/_jQuery.pm
 grm_editor
+make_svg
