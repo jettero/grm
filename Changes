@@ -1,7 +1,5 @@
 1.4001: Tue Mar 31 07:59:51 EDT 2009
    - added another keyword and versioned up
-   - added make_svg, which was conspicuously absent -- I must
-     have considered it a trade secret or something.
 
 1.4: ????
    - added the chorny META.yml stuff
