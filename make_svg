@@ -1,0 +1,5 @@
+#!/bin/bash
+
+sed -e s/GD/Games::RolePlay::MapGen::Exporter::SVG::_GDSVG/g -e s/::Image//g -e s/::PNG/::SVG/g -e 's/->png/->svg/g' \
+    < MapGen/Exporter/PNG.pm \
+    > MapGen/Exporter/SVG.pm
