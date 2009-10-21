@@ -130,14 +130,3 @@ sub add_plugin {
     }
 }
 # }}}
-
-__END__
-# Below is stub documentation for your module. You better edit it!
-
-=head1 NAME
-
-Games::RolePlay::MapGen::Generator - A base class for Generators
-
-Games::RolePlay::MapGen, Games::RolePlay::MapGen::Generator::Basic, Games::RolePlay::MapGen::Generator::Perfect
-
-=cut
