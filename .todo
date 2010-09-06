@@ -1,0 +1,221 @@
+<todo version="0.1.19">
+    <note priority="veryhigh" time="1208776791" done="1209058983">
+        we need a reset button that puts the generator options back to defaults
+    </note>
+    <note priority="veryhigh" time="1209242478" done="1209302524">
+        GD a green png the size of a tile and PixbufLoader it into a pixbuf.  We then $greeny-&gt;composit(my $d=$pb-&gt;copy, ....) to push the cursor with alpha...
+        <comment>
+            it turned out to be a render to drawable from a GD
+        </comment>
+    </note>
+    <note priority="veryhigh" time="1209411870" done="1209423690">
+        trying to hot-spot the closures... there exist bugs.  Occasionally, $X xor $Y should be true, but we don't update the O_DR ... why why why?
+    </note>
+    <note priority="veryhigh" time="1210073369" done="1210422969">
+        add room and un-room handlers
+        <comment>
+            yeah, this was two patches ago
+        </comment>
+    </note>
+    <note priority="veryhigh" time="1210260171" done="1210348460">
+        there's an ugly problem where {nb}{} to a location outside the bounding box ... well, gross ---- autovivifing new rows and columns is disabled (14&gt;13) at blib/lib/Games/RolePlay/MapGen/Editor.pm line 684 ---- we introduced errors in the t/*.t when we added the disallow autovifify object
+    </note>
+    <note priority="high" time="1208730064" done="1209388792">
+        think of a way to add the BasicDoors plugin options (hashes).  submenu? comma separated?
+    </note>
+    <note priority="high" time="1209211867" done="1209302552">
+        check and see how Dia snaps to and shows objects for placement
+    </note>
+    <note priority="high" time="1209388835" done="1209986765">
+        mousover status for doors, possibly change the cursor too
+    </note>
+    <note priority="high" time="1209986843" done="1210348491">
+        We need right click commands to convert a tile selection into:
+        <note priority="high" time="1209986869" done="0">
+            outer door selection (all the doors around the outside of the current selection)
+        </note>
+        <note priority="high" time="1209986924" done="0">
+            inner door selection (all the closures between tiles in the selection) ...
+        </note>
+        <note priority="high" time="1209986942" done="1210033672">
+            hrm, door selection requires a great deal more thought than tile selection did...
+            <comment>
+                I thought about it... I'm going to do all the wall changes (besides removal) as changes around the outside of the selected area... maybe version 2 will support selecting doors
+            </comment>
+        </note>
+    </note>
+    <note priority="high" time="1214253142" done="1214393236">
+        figure out what all of these are:     -&gt;[SEL_S] = -&gt;[SEL_E] = -&gt;[SELECTION] = -&gt;[O_DR] = -&gt;[S_ARG] = undef; then document it.  Also document O_LT...
+        <note priority="high" time="1214253248" done="0">
+            also, figure out why we lose our tile highlight after a double click... did we receive a leave event?
+        </note>
+    </note>
+    <note priority="high" time="1214443314" done="1214478373">
+        the new mapqueue convenience object
+        <note priority="veryhigh" time="1214445206" done="1214478368">
+            must deal with attributes like lname: and item1: automatically
+        </note>
+        <note priority="high" time="1214443338" done="1214445182">
+            must deal with unique (or non-unique) status
+        </note>
+        <note priority="high" time="1214443355" done="1214445183">
+            must deal with tagging (which is just string interp)
+        </note>
+        <note priority="high" time="1214443374" done="1214445185">
+            must deal with quantities
+        </note>
+    </note>
+    <note priority="medium" time="1208730111" done="1209986786">
+        there should be a different tooltip for each item in the choice and choices widgets... they should switch somehow ... looks like they had this problem with comboboxes in gnu-cash: http://svn.gnucash.org/trac/changeset/12295 &lt;-- supposedly they're added there, but I don't see it.  See also: http://wiki.gnucash.org/wiki/Tooltips
+    </note>
+    <note priority="medium" time="1208730629" done="1209059635">
+        finish the regular old tooltips
+    </note>
+    <note priority="medium" time="1208790428" done="1209059642">
+        split out the make_form() function into a Gtk2::Ex::VerySimpleFormDialog -- or something like that
+    </note>
+    <note priority="medium" time="1208998077" done="1209220847">
+        add a status bar that shows map co-ordinates and things
+    </note>
+    <note priority="medium" time="1209122913" done="1209220837">
+        we seem to be able to status update an extra tile by hitting the extra pixel at the edge of the map...
+        <note priority="medium" time="1209122944" done="1209220825">
+            check to make sure the Alignment Area didn't spread out to the whole viewport
+        </note>
+        <note priority="medium" time="1209122956" done="1209220805">
+            fix the extra pixel problem at the very right and bottom of the map
+        </note>
+    </note>
+    <note priority="medium" time="1209159048" done="1209312952">
+        add a pulsed progress meter
+        <note priority="medium" time="1209159184" done="0">
+            for saves
+        </note>
+        <note priority="medium" time="1209159188" done="0">
+            for exports
+        </note>
+        <note priority="medium" time="1209159221" done="0">
+            for generates
+        </note>
+    </note>
+    <note priority="medium" time="1209388857" done="1209986797">
+        doubleclick (maybe rightclick?) to edit a single tile via dialog
+    </note>
+    <note priority="medium" time="1209388911" done="1210073446">
+        group editing (delete a group or add to it)
+        <comment>
+            (we're ignoring the groups for now, and just talking about corridors, walls and rooms)
+        </comment>
+    </note>
+    <note priority="medium" time="1209388953" done="1209986820">
+        remote viewing via TCP/IP
+    </note>
+    <note priority="medium" time="1209687300" done="1209687591">
+        [bug] if the render settings dont initially match the map, clicking [ok] doesn\t do anything
+        <comment>
+            yeah, ... no brainer really
+        </comment>
+    </note>
+    <note priority="medium" time="1210073040" done="1210341857">
+        add ^M accelerators do the various file menus -- it seems most gnome apps *do* know to submit the form on enter
+        <comment>
+            wow
+        </comment>
+    </note>
+    <note priority="medium" time="1211813889" done="1211905480">
+        must look at File::HomeDir
+    </note>
+    <note priority="medium" time="1216642627" done="1217155257">
+        create a Shapes.pm
+        <comment>
+            I claim this is done, although it looks gnarly in eog, and probably elsewhere, it seems to function in FF3
+        </comment>
+        <note priority="high" time="1216652482" done="0">
+            consider using GD::SVG to simplify this process
+            <note priority="high" time="1216672135" done="0">
+                this seems to work but there are problems...
+            </note>
+        </note>
+        <note priority="medium" time="1216642702" done="0">
+            rename BasicImage to PNG and base Shapes off BI, then use the Shapes exporter in the PNG exporter
+        </note>
+        <note priority="medium" time="1216642722" done="0">
+            create an SVG exporter that uses the Shapes exporter
+        </note>
+    </note>
+    <note priority="veryhigh" time="1220786295">
+        render settings need to save in the map
+    </note>
+    <note priority="veryhigh" time="1220786309" done="1220797839">
+        closing the main app doesn't seem to close the server
+    </note>
+    <note priority="high" time="1220016355">
+        get XML::Simple out of here if possible
+    </note>
+    <note priority="medium" time="1210440328">
+        add the map-queue visicalc stuff
+        <note priority="high" time="1213567878" done="1215602951">
+            need to deal with MQ integrity ... either remove objects at locations when they wallify, or error when it happens
+        </note>
+        <note priority="medium" time="1210440376" done="1213462456">
+            add support for item and people drops
+        </note>
+        <note priority="medium" time="1210440402" done="1215564198">
+            add support for visualizations of those things
+            <note priority="medium" time="1214741901" done="0">
+                add 3-touple color support
+            </note>
+            <note priority="medium" time="1214741915" done="0">
+                add a color picker dialog
+            </note>
+        </note>
+        <note priority="medium" time="1213462450" done="1213542143">
+            document MapQueue
+        </note>
+        <note priority="medium" time="1213567851" done="1215564188">
+            need to find a way to save and restore mapqueues
+            <note priority="medium" time="1214741977" done="0">
+                presently, I'm thinking the item saves should be separate files so you can quickly load different sets of mobs and items for the same map...
+            </note>
+            <note priority="medium" time="1214742006" done="0">
+                if 24.5.1 is true then we'll need to fix the mapgen dtd to not have item extensions
+            </note>
+        </note>
+        <note priority="medium" time="1214173198" done="1215630901">
+            think about living+item,plan.txt and add todos or implement
+        </note>
+        <note priority="medium" time="1215564311" done="1215630359">
+            hitting enter on door properties and objects at location should really submit the changes... even while sitting on a Gtk2::Entry
+        </note>
+        <note priority="medium" time="1215603057" done="1215687446">
+            mousing over a tile with stuff in it should announce what's in it (either on the status bar or a tool tip)
+        </note>
+        <note priority="medium" time="1210440388">
+            add support for paths and steps -- I was thinking that holding ctrl should show visible tiles, space should complete moves
+        </note>
+        <note priority="medium" time="1215564336">
+            in the item/living dropper dialog, tabbing through the objects should go straight down, not across
+        </note>
+    </note>
+    <note priority="medium" time="1210440341">
+        add a tcp/ip remote viewer
+        <note priority="medium" time="1216041734" done="1217164399">
+            we need sub-map functionality
+            <note priority="high" time="1216559286" done="0">
+                needs a test
+            </note>
+            <note priority="medium" time="1216559312" done="1217164340">
+                the new 'fog' tile type needs visualization support
+                <note priority="medium" time="1216642562" done="0">
+                    much of it is done, but it needs further fixes
+                </note>
+            </note>
+        </note>
+        <note priority="medium" time="1216042133" done="1217164346">
+            we should probably consider an svg exporter, if not just for this then because it'd be cool
+        </note>
+    </note>
+    <note priority="medium" time="1210440355">
+        add background-image support
+    </note>
+</todo>
