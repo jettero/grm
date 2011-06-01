@@ -174,8 +174,6 @@ sub genmap {
 
     $map = new Games::RolePlay::MapGen::_interconnected_map( $map );
 
-    close $input;
-
     return ($map, $groups);
 }
 
