@@ -1,7 +1,7 @@
 
 =head1 NAME
 
-Games::RolePlay::MapGen::MapQueue - And object for storing objects by location, on a map, with visi-calc support
+Games::RolePlay::MapGen::MapQueue - An object for storing objects by location, on a map, with visi-calc support
 
 =head1 SYNOPSIS
 
