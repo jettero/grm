@@ -19,9 +19,18 @@ sub genmap {
     my $xml_path = $INC{ 'Games/RolePlay/MapGen.pm' };
        $xml_path =~ s/\.pm$//;
 
-    croak "you must supply a filename with xml_input_file => \"something.xml\"" unless exists $opts->{xml_input_file};
-    open my $input, $opts->{xml_input_file} or croak "unable to open $opts->{xml_input_file}: $!";
-    my $xp = XML::XPath->new( ioref => $input );
+    my $xp;
+    if( my $input = $opts->{xml_input} ) {
+        $xp = XML::XPath->new( xml => $input );
+
+    } elsif( exists $opts->{xml_input_file} ) {
+        open my $input, $opts->{xml_input_file} or croak "unable to open $opts->{xml_input_file}: $!";
+        $xp = XML::XPath->new( ioref => $input );
+
+    } else {
+        croak "you must supply either XML (xml_input=>\$string) or a filename (xml_input_file=>\"something.xml\")"
+    }
+
     $xp->set_parser( XML::Parser->new(
         ErrorContext  => 2,
         ParseParamEnt => 1,

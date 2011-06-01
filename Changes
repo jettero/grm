@@ -1,3 +1,6 @@
+1.4002: Wed Jun 01 2011
+   - pure xml import (no file)
+
 1.4002: Wed Oct 21 2009
    - Just added Data::Dumper to the Makefile.PL reqs
 

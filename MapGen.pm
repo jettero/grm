@@ -7,7 +7,7 @@ use AutoLoader;
 use Carp;
 use Data::Dumper; $Data::Dumper::Indent = 1; $Data::Dumper::SortKeys = 1;
 
-our $VERSION = 1.4002;
+our $VERSION = 1.4003;
 
 our $AUTOLOAD;
 
@@ -268,7 +268,12 @@ sub import_xml {
     $this = $this->new unless ref $this;
 
     $this->set_generator( "XMLImport" );
-    $this->generate( xml_input_file => $that, @_ ); 
+    if( -f $that ) {
+        $this->generate( xml_input_file => $that, @_ );
+
+    } else {
+        $this->generate( xml_input      => $that, @_ );
+    }
     $this;
 }
 # }}}
