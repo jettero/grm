@@ -1,0 +1,4 @@
+MANIFEST.SKIP
+^\.git
+^\.todo
+make_svg
