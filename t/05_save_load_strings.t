@@ -10,8 +10,8 @@ use Games::RolePlay::MapGen;
 
 my $map = new Games::RolePlay::MapGen({bounding_box => join("x", $x, $y) });
 
-generate $map;
-save_map $map ("the.map");
+$map->generate;
+my $saved_string = $map->save_map();
 
 my %checksums = ();
 for my $i (0..$x-1) {
@@ -23,7 +23,8 @@ for my $i (0..$x-1) {
 delete $map->{_the_map};
 delete $map->{_the_groups};
 
-load_map $map ("the.map");
+$map->load_map($saved_string);
+
 for my $i (0..$x-1) {
     for my $j (0..$y-1) {
         ok( &a_kind_of_checksum($i, $j, $map), $checksums{$i}{$j} );

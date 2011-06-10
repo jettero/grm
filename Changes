@@ -1,3 +1,10 @@
+1.5000: Wed Jun 01 2011
+   - load_map() and save_map() were using Data::Dumper rather
+     than the more obvious choice: Storable — fixed.  I'm not
+     aware of anyone using these functions, or indeed this entire
+     package, so if I broke something sorry, didn't mean it.
+     Look at legacy_load_map() if necessary.
+
 1.4002: Wed Jun 01 2011
    - pure xml import (no file)
 

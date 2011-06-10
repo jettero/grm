@@ -33,6 +33,7 @@ WriteMakefile(
         'Algorithm::Diff' => 0, # <-- this is used automatcially by the test harness
 
         'Data::Dumper' => 0, # required for testing, got some FAIL reports because this wasn't here.
+        Storable => 0,
     },
 
     ($ExtUtils::MakeMaker::VERSION ge '6.48'? 

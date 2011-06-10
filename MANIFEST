@@ -42,7 +42,8 @@ t/03_tools.t
 t/04_irange.t
 t/05_export.t
 t/05_perfect.t
-t/05_save_load.t
+t/05_save_load_files.t
+t/05_save_load_strings.t
 t/06_xml_parser_test.t
 t/07_basic.t
 t/08_interconnects.t
