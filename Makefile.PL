@@ -34,6 +34,7 @@ WriteMakefile(
 
         'Data::Dumper' => 0, # required for testing, got some FAIL reports because this wasn't here.
         Storable => 0,
+        Memoize => 0,
     },
 
     ($ExtUtils::MakeMaker::VERSION ge '6.48'? 
