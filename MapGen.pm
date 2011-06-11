@@ -337,7 +337,6 @@ FREEZE_THAW_HOOKS: {
 
     sub STORABLE_thaw {
         my $this = shift;
-
         $this->load_map($_[1]);
     }
 }
