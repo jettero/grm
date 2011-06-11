@@ -41,7 +41,7 @@ WriteMakefile(
             META_MERGE => {
                 keywords => ['map','editor','visicalc', 'grm'],
                 resources=> {
-                    repository => 'http://github.com/jettero/grm/tree',
+                    repository => 'https://github.com/jettero/grm',
                 },
             },
 
