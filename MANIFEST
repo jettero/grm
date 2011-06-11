@@ -66,3 +66,8 @@ xmllint.test/bad.xml
 xmllint.test/map.xml
 xmllint.test/t2/MapGen.dtd
 xmllint.test/t2/MapGen.xsl
+t/05_export.t
+t/05_perfect.t
+t/05_save_load_files.t
+t/05_save_load_strings.t
+t/05_z_freeze_thaw.t

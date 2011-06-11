@@ -6,6 +6,7 @@ use strict;
 use AutoLoader;
 use Carp;
 use Storable;
+no warnings;
 
 our $VERSION = '1.5000';
 
