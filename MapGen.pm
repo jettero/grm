@@ -35,8 +35,6 @@ our %known_opts = (
 );
 # }}}
 
-1;
-
 # _check_mod_path {{{
 sub _check_mod_path  {
     my $this = shift;
@@ -153,13 +151,17 @@ sub save_map {
 
     $this->{_the_map}->disconnect_map;
 
+    my $str;
     if( $filename ) {
         Storable::store($this, $filename);
-        $this->{_the_map}->interconnect_map;
-        return;
+
+    } else {
+        $str = Storable::freeze($this);
     }
 
-    return Storable::freeze($this);
+    $this->{_the_map}->interconnect_map;
+
+    return $str;
 }
 # }}}
 # load_map {{{
@@ -319,5 +321,28 @@ sub size {
     return [$x, $y];
 }
 # }}}
+
+# {{{ FREEZE_THAW_HOOKS
+FREEZE_THAW_HOOKS: {
+    my $going;
+    sub STORABLE_freeze {
+        return if $going;
+        my $this = shift;
+        $going = 1;
+        my $str = $this->save_map;
+        $going = 0;
+        return $str;
+    }
+
+    sub STORABLE_thaw {
+        my $this = shift;
+
+        $this->load_map($_[1]);
+    }
+}
+
+# }}}
+
+1;
 
 __END__
