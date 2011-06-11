@@ -48,18 +48,6 @@ in feet (or meters or whatever) of the tiles.  If you want the distance in feet
 
 C<new()> takes a single argument, which is required: a MapGen map object
 
-=head2 retag
-
-The MapQueue stores the location of objects by name for quick location queries.
-After a deep copy (e.g. L<Storable>) or data dump (e.g. L<Data::Dumper>) object
-tags for non-scalar queue entries (e.g. blessed references or references) will
-not be linked correctly and you must C<retag()> the new copy to make everything
-line up again.
-
-    use Storable qw(dclone);
-    my $q2 = dclone($queue);
-       $q2->retag;
-
 =head2 flush
 
 Most of the MapQueue functions are cached with L<Memoize>, C<flush()> clears the

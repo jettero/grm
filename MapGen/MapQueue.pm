@@ -8,6 +8,7 @@ use Exporter;
 use Math::Trig;
 use Math::Round;
 use List::Util qw(min max);
+use Storable qw(freeze thaw);
 use constant {
     LOS_NO              => 0,
     LOS_YES             => 1,
@@ -48,8 +49,6 @@ our @toflush = qw( _line_of_sight _tight_line_of_sight _ranged_cover _melee_cove
 
 use Games::RolePlay::MapGen;
 require XSLoader; XSLoader::load('Games::RolePlay::MapGen', $Games::RolePlay::MapGen::VERSION);
-
-1;
 
 # new {{{
 sub new {
@@ -1353,3 +1352,26 @@ sub map_domain {
     return $this->{ym};
 }
 # }}}
+
+# {{{ FREEZE_THAW_HOOKS
+FREEZE_THAW_HOOKS: {
+    my $going;
+    sub STORABLE_freeze {
+        return if $going;
+        my $this = shift;
+        $going = 1;
+        my $str = freeze($this);
+        $going = 0;
+        return $str;
+    }
+
+    sub STORABLE_thaw {
+        my $this = shift;
+        %$this = %{ thaw($_[1]) };
+        $this->retag;
+    }
+}
+
+# }}}
+
+1;
