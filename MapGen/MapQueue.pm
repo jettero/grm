@@ -1096,7 +1096,7 @@ sub closure_lline_of_sight {
 # add {{{
 sub add {
     my $this = shift;
-    my $that = shift; my $tag = "$that";
+    my $that = shift or croak "place what?"; my $tag = "$that";
     my @loc  = @_;
 
     croak "that object/tag ($tag) appears to already be on the map" if exists $this->{l}{$tag};
