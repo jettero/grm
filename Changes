@@ -4,6 +4,7 @@
      aware of anyone using these functions, or indeed this entire
      package, so if I broke something sorry, didn't mean it.
      Look at legacy_load_map() if necessary.
+   - added freeze/thaw hooks to both MapGen and MapQueue
 
 1.4002: Wed Jun 01 2011
    - pure xml import (no file)
