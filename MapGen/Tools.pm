@@ -77,6 +77,7 @@ sub interconnect_map {
 sub disconnect_map {
     my $map = shift;
 
+    local $@;
 
     eval {
         untie @$_ for grep {tied $_} @$map;

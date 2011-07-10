@@ -1,3 +1,7 @@
+1.5003: Sun Jul 10 2011
+   - during a crash, DESTROY that uses eval screws up the error
+     that's propagating.  Localize $@ to be polite to users.
+
 1.5000: Wed Jun 01 2011
    - load_map() and save_map() were using Data::Dumper rather
      than the more obvious choice: Storable — fixed.  I'm not

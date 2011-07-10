@@ -8,7 +8,7 @@ use Carp;
 use Storable;
 no warnings;
 
-our $VERSION = '1.5000';
+our $VERSION = '1.5003';
 
 our $AUTOLOAD;
 
