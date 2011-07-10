@@ -2,11 +2,10 @@
 
 package Games::RolePlay::MapGen;
 
-use strict;
 use AutoLoader;
 use Carp;
 use Storable;
-no warnings;
+use common::sense;
 
 our $VERSION = '1.5000';
 
@@ -57,7 +56,6 @@ sub _check_opts {
     my @e    = ();
 
     # warn "checking known_opts";
-    no strict 'refs';
     for my $k (keys %known_opts) {
         "set_$k"->($this, $known_opts{$k} ) unless defined $this->{$k};
     }
