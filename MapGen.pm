@@ -2,7 +2,6 @@
 
 package Games::RolePlay::MapGen;
 
-use AutoLoader;
 use Carp;
 use Storable;
 use common::sense;
