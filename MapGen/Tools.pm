@@ -5,7 +5,7 @@ package Games::RolePlay::MapGen::_disallow_autoviv;
 
 use common::sense;
 use Tie::Array;
-use parent 'Tie::StdArray';
+use parent -norequire => 'Tie::StdArray';
 use Carp;
 
 1;
