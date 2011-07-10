@@ -4,7 +4,7 @@ package Games::RolePlay::MapGen::Generator::Blank;
 
 use strict;
 use Carp;
-use base qw(Games::RolePlay::MapGen::Generator);
+use parent 'Games::RolePlay::MapGen::Generator';
 use Games::RolePlay::MapGen::Tools qw( _tile );
 
 1;

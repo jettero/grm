@@ -4,7 +4,7 @@ package Games::RolePlay::MapGen::Generator::Basic;
 
 use strict;
 use Carp;
-use base qw(Games::RolePlay::MapGen::Generator::SparseAndLoops);
+use parent q(Games::RolePlay::MapGen::Generator::SparseAndLoops);
 use Games::RolePlay::MapGen::Tools qw( choice roll _group irange str_eval );
 
 1;

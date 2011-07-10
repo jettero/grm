@@ -5,7 +5,7 @@ package Games::RolePlay::MapGen::_disallow_autoviv;
 
 use strict;
 use Tie::Array;
-use base 'Tie::StdArray';
+use parent 'Tie::StdArray';
 use Carp;
 
 1;
@@ -346,7 +346,7 @@ package Games::RolePlay::MapGen::Tools;
 
 use strict;
 use Carp;
-use base q(Exporter);
+use parent q(Exporter);
 
 our @EXPORT_OK = qw(choice roll random irange range str_eval _group _tile _door);
 
