@@ -1197,6 +1197,7 @@ sub random_open_location {
     my @l    = $this->all_open_locations;
     my $i    = int rand int @l;
 
+    return unless @l;
     return (wantarray ? @{$l[$i]}:$l[$i]);
 }
 # }}}
