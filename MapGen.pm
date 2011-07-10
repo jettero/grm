@@ -6,7 +6,7 @@ use Carp;
 use Storable;
 use common::sense;
 
-our $VERSION = '1.5000';
+our $VERSION = '1.5005';
 
 our $AUTOLOAD;
 

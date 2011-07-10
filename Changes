@@ -1,3 +1,7 @@
+1.5005: Sun Jul 10 2011
+   - use common::sense and use parent
+   - no AutoLoader
+
 1.5000: Wed Jun 01 2011
    - load_map() and save_map() were using Data::Dumper rather
      than the more obvious choice: Storable — fixed.  I'm not
