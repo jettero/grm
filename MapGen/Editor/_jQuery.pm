@@ -1,7 +1,7 @@
 
 package Games::RolePlay::MapGen::Editor::_jQuery;
 
-use strict;
+use common::sense;
 use Fcntl qw(:seek);
 
 our $top = tell DATA;

@@ -2,7 +2,7 @@
 
 package Games::RolePlay::MapGen::GeneratorPlugin::FiveSplit;
 
-use strict;
+use common::sense;
 use Carp;
 use Games::RolePlay::MapGen::Tools qw( roll choice _group );
 

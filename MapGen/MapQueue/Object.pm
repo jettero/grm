@@ -2,7 +2,7 @@
 
 package Games::RolePlay::MapGen::MapQueue::Object;
 
-use strict;
+use common::sense;
 use overload fallback => 1, bool => sub{1}, '0+' => \&n, '""' => \&q, "-=" => \&me, "+=" => \&pe;
 
 sub new { my $class = shift; my $val = shift; bless {q=>1, u=>1, v=>$val}, $class }

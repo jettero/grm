@@ -2,7 +2,7 @@
 
 package Games::RolePlay::MapGen::Exporter::XML;
 
-use strict;
+use common::sense;
 use Carp;
 use Tie::IxHash;
 use XML::Simple;

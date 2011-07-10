@@ -9,7 +9,7 @@
 
 package Games::RolePlay::MapGen::Editor::_MForm;
 
-use strict;
+use common::sense;
 use Gtk2;
 use Gtk2::SimpleList;
 use Glib qw(TRUE FALSE);

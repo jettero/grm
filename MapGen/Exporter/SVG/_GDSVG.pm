@@ -15,7 +15,7 @@ package Games::RolePlay::MapGen::Exporter::SVG::_GDSVG;
 #
 # -Paul
 
-use strict;
+use common::sense;
 use SVG;
 use Carp;
 

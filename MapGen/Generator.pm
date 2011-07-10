@@ -2,7 +2,7 @@
 
 package Games::RolePlay::MapGen::Generator;
 
-use strict;
+use common::sense;
 use Carp;
 
 our @ISA;

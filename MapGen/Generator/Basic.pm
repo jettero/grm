@@ -2,7 +2,7 @@
 
 package Games::RolePlay::MapGen::Generator::Basic;
 
-use strict;
+use common::sense;
 use Carp;
 use parent q(Games::RolePlay::MapGen::Generator::SparseAndLoops);
 use Games::RolePlay::MapGen::Tools qw( choice roll _group irange str_eval );

@@ -3,7 +3,7 @@
 # package ::_interconnected_map {{{
 package Games::RolePlay::MapGen::_disallow_autoviv;
 
-use strict;
+use common::sense;
 use Tie::Array;
 use parent 'Tie::StdArray';
 use Carp;
@@ -30,7 +30,7 @@ sub FETCH {
 
 package Games::RolePlay::MapGen::_interconnected_map;
 
-use strict;
+use common::sense;
 use Carp;
 
 1;
@@ -140,7 +140,7 @@ sub DESTROY {
 # package ::_group; {{{
 package Games::RolePlay::MapGen::_group;
 
-use strict;
+use common::sense;
 
 1;
 
@@ -300,7 +300,7 @@ sub enumerate_extents {
 # package ::_tile; {{{
 package Games::RolePlay::MapGen::_tile;
 
-use strict;
+use common::sense;
 
 1;
 
@@ -323,7 +323,7 @@ sub DESTROY { warn "tile verbosely dying" if $ENV{VERBOSE_TILE_DEATH} }  # searc
 # package ::_door; {{{
 package Games::RolePlay::MapGen::_door;
 
-use strict;
+use common::sense;
 
 1;
 
@@ -344,7 +344,7 @@ sub new {
 
 package Games::RolePlay::MapGen::Tools;
 
-use strict;
+use common::sense;
 use Carp;
 use parent q(Exporter);
 

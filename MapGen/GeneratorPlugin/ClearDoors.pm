@@ -2,7 +2,7 @@
 
 package Games::RolePlay::MapGen::GeneratorPlugin::BasicDoors;
 
-use strict;
+use common::sense;
 use Carp;
 
 1;

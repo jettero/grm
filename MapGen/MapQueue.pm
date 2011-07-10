@@ -2,7 +2,7 @@
 
 package Games::RolePlay::MapGen::MapQueue;
 
-use strict;
+use common::sense;
 use Carp;
 use Exporter;
 use Math::Trig;

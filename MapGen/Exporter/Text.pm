@@ -2,7 +2,7 @@
 
 package Games::RolePlay::MapGen::Exporter::Text;
 
-use strict;
+use common::sense;
 use Carp;
 
 1;

@@ -2,7 +2,7 @@
 
 package Games::RolePlay::MapGen::Generator::OneBigRoom;
 
-use strict;
+use common::sense;
 use Carp;
 use parent q(Games::RolePlay::MapGen::Generator);
 use Games::RolePlay::MapGen::Tools qw( _group _tile );
