@@ -64,6 +64,7 @@ sub _check_opts {
             next if $k eq "objs";
             next if $k eq "_the_map";
             next if $k eq "_the_groups";
+            next if $k eq "_the_queue";
 
             push @e, "unrecognized option: '$k'";
         }
