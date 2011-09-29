@@ -22,7 +22,7 @@ sub TIEARRAY {
 
 sub FETCH {
     my $this = shift;
-    
+
     croak "autovivifing new rows and columns is disabled ($_[0]>$#$this)" if $_[0] > $#$this;
 
     $this->SUPER::FETCH(@_);
@@ -90,7 +90,7 @@ sub disconnect_map {
                 # Destroying the map wouldn't destroy the tiles if they're self
                 # referencing like this.  That's not a problem because of the
                 # global destructor, *whew*; except that each new map generated,
-                # until perl exits, would eat up more memory.  
+                # until perl exits, would eat up more memory.
 
                 delete $map->[$i][$j]{nb}; # So we have to break the self-refs here.
             }
@@ -245,7 +245,7 @@ sub add_rectangle {
         splice @{$this->{size}}, $kill, 0;
     }
 
-    my $cloc = [0,0]; 
+    my $cloc = [0,0];
        $cloc = [ int($sloc->[0]/$nloc),  int($sloc->[1]/$nloc) ] if $nloc > 0;
 
     my $extent = [ $Mloc->[0]-$mloc->[0]+1, $Mloc->[1]-$mloc->[1]+1 ];
@@ -329,8 +329,8 @@ use common::sense;
 1;
 
 sub new {
-    my $class = shift; 
-    my $this  = bless { @_ }, $class; 
+    my $class = shift;
+    my $this  = bless { @_ }, $class;
 
     $this->{locked}   = 0 unless $this->{locked};
     $this->{stuck}    = 0 unless $this->{stuck};
@@ -362,8 +362,8 @@ sub choice {
 # roll {{{
 sub roll {
     my ($num, $sides) = @_;
-    my $roll = 0; 
-    
+    my $roll = 0;
+
     $roll += int rand $sides for 1 .. $num;
     $roll += $num;
 
@@ -432,7 +432,7 @@ sub str_eval {
 
     return int $str if $str =~ m/^\d+$/;
     $str =~ s/\s+//g;
-    
+
     $str =~ s/^(\d+)-(\d+)$/&irange($1, $2)/eg;
     $str =~ s/^([\d\.]+)-([\d\.]+)f$/&range($1, $2)/egi;
     $str =~ s/^(\d+)d(\d+)$/&roll($1, $2)/eg;
@@ -466,12 +466,12 @@ Games::RolePlay::MapGen::Tools - Some support tools and objects for the mapgen s
     my $ri = irange(0, 7);                  # An integer between 0 and 7
     my $e  = choice(qw(test this please));  # picks one of test, this, and please at random
 
-    my $v  = str_eval("1d8");               # returns int(roll(1,8)) 
+    my $v  = str_eval("1d8");               # returns int(roll(1,8))
     my $v  = str_eval("1d20+5");            # returns int(roll(1,20) + 5)
     my $v  = str_eval("5-12");              # returns irange(5, 12)
     my $v  = str_eval("2.5-12.0333f");      # returns range(2.5, 12.0333) -- note the 'f' on the end
     my $v  = str_eval("NaN");               # -- returns undef on parse error
-    
+
     # This package also exports _group and _tile, which are shortcut functions for new
     # Games::RolePlay::MapGen::_tile and ::_group objects.
 
@@ -527,7 +527,7 @@ At this time, the ::_tile object is just a blessed hash that the
 ::Generators instantiate at every map location.  There are no required
 variables at this time.
 
-    v=>0, 
+    v=>0,
     od=>{n=>0, s=>0, e=>0, w=>0}
 
 Though, for convenience, visited is set to 0 and "open directions" is set to
@@ -535,7 +535,7 @@ all zeros.
 
 =head1 Games::RolePlay::MapGen::_interconnected_map
 
-This object interconnects all the tiles in a map array, so 
+This object interconnects all the tiles in a map array, so
 $tile = $map->[$y][$x] and $tile->{nb} is an array of neighboring tiles.
 Example: $east_neighbor = $map->[$y][$x]->{nb}{e};
 
@@ -565,7 +565,7 @@ Jet is using this software in his own projects...
 If you find bugs, please please please let him know. :)
 
 Actually, let him know if you find it handy at all.
-Half the fun of releasing this stuff is knowing 
+Half the fun of releasing this stuff is knowing
 that people use it.
 
 =head1 COPYRIGHT
