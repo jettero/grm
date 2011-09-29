@@ -431,9 +431,12 @@ sub str_eval {
     my $str = shift;
 
     return int $str if $str =~ m/^\d+$/;
-
-    $str =~ s/^\s*(\d+)d(\d+)\s*$/&roll($1, $2)/eg;
-    $str =~ s/^\s*(\d+)d(\d+)\s*([\+\-])\s*(\d+)$/&roll($1, $2) + ($3 eq "+" ? $4 : 0-$4)/eg;
+    $str =~ s/\s+//g;
+    
+    $str =~ s/^(\d+)-(\d+)$/&irange($1, $2)/eg;
+    $str =~ s/^([\d\.]+)-([\d\.]+)f$/&range($1, $2)/egi;
+    $str =~ s/^(\d+)d(\d+)$/&roll($1, $2)/eg;
+    $str =~ s/^(\d+)d(\d+)([\+\-])(\d+)$/&roll($1, $2) + ($3 eq "+" ? $4 : 0-$4)/eg;
 
     return undef if $str =~ m/\D/;
     return int $str;
@@ -462,8 +465,13 @@ Games::RolePlay::MapGen::Tools - Some support tools and objects for the mapgen s
     my $r5 = range(7, 12, -1);              # 100% negatively correlated with the last range (ie, not random at all)
     my $ri = irange(0, 7);                  # An integer between 0 and 7
     my $e  = choice(qw(test this please));  # picks one of test, this, and please at random
-    my $v  = str_eval("1d8");               # returns int(roll(1,8)) -- returns undef on parse error
 
+    my $v  = str_eval("1d8");               # returns int(roll(1,8)) 
+    my $v  = str_eval("1d20+5");            # returns int(roll(1,20) + 5)
+    my $v  = str_eval("5-12");              # returns irange(5, 12)
+    my $v  = str_eval("2.5-12.0333f");      # returns range(2.5, 12.0333) -- note the 'f' on the end
+    my $v  = str_eval("NaN");               # -- returns undef on parse error
+    
     # This package also exports _group and _tile, which are shortcut functions for new
     # Games::RolePlay::MapGen::_tile and ::_group objects.
 
