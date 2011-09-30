@@ -1,6 +1,6 @@
 package Games::RolePlay::MapGen::GeneratorPlugin::Terraria;
 
-use v5.10;
+use common::sense;  # ...  it works every time!
 use XML::Parser;
 use Games::RolePlay::MapGen::MapQueue::Object;
 use Games::RolePlay::MapGen::Tools qw( choice random );
@@ -8,7 +8,7 @@ use List::Util qw( shuffle );
 use Memoize;
 
 use parent Exporter;
-our @EXPORT_OK = qw(odds_pick add_to_tile frame_info);
+our @EXPORT_OK = qw(odds_pick add_to_tile frame_info tile_convert);
 
 ##############################################################################
 

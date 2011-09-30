@@ -1,10 +1,11 @@
-package Games::RolePlay::MapGen::Exporter::TerrariaPNG;
+package Games::RolePlay::MapGen::Exporter::Terraria::PNG;  ### change to Image ###
 use v5.10;
 use Data::Dumper;
 use List::Util qw(shuffle);
 use Games::RolePlay::MapGen::GeneratorPlugin::Terraria;
 use Games::RolePlay::MapGen::MapQueue;
-use parent qw(Games::RolePlay::MapGen::Exporter::PNG);
+
+use parent qw(Games::RolePlay::MapGen::Exporter);
 
 sub genmap {
    my $this = shift;
