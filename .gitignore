@@ -3,7 +3,6 @@
 *.png
 *.svg
 *.txt
-*.xml
 10_groups.*
 META.yml
 Makefile
