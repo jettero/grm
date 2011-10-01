@@ -6,7 +6,7 @@ use List::Util qw(shuffle);
 use Games::RolePlay::MapGen::GeneratorPlugin::Terraria qw(tile_convert);
 use Games::RolePlay::MapGen::MapQueue;
 use Games::RolePlay::MapGen::Tools qw( random );
-
+use subs qw(bool)
 use parent qw(Games::RolePlay::MapGen::Exporter);
 
 sub genmap {
@@ -45,34 +45,48 @@ sub genmap {
    )<";     # Make these little-endian (per Windows standard)
    
    ### FIXME: Need to add these variables ###
-   my $wld = pack($pack_head, 20, "GRM World", random(2 * 32), 0, $opts->{x_size}, 0, $opts->{y_size}, $opts->{x_size}, $opts->{y_size}, undef, 
+   my $wld = pack($pack_head, 20, "GRM World", my $id = random(2 * 32), 0, $opts->{x_size}, 0, $opts->{y_size}, $opts->{x_size}, $opts->{y_size}, undef, 
                   # ...WorldSurface
                   undef, undef, undef, 1, 0, 0, undef, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
   
-   foreach my $x (0 .. $#$tmap) {
+  # Tiles, Walls, and Liquid layers
+  foreach my $x (0 .. $#$tmap) {
       my $yend = $#{$tmap->[$x]};
 
       foreach my $y (0 .. $yend) {
-         my $t  = $map->[$x][$y];
+         my $t = map { $tmap->{$_}[$x][$y] } qw(liquid wall block);
+         $wld .= pack('b1', bool $t->{block});
          
-         if (IsActive = Boolean) {
+         ### Tiles ###
+         # if (IsActive = Boolean) {
+         #    Type = Byte
+         #    if ([Type].IsFramed) Frame = PointShort(Int16, Int16)
+         # }
+         if (my $tb = $t->{block}) {
+            $wld .= pack('C', $tb->{num});
+            $wld .= pack('SS', split(/,/, $tb->{frame_xy}[$x][$y])) if ($tb->{type} eq 'frame' || $tb->{isFramed});
+         }
+         # IsLighted = Boolean
+         $wld .= pack('b1', 0);  # still haven't figured out what the hell this property does...
+         
+         ### Walls ###
+         # if (Boolean) Wall = Byte
+         $wld .= pack('b1', bool $t->{wall});
+         $wld .= pack('C', $t->{wall}{num}) if ($t->{wall});
+         
+         ### Liquid ###
+         # if (Boolean) {
+         #    Liquid = Byte
+         #    IsLava = Boolean
+         # }
+         $wld .= pack('b1', bool $t->{liquid});
+         if ($t->{liquid}) {
+            $wld .= pack('C', 255);  ### TODO: Support liquid levels ###
+            $wld .= pack('b1', bool ($t->{liquid}{name} eq 'Lava'));
+         }
+      }
+   }
    
-   
-   # unpack uses c/(), pack uses ()[c]
-   # serves as a conditional, but with different orders
-   tile_unpack => "
-      c/(    # if (IsActive = Boolean) {
-      C      #    Type = Byte
-      {SS}   #    if ([Type].IsFramed) Frame = PointShort(Int16, Int16)
-      }      # }
-      c      # IsLighted = Boolean
-      c{C}   # if (Boolean) Wall = Byte
-      c{     # if (Boolean) {
-      C      #    Liquid = Byte
-      c      #    IsLava = Boolean
-      }      # }
-   ",
-
    # if (Boolean) {
    #    Location = PointInt32(Int32, Int32)
    # 
@@ -80,24 +94,16 @@ sub genmap {
    #       if (stackSize = Byte > 0) itemName = String
    #    }
    # }
+   $wld .= pack('x2001');  ### FIXME: Support chests/signs/NPCs ###
 
-
-   chest        => '(L2((CC/A*)[&])[20])[&]',
-   sign  => "",
-   npc   => "",
+   # TRUE      = Boolean
+   # WorldName = String
+   # WorldId   = Int32
+   $wld .= pack('b1C/A*L', 1, "GRM World", $id);
    
-
    return $wld;
 }
 
+sub bool (*) { $_[0] ? 1 : 0 }
+
 1;
-
-use v5.10;
-say unpack("b1/(a8)", "\001Gurusamy");
-say unpack("c/(aaaaaaaa)", "\001Gurusamy");
-say join ',', unpack("c/(C8)", "\001Gurusamy");
-
-say pack("c/(ALdd)",     0, 'G', 75, 75, 75);
-say pack("c/(aaaaaaaa)", 1, split(//, "Gurusamy"));
-say pack("(C8)[1]", 71,117,114,117,115,97,109,121);
-
