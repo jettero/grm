@@ -5,14 +5,12 @@ package Games::RolePlay::MapGen::Generator;
 use common::sense;
 use Carp;
 
-our @ISA;
-
 1;
 
 # new {{{
 sub new {
-    my $class = shift;
-    my $this  = bless {o => {@_}}, $class;
+    my ($class, $opts) = @_;
+    my $this  = bless {o => $opts}, $class;
 
     $this->{plugins} = {
          pre => [ ], # after the entire map is built, this executes on the topnode (before treasure and traps are added)
@@ -30,8 +28,7 @@ sub new {
 # }}}
 # gen_opts {{{
 sub gen_opts {
-    my $this = shift;
-    my $opts = {@_};
+    my ($this, $opts) = @_;
 
     for my $k (keys %{ $this->{o} }) {
         $opts->{$k} = $this->{o}{$k} if not exists $opts->{$k};
@@ -42,8 +39,8 @@ sub gen_opts {
 # }}}
 # go {{{
 sub go {
-    my $this = shift;
-    my $opts = $this->gen_opts(@_);
+    my ($this, $opts) = @_;
+    $opts = $this->gen_opts($opts);
 
     $this->gen_bounding_size( $opts );
 
