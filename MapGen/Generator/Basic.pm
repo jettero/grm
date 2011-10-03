@@ -6,6 +6,9 @@ use common::sense;
 use Carp;
 use parent q(Games::RolePlay::MapGen::Generator::SparseAndLoops);
 use Games::RolePlay::MapGen::Tools qw( choice roll _group irange str_eval );
+use List::Utils qw(max);
+use List::MoreUtils qw(part pairwise uniq indexes);
+use Data::Dumper;
 
 1;
 
@@ -13,7 +16,7 @@ use Games::RolePlay::MapGen::Tools qw( choice roll _group irange str_eval );
 sub gen_room_size {
     my $this = shift;
     my $opts = shift;
-     
+
     my ($xm, $ym) = split /x/, $opts->{min_room_size};
     my ($xM, $yM) = split /x/, $opts->{max_room_size};
 
@@ -33,7 +36,7 @@ sub mark_things_as_pseudo_rooms {
     my $groups = shift;
 
     # This function assumes all defined {type}s are corridoors and that all {od} are un-broken.
-    
+
     my ($i, $np, @tiles) = (0, 0, map(@$_, @$map));
     my $progress = Term::ProgressBar::Quiet->new({
        name   => 'Marking potential rooms',
@@ -42,7 +45,7 @@ sub mark_things_as_pseudo_rooms {
        ETA    => 'linear',
     });
     $progress->minor(0);
-    
+
     for my $tile ( @tiles ) {
         if( $tile->{type} ) {
 
@@ -130,9 +133,21 @@ sub drop_rooms {
 
     $opts->{y_size} = $#$map;
     $opts->{x_size} = $#{ $map->[0] };
-    
+
     my $num_rooms = &str_eval( $opts->{num_rooms} );
-    
+    my @room_locs = pairwise { [@$a, @$b] } map { ($_->{loc}, $_->{size}) } grep { $_->{type} eq 'room' } @$groups;  # [ $x, $y, $sx, $sy ]
+
+    my $types = [[]];
+    # Calculate types on a full map scale
+    for my $y (0 .. $#$map) {
+        my $s = $types->[$y];
+        for my $x (0 .. $#{ $map->[$y] }) {
+            my $tile = $map->[$y][$x];
+            $s->[$x] = $tile && $tile->{type};
+            $s->[$x] = $tile->{group} if ($s->[$x] eq 'pseudo');
+        }
+    }
+
     my $progress = Term::ProgressBar::Quiet->new({
        name   => 'Adding rooms',
        count  => $num_rooms,
@@ -140,7 +155,8 @@ sub drop_rooms {
        ETA    => 'linear',
     });
     $progress->minor(0);
-    
+
+    # Add in the rooms
     for my $rn (1 .. $num_rooms) {
         my @size    = $this->gen_room_size( $opts );
            $size[0] = $opts->{x_size} if $size[0] > $opts->{x_size};
@@ -151,53 +167,57 @@ sub drop_rooms {
 
         $opts->{t_cb}->() if exists $opts->{t_cb};
 
-        for my $i (0 .. $#$map - $size[1]) {
-            my $jend = $#{ $map->[$i] };
-
-            ### FIXME: Detect rooms before we waste time with loops ###
+        # Calculate score for each potential location
+        my $yend = $#$map - $size[1] - 1;
+        for (my $y = 0; $y <= $yend; $y++) {  # (old-fashioned loop for greater control)
             
-            LONGJUMP: for my $j (0 .. $jend - $size[0]) {
+            my @room_rng = grep { $y <= $_->[1] && $y+$size[1]-1 >= $_->[1] } @room_locs;  # first pass room check
+            my $xend = $#{ $map->[$y] } - $size[0] - 1;
+            for (my $x = 0; $x <= $xend; $x++) {
+                # room check
+                my $room = (sort { $b->[2] <=> $a->[2] } grep { $x <= $_->[0] && $x+$size[0] >= $_->[0] } @room_rng)[0];
+                if ($room) {  # biggest room
+                    #     this sx  + room sx    - x offset (usually 0)       - 1 (since for loop does a extra +1)
+                    $x += $size[0] + $room->[2] - ($x+$size[0] - $room->[0]) - 1;
+                    next;
+                }
+            
+                # get a slice of scores (using a single array, since it's easier to deal with)
+                my @loc_slice = map { @{$types->[$_]} [$j .. $size[0]-1] } $i .. $size[1]-1;
+                my $score = 0;
+                
+                ### DEBUG ###
+                die "Unskipped room at ($x, $y, $size[0], $size[1])!\n".Dumper(\@room_locs, \@loc_slice) if ('room' ~~ @loc_slice);
+                ### DEBUG ###
+                
+                my @p = part { ref ? 1 : defined ? 0 : 2 } @loc_slice;  # split out the psuedo/defined tiles away from the rest of it
+                $score = scalar(@{$p[0]}) * 1.07;    # score multiply (since the rest of the tiles are corridors)
+                
+                my %rd_all;
+                for (@{$p[1]}) { $rd_all{$_->{name}}++; }
+                for my $g (uniq @{$p[1]}) {
+                    my $rd_all = $rd_all{$g->{name}};
+                    if( $rd_all == $g->{lsize} ) {
+                        $score += ( $g->{lsize} == 6 ? 1.01 : 1.03 );
 
-                my ($score, $pseudo) = (0, 0);
-                for my $w (0 .. $size[0]-1) {
-                    for my $h (0 .. $size[1]-1) {
-                        my $tile = $map->[$i+$h][$j+$w];
+                    } elsif( $g->{lsize} == 6 and $rd_all == 4 ) {
+                        $score += 1.05;
 
-                        given ($tile->{type}) {
-                            when (undef)      { next; }
-                            when ('room')     { next LONGJUMP; }
-                            when ('corridor') { $score += 1.07; }
-                            when ('pseudo')   { $tile->{group}{_rd_all}++; $pseudo = 1; }
-                        }
+                    } else {
+                        $score += 1.07 * 4;
+
                     }
                 }
-                
-                if ($pseudo) {
-                    for my $g (grep { exists $_->{_rd_all} && $_->{type} eq "pseudo" } @$groups) {
-                        if( $g->{_rd_all} == $g->{lsize} ) {
-                            $score += ( $g->{lsize} == 6 ? 1.01 : 1.03 );
 
-                        } elsif( $g->{lsize} == 6 and $g->{_rd_all} == 4 ) {
-                            $score += 1.05;
-
-                        } else {
-                            $score += 1.07 * 4;
-
-                        }
-
-                        delete $g->{_rd_all};
-                    }
-                }
-                
-                if( $score > 0 ) {
+                if ($score > 0) {
                     if( not defined $lowest_score or $score < $lowest_score ) {
                         $lowest_score = $score;
                         @possible_locs = grep { $_->[2] <= $lowest_score } @possible_locs;
                     }
 
                     push @possible_locs, [ $j, $i, $score ] if $score <= $lowest_score;
-               }
-           }
+                }
+            }
         }
 
         if( my $loc = &choice( @possible_locs ) ) {
@@ -209,13 +229,14 @@ sub drop_rooms {
                $group->name( "Room #$rn" );
                $group->type( "room" );
                $group->add_rectangle( [@$loc], [@size] );
+            push @room_locs, (@$loc, @size);
 
             my @tiles = $group->enumerate_tiles;
             my ($xmin, $ymin, $xmax, $ymax) = $group->enumerate_extents;
 
             for my $tl ( @tiles ) {
                 my ($x,$y) = @$tl;
-                my $tile = $map->[ $y ][ $x ];
+                my $tile = $map->[$y][$x];
 
                 if( exists $tile->{type} ) {
                     if( $tile->{type} eq "corridor" or $tile->{type} eq "pseudo" ) {
@@ -226,8 +247,9 @@ sub drop_rooms {
                     }
                 }
 
-                $tile->{type}  = "room";
+                $tile->{type}  = $types->[$y][$x] = 'room';
                 $tile->{group} = $group;
+                
                 for my $dir (qw(n e s w)) {
                     $tile->{od}{$dir} = 1; # open every direction... close edges below
 
@@ -274,7 +296,7 @@ sub drop_rooms {
 
             push @$groups, $group;
         }
-        
+
         $progress->update($rn);
     }
 }
@@ -353,7 +375,7 @@ Games::RolePlay::MapGen::Generator::Basic - The basic random bounded dungeon gen
     use Games::RolePlay::MapGen;
 
     my $map = new Games::RolePlay::MapGen;
-    
+
     $map->set_generator( "Games::RolePlay::MapGen::Generator::Basic" );
 
     generate $map;
