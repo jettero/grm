@@ -47,6 +47,15 @@ sub gen_cell_size {
         $opts->{x_size} = $1;
         $opts->{y_size} = $2;
     }
+
+    if( $opts->{bounding_box} ) {
+        die "ERROR: illegal bounding box '$opts->{bounding_box}'" unless $opts->{bounding_box} =~ m/^(\d+)x(\d+)/;
+        $opts->{bound_x_size} = $1;
+        $opts->{bound_y_size} = $2;
+    }
+
+    map { $opts->{'pixel_'.$_.'_size'} = $opts->{'bound_'.$_.'_size'} * $opts->{$_.'_size'} } qw(x y);
+    
 }
 # }}}
 # genmap {{{

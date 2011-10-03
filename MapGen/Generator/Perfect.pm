@@ -5,7 +5,11 @@ package Games::RolePlay::MapGen::Generator::Perfect;
 use common::sense;
 use Carp;
 use parent q(Games::RolePlay::MapGen::Generator);
-use Games::RolePlay::MapGen::Tools qw( _group _tile choice roll );
+use Games::RolePlay::MapGen::Tools qw( _group _tile choice roll random );
+use List::MoreUtils qw(firstidx);
+use Term::ProgressBar::Quiet;
+
+use Benchmark ':hireswallclock';
 
 1;
 
@@ -45,20 +49,21 @@ sub generate_perfect_maze {
 
     $cur->{type} = "corridor";
 
-    # open DEBUG, ">debug.log" or die $!;
-
-    for(;;) {
+    my ($i, $np, $max) = (0, 0, $opts->{x_size} * $opts->{x_size} * 4);
+    my $progress = Term::ProgressBar::Quiet->new({
+       name   => 'Generating perfect maze',
+       count  => $max,
+       remove => 1,
+       ETA    => 'linear',
+    });
+    $progress->minor(0);
+    
+    while (@visited) {
         my $nex = $cur->{nb}{$dir};
-
-        my $show = sub { my $n = shift; sprintf '(%2d, %2d)', $n->{x}, $n->{y} };
 
         $opts->{t_cb}->() if exists $opts->{t_cb};
 
-        # printf DEBUG '@visited=%3d; $cur=%s; $nex=%s;%s', int @visited, $show->($cur), $show->($nex);
-
         if( $nex and not $nex->{visited} ) {
-            # print DEBUG " NEXT";
-
             $cur->{od}{$dir} = 1;
 
             $cur = $nex;
@@ -73,8 +78,6 @@ sub generate_perfect_maze {
             # $opts->{same_way_percent} of the time, we won't change the direction
 
         } elsif( @togo ) {
-            # print DEBUG " TOGO";
-
             $cur->{_pud}{$dir} = 1; # perfect's used dir
 
             # $opts->{same_node_percent} of the time, we try to use the same node
@@ -95,7 +98,10 @@ sub generate_perfect_maze {
         } else {
             # print DEBUG " DULL";
             # This node is so boring, we don't want to accidentally try it again
-            @visited = grep {$_ != $cur} @visited;
+            
+            # (@visited can get large pretty quick, so we need to process it as
+            # efficiently as possible)
+            splice(@visited, (firstidx {$_ == $cur} @visited), 1);
 
             last unless @visited;
 
@@ -104,11 +110,13 @@ sub generate_perfect_maze {
             @togo = grep { !$cur->{od}{$_} and !$cur->{_pud}{$_} } @dirs;
             $dir  = &choice(@togo);
         }
+        
+        $np = $progress->update($i) if (++$i >= $np);
+    };
 
-        # print DEBUG "\n";
-    }
-
-    delete $_->{_pud} for (map(@$_, @$map))
+    delete $_->{_pud} for (map(@$_, @$map));
+    
+    $progress->update($max);
 
 }
 # }}}

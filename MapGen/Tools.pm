@@ -32,6 +32,8 @@ package Games::RolePlay::MapGen::_interconnected_map;
 
 use common::sense;
 use Carp;
+use List::Util qw(max);
+use Term::ProgressBar::Quiet;
 
 1;
 
@@ -43,6 +45,15 @@ sub interconnect_map {
 
     tie @$_, "Games::RolePlay::MapGen::_disallow_autoviv", $_ for $map, @$map;
 
+    my $np = 0;
+    my $progress = Term::ProgressBar::Quiet->new({
+       name   => 'Interconnecting the map',
+       count  => $#$map * 2,
+       remove => 1,
+       ETA    => 'linear',
+    });
+    $progress->minor(0);
+    
     for my $i (0 .. $#$map) {
         my $jend = $#{ $map->[$i] };
 
@@ -53,6 +64,7 @@ sub interconnect_map {
             $map->[$i][$j]->{nb}{e} = $map->[$i][$j+1] unless $j == $jend;
             $map->[$i][$j]->{nb}{w} = $map->[$i][$j-1] unless $j == 0;
         }
+        $np = $progress->update($i) if ($i >= $np);
     }
 
     # check
@@ -70,6 +82,7 @@ sub interconnect_map {
                 warn "nb issues with ($x, $y):$d-$o" unless $n->{nb}{$o} == $t;
             }
         }
+        $np = $progress->update($#$map + $y) if ($#$map + $y >= $np);
     }
 }
 # }}}

@@ -207,7 +207,7 @@ sub generate {
     if( my $gen = $this->{objs}{generator} ) {
         my $new_opts;
 
-        (map { $this->{'_the_'.$_} } qw(map groups queue), $new_opts) = $gen->go( @_ );
+        ($this->{_the_map}, $this->{_the_groups}, $new_opts) = $gen->go( @_ );
 
         if( $new_opts and keys %$new_opts ) {
             for my $k (keys %$new_opts) {
@@ -251,7 +251,7 @@ sub export {
     __MADE_VIS_OBJ:
     if( my $vis = $this->{objs}{exporter} ) {
 
-        return $vis->go( map { $_ = '_the_'.$_; $_ => $this->{$_}; } qw(map groups queue), (@_==1 ? (fname=>$_[0]) : @_) );
+        return $vis->go( map { my $s = '_the_'.$_; $s => $this->{$s}; } qw(map groups queue), (@_==1 ? (fname=>$_[0]) : @_) );
 
     } else {
         die "problem creating new exporter object" if $err;

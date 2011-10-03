@@ -1,7 +1,6 @@
 package Games::RolePlay::MapGen::GeneratorPlugin::Terraria::Traps;
 
-use v5.10;
-use strict;
+use common::sense;  # works every time!
 use Games::RolePlay::MapGen::GeneratorPlugin::Terraria qw( odds_pick add_to_tile frame_info );
 use Games::RolePlay::MapGen::Tools qw( irange );
 
@@ -9,17 +8,17 @@ use Games::RolePlay::MapGen::Tools qw( irange );
 
 $Games::RolePlay::MapGen::known_opts{'terraria_trap_room_obj_odds'} = [
    # Object, Odds
-   [undef,  .40],
-   [Sand,   .20],
-   [Water,  .20],
-   [Spikes, .20],
-   [Lava,   .20],
+   [''     => .40],
+   [Sand   => .20],
+   [Water  => .20],
+   [Spikes => .20],
+   [Lava   => .20],
 ];
 $Games::RolePlay::MapGen::known_opts{'terraria_trap_corr_obj_odds'} = [
-   [undef,  .98],
-   [Sand,   .20],
-   [Water,  .20],
-   [Spikes,   1]
+   [''     => .98],
+   [Sand   => .20],
+   [Water  => .20],
+   [Spikes =>   1]
 ];
 
 our $specs = {};
@@ -61,7 +60,7 @@ sub trapgen {
          my $p = $attr{placement};
          
          for (my $l = 0; $l < @{$grp->{loc}}; $l++) {
-            my @e = ($grp->{loc}[$l][0,1], map { $_ = $grp->{loc}[$l][$_] + $grp->{size}[$l][$_] - 1; } (0, 1));
+            my @e = ($grp->{loc}[$l][0,1], map { $grp->{loc}[$l][$_] + $grp->{size}[$l][$_] - 1 } (0, 1));
 
             foreach my $y ($e[1] .. $e[3]) {
                foreach my $x ($e[0] .. $e[2]) {

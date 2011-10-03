@@ -33,8 +33,17 @@ sub mark_things_as_pseudo_rooms {
     my $groups = shift;
 
     # This function assumes all defined {type}s are corridoors and that all {od} are un-broken.
-
-    for my $tile ( map(@$_, @$map) ) {
+    
+    my ($i, $np, @tiles) = (0, 0, map(@$_, @$map));
+    my $progress = Term::ProgressBar::Quiet->new({
+       name   => 'Marking potential rooms',
+       count  => scalar @tiles,
+       remove => 1,
+       ETA    => 'linear',
+    });
+    $progress->minor(0);
+    
+    for my $tile ( @tiles ) {
         if( $tile->{type} ) {
 
             # Look for those 2x2 corridor-loops starting with familiar upper left corner tiles.
@@ -100,8 +109,11 @@ sub mark_things_as_pseudo_rooms {
                     }
                 }
             }
+
+            $np = $progress->update($i) if (++$i >= $np);
         }
     }
+    $progress->update(scalar @tiles);
 
     push @$groups, map($_->{group}, grep {$_->{group}} map(@$_, @$map));
     for my $g (@$groups) {
@@ -118,8 +130,18 @@ sub drop_rooms {
 
     $opts->{y_size} = $#$map;
     $opts->{x_size} = $#{ $map->[0] };
-
-    for my $rn (1 .. &str_eval( $opts->{num_rooms} )) {
+    
+    my $num_rooms = &str_eval( $opts->{num_rooms} );
+    
+    my $progress = Term::ProgressBar::Quiet->new({
+       name   => 'Adding rooms',
+       count  => $num_rooms,
+       remove => 1,
+       ETA    => 'linear',
+    });
+    $progress->minor(0);
+    
+    for my $rn (1 .. $num_rooms) {
         my @size    = $this->gen_room_size( $opts );
            $size[0] = $opts->{x_size} if $size[0] > $opts->{x_size};
            $size[1] = $opts->{y_size} if $size[1] > $opts->{y_size};
@@ -130,64 +152,51 @@ sub drop_rooms {
         $opts->{t_cb}->() if exists $opts->{t_cb};
 
         for my $i (0 .. $#$map - $size[1]) {
-           my $jend = $#{ $map->[$i] };
+            my $jend = $#{ $map->[$i] };
 
-           for my $j (0 .. $jend - $size[0]) {
+            ### FIXME: Detect rooms before we waste time with loops ###
+            
+            LONGJUMP: for my $j (0 .. $jend - $size[0]) {
 
-               my $score  = 0;
-               my $pseudo = 0;
-               for my $x (0 .. $size[0]-1) {
-                   for my $y (0 .. $size[1]-1) {
-                       my $tile = $map->[$i+$y][$j+$x];
+                my ($score, $pseudo) = (0, 0);
+                for my $w (0 .. $size[0]-1) {
+                    for my $h (0 .. $size[1]-1) {
+                        my $tile = $map->[$i+$h][$j+$w];
 
-                       if( exists $tile->{type} ) {
-                           goto LONGJUMP_PAST_SCORING if $tile->{type} eq "room";
+                        given ($tile->{type}) {
+                            when (undef)      { next; }
+                            when ('room')     { next LONGJUMP; }
+                            when ('corridor') { $score += 1.07; }
+                            when ('pseudo')   { $tile->{group}{_rd_all}++; $pseudo = 1; }
+                        }
+                    }
+                }
+                
+                if ($pseudo) {
+                    for my $g (grep { exists $_->{_rd_all} && $_->{type} eq "pseudo" } @$groups) {
+                        if( $g->{_rd_all} == $g->{lsize} ) {
+                            $score += ( $g->{lsize} == 6 ? 1.01 : 1.03 );
 
-                           if( $tile->{type} eq "corridor" ) {
-                               $score += 1.07;
+                        } elsif( $g->{lsize} == 6 and $g->{_rd_all} == 4 ) {
+                            $score += 1.05;
 
-                           } elsif( $tile->{type} eq "pseudo" ) {
-                               $tile->{group}{_rd_all} ++;
+                        } else {
+                            $score += 1.07 * 4;
 
-                               $pseudo = 1;
-                           }
-                       }
-                   }
+                        }
+
+                        delete $g->{_rd_all};
+                    }
+                }
+                
+                if( $score > 0 ) {
+                    if( not defined $lowest_score or $score < $lowest_score ) {
+                        $lowest_score = $score;
+                        @possible_locs = grep { $_->[2] <= $lowest_score } @possible_locs;
+                    }
+
+                    push @possible_locs, [ $j, $i, $score ] if $score <= $lowest_score;
                }
-
-               if( $pseudo ) {
-                   for my $g (grep { $_->{type} eq "pseudo" } @$groups) {
-                       if( exists $g->{_rd_all} ) {
-
-                           if( $g->{_rd_all} == $g->{lsize} ) {
-                               $score += ( $g->{lsize} == 6 ? 1.01 : 1.03 );
-
-                           } elsif( $g->{lsize} == 6 and $g->{_rd_all} == 4 ) {
-                               $score += 1.05;
-
-                           } else {
-                               $score += 1.07 * 4;
-
-                           }
-
-                           delete $g->{_rd_all};
-                           $pseudo = 0;
-                       } 
-                   }
-               }
-
-               if( $score > 0 ) {
-                   if( not defined $lowest_score or $score < $lowest_score ) {
-                       $lowest_score = $score;
-                       @possible_locs = grep { $_->[2] <= $lowest_score } @possible_locs;
-                   }
-
-                   push @possible_locs, [ $j, $i, $score ] if $score <= $lowest_score;
-               }
-
-               LONGJUMP_PAST_SCORING: 
-               # This is a way of short-cutting much looping when we're not
-               # going to be putting the room there anyway.
            }
         }
 
@@ -265,7 +274,8 @@ sub drop_rooms {
 
             push @$groups, $group;
         }
-
+        
+        $progress->update($rn);
     }
 }
 # }}}
