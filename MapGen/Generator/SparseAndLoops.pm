@@ -27,6 +27,7 @@ sub remove_deadends {
        count  => scalar @endians,
        remove => 1,
        ETA    => 'linear',
+       max_update_rate => .1,
     });
     $progress->minor(0);
     

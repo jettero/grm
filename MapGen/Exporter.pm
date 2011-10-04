@@ -9,20 +9,27 @@ use Carp;
 
 # new {{{
 sub new {
-    my $class = shift;
-    my $this  = bless {o => {@_}}, $class;
+    my ($class, $opts) = @_;
+    my $this = bless {o => $opts}, $class;
 
     return $this;
 }
 # }}}
-# go {{{
-sub go {
-    my $this = shift;
-    my $opts = {@_};
+# gen_opts {{{
+sub gen_opts {
+    my ($this, $opts) = @_;
 
     for my $k (keys %{ $this->{o} }) {
         $opts->{$k} = $this->{o}{$k} if not exists $opts->{$k};
     }
+
+    return $opts;
+}
+# }}}
+# go {{{
+sub go {
+    my ($this, $opts) = @_;
+    $opts = $this->gen_opts($opts);
 
     croak "ERROR: fname is a required option for " . ref($this) . "::go()" unless $opts->{fname};
     croak "ERROR: _the_map is a required option for " . ref($this) . "::go()" unless ref($opts->{_the_map});

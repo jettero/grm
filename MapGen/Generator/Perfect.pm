@@ -9,8 +9,6 @@ use Games::RolePlay::MapGen::Tools qw( _group _tile choice roll random );
 use List::MoreUtils qw(firstidx);
 use Term::ProgressBar::Quiet;
 
-use Benchmark ':hireswallclock';
-
 1;
 
 # create_tiles {{{
@@ -55,6 +53,7 @@ sub generate_perfect_maze {
        count  => $max,
        remove => 1,
        ETA    => 'linear',
+       max_update_rate => .1,
     });
     $progress->minor(0);
     

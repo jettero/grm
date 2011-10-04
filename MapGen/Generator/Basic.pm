@@ -6,9 +6,7 @@ use common::sense;
 use Carp;
 use parent q(Games::RolePlay::MapGen::Generator::SparseAndLoops);
 use Games::RolePlay::MapGen::Tools qw( choice roll _group irange str_eval );
-use List::Utils qw(max);
-use List::MoreUtils qw(part pairwise uniq indexes);
-use Data::Dumper;
+use List::MoreUtils qw(part pairwise uniq);
 
 1;
 
@@ -43,6 +41,7 @@ sub mark_things_as_pseudo_rooms {
        count  => scalar @tiles,
        remove => 1,
        ETA    => 'linear',
+       max_update_rate => .1,
     });
     $progress->minor(0);
 
@@ -135,12 +134,15 @@ sub drop_rooms {
     $opts->{x_size} = $#{ $map->[0] };
 
     my $num_rooms = &str_eval( $opts->{num_rooms} );
-    my @room_locs = pairwise { [@$a, @$b] } map { ($_->{loc}, $_->{size}) } grep { $_->{type} eq 'room' } @$groups;  # [ $x, $y, $sx, $sy ]
+    my $room_groups = grep { $_->{type} eq 'room' } @$groups;  # (pairwise likes to complain about args, hence the @{[ ]} syntax)
+    my @room_locs = pairwise { [@$a, @$b] } @{[map { @{$_->{loc}} } @$room_groups]}, @{[map { @{$_->{size}} } @$room_groups]};  # [ $x, $y, $sx, $sy ]
 
     my $types = [[]];
     # Calculate types on a full map scale
     for my $y (0 .. $#$map) {
+        $types->[$y] = [];
         my $s = $types->[$y];
+        
         for my $x (0 .. $#{ $map->[$y] }) {
             my $tile = $map->[$y][$x];
             $s->[$x] = $tile && $tile->{type};
@@ -170,43 +172,38 @@ sub drop_rooms {
         # Calculate score for each potential location
         my $yend = $#$map - $size[1] - 1;
         for (my $y = 0; $y <= $yend; $y++) {  # (old-fashioned loop for greater control)
-            
-            my @room_rng = grep { $y <= $_->[1] && $y+$size[1]-1 >= $_->[1] } @room_locs;  # first pass room check
+            # Y <= Y2+S && Y+S >= Y2
+            # ----------------Y---------Y+S---|----Y---------Y+S
+            # ------------------------Y2------|------Y2+S-------
+            my @room_rng = grep { $y <= $_->[1]+$_->[3]-1 && $y+$size[1]-1 >= $_->[1] } @room_locs;  # first pass room check
             my $xend = $#{ $map->[$y] } - $size[0] - 1;
             for (my $x = 0; $x <= $xend; $x++) {
                 # room check
-                my $room = (sort { $b->[2] <=> $a->[2] } grep { $x <= $_->[0] && $x+$size[0] >= $_->[0] } @room_rng)[0];
-                if ($room) {  # biggest room
+                my @rooms = sort { $b->[2] <=> $a->[2] } grep { $x <= $_->[0]+$_->[2]-1 && $x+$size[0]-1 >= $_->[0] } @room_rng;
+                if (my $room = shift @rooms) {  # biggest room
                     #     this sx  + room sx    - x offset (usually 0)       - 1 (since for loop does a extra +1)
                     $x += $size[0] + $room->[2] - ($x+$size[0] - $room->[0]) - 1;
                     next;
                 }
             
                 # get a slice of scores (using a single array, since it's easier to deal with)
-                my @loc_slice = map { @{$types->[$_]} [$j .. $size[0]-1] } $i .. $size[1]-1;
+                my @loc_slice = map { @{$types->[$_]} [$x .. $x+$size[0]-1] } $y .. $y+$size[1]-1;
                 my $score = 0;
                 
                 ### DEBUG ###
-                die "Unskipped room at ($x, $y, $size[0], $size[1])!\n".Dumper(\@room_locs, \@loc_slice) if ('room' ~~ @loc_slice);
+                die "Unskipped room at ($x, $y, $size[0], $size[1])!\n" if (/^room$/ ~~ @loc_slice);
                 ### DEBUG ###
                 
-                my @p = part { ref ? 1 : defined ? 0 : 2 } @loc_slice;  # split out the psuedo/defined tiles away from the rest of it
+                my @p = part { ref $_ ? 1 : (defined $_ ? 0 : 2) } @loc_slice;  # split out the psuedo/defined tiles away from the rest of it
                 $score = scalar(@{$p[0]}) * 1.07;    # score multiply (since the rest of the tiles are corridors)
-                
+
                 my %rd_all;
                 for (@{$p[1]}) { $rd_all{$_->{name}}++; }
                 for my $g (uniq @{$p[1]}) {
-                    my $rd_all = $rd_all{$g->{name}};
-                    if( $rd_all == $g->{lsize} ) {
-                        $score += ( $g->{lsize} == 6 ? 1.01 : 1.03 );
-
-                    } elsif( $g->{lsize} == 6 and $rd_all == 4 ) {
-                        $score += 1.05;
-
-                    } else {
-                        $score += 1.07 * 4;
-
-                    }
+                    my ($rd_all, $lsize) = ($rd_all{$g->{name}}, $g->{lsize});
+                    if   ( $rd_all == $lsize )            { $score += ( $lsize == 6 ? 1.01 : 1.03 ); }
+                    elsif( $lsize == 6 and $rd_all == 4 ) { $score += 1.05; }
+                    else                                  { $score += 1.07 * 4; }
                 }
 
                 if ($score > 0) {
@@ -215,7 +212,7 @@ sub drop_rooms {
                         @possible_locs = grep { $_->[2] <= $lowest_score } @possible_locs;
                     }
 
-                    push @possible_locs, [ $j, $i, $score ] if $score <= $lowest_score;
+                    push @possible_locs, [ $x, $y, $score ] if $score <= $lowest_score;
                 }
             }
         }
@@ -229,7 +226,7 @@ sub drop_rooms {
                $group->name( "Room #$rn" );
                $group->type( "room" );
                $group->add_rectangle( [@$loc], [@size] );
-            push @room_locs, (@$loc, @size);
+            push @room_locs, [ @$loc, @size ];
 
             my @tiles = $group->enumerate_tiles;
             my ($xmin, $ymin, $xmax, $ymax) = $group->enumerate_extents;
@@ -306,11 +303,20 @@ sub cleanup_pseudo_rooms {
     my $this   = shift;
     my $map    = shift;
     my $groups = shift;
-    my @pseudo = ();
+    my @p = part { $_->{type} eq 'pseudo' ? 1 : 0 } @$groups;
 
-    @$groups = grep { my $r = 1; if( $_->{type} eq "pseudo" ) { push @pseudo, $_; $r = 0 } $r } @$groups;
+    @$groups = @{$p[0]};
 
-    for my $group (@pseudo) {
+    my $i = 0;
+    my $progress = Term::ProgressBar::Quiet->new({
+       name   => 'Cleaning up groups/tiles',
+       count  => scalar(@{$p[1]}) + 1,
+       remove => 1,
+       ETA    => 'linear',
+    });
+    $progress->minor(0);
+
+    for my $group (@{$p[1]}) {
 
         my $intact = 1;
         my @tofix  = ();
@@ -337,12 +343,11 @@ sub cleanup_pseudo_rooms {
                 $tile->{od}{w} = 1 if $tile->{x} > $xmin;
             }
         }
+        $progress->update(++$i);
     }
 
-    for my $tile (grep {$_->{group}} map {@$_} @$map) {
-        delete $tile->{group}
-            if $tile->{group}{type} eq "pseudo";
-    }
+    for (grep { $_->{group} && $_->{group}{type} eq 'pseudo' } map {@$_} @$map) { delete $_->{group} }
+    $progress->update(++$i);
 }
 # }}}
 

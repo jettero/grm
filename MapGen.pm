@@ -133,8 +133,7 @@ sub DESTROY {}
 # new {{{
 sub new {
     my $class = shift;
-    my @opts  = @_;
-    my $opts  = ( (@opts == 1 and ref($opts[0]) eq "HASH") ? {%{$opts[0]}} : {@opts} );
+    my $opts  = opts_reref(undef, undef, @_);
     my $this  = bless $opts, $class;
 
     if( my $e = $this->_check_opts ) { croak $e }
@@ -203,44 +202,44 @@ sub generate {
     my $this = shift;
     my $err;
 
-    __MADE_GEN_OBJ:
-    if( my $gen = $this->{objs}{generator} ) {
-        my $new_opts;
+    while(1) {
+        if( my $gen = $this->{objs}{generator} ) {
+            my $new_opts;
 
-        ($this->{_the_map}, $this->{_the_groups}, $new_opts) = $gen->go( @_ );
+            ($this->{_the_map}, $this->{_the_groups}, $new_opts) = $gen->go( $this->opts_reref(undef, @_) );
 
-        if( $new_opts and keys %$new_opts ) {
-            for my $k (keys %$new_opts) {
-                $this->{$k} = $new_opts->{$k};
+            if( $new_opts and keys %$new_opts ) {
+                for my $k (keys %$new_opts) {
+                    $this->{$k} = $new_opts->{$k};
+                }
             }
+
+            return;
+
+        } else {
+            die "ERROR: problem creating new generator object" if $err;
         }
 
-        return;
+        eval qq( require $this->{generator} ); 
+        croak "ERROR locating generator module:\n\t$@\n " if $@;
 
-    } else {
-        die "ERROR: problem creating new generator object" if $err;
+        my $obj;
+        my @opts = map(($_=>$this->{$_}), grep {defined $this->{$_} and $_ ne "objs"  and $_ ne "plugins" } keys %$this);
+        my $opts = $this->opts_reref(undef, @opts);
+
+        eval qq( \$obj = new $this->{generator} (\$opts); );
+        if( $@ ) {
+            die   "ERROR generating generator:\n\t$@\n " if $@ =~ m/ERROR/;
+            croak "ERROR generating generator:\n\t$@\n " if $@;
+        }
+
+        $obj->add_plugin( $_ ) for @{ $this->{plugins}{generator} };
+
+        $this->{objs}{generator} = $obj;
+        $err = 1;
+
+        $this->_check_opts; # plugins, generators and exporters can add default options
     }
-
-    eval qq( require $this->{generator} ); 
-    croak "ERROR locating generator module:\n\t$@\n " if $@;
-
-    my $obj;
-    my @opts = map(($_=>$this->{$_}), grep {defined $this->{$_} and $_ ne "objs"  and $_ ne "plugins" } keys %$this);
-
-    eval qq( \$obj = new $this->{generator} (\@opts); );
-    if( $@ ) {
-        die   "ERROR generating generator:\n\t$@\n " if $@ =~ m/ERROR/;
-        croak "ERROR generating generator:\n\t$@\n " if $@;
-    }
-
-    $obj->add_plugin( $_ ) for @{ $this->{plugins}{generator} };
-
-    $this->{objs}{generator} = $obj;
-    $err = 1;
-
-    $this->_check_opts; # plugins, generators and exporters can add default options
-
-    goto __MADE_GEN_OBJ;
 }
 # }}}
 # export {{{
@@ -248,33 +247,35 @@ sub export {
     my $this = shift;
     my $err;
 
-    __MADE_VIS_OBJ:
-    if( my $vis = $this->{objs}{exporter} ) {
+    while(1) {
+        if( my $vis = $this->{objs}{exporter} ) {
 
-        return $vis->go( map { my $s = '_the_'.$_; $s => $this->{$s}; } qw(map groups queue), (@_==1 ? (fname=>$_[0]) : @_) );
+            my $opts = $this->opts_reref('fname', @_);
+            for (qw(map groups queue)) { my $s = '_the_'.$_; $opts->{$s} = $this->{$s}; }
+            return $vis->go( $opts );
 
-    } else {
-        die "problem creating new exporter object" if $err;
+        } else {
+            die "problem creating new exporter object" if $err;
+        }
+
+        eval qq( require $this->{exporter} );
+        croak "ERROR locating exporter module:\n\t$@\n " if $@;
+
+        my $obj;
+        my @opts = map(($_=>$this->{$_}), grep {defined $this->{$_} and $_ ne "objs"  and $_ ne "plugins" } keys %$this);
+        my $opts = $this->opts_reref(undef, @opts);
+
+        eval qq( \$obj = new $this->{exporter} (\$opts); );
+        if( $@ ) {
+            die   "ERROR generating exporter:\n\t$@\n " if $@ =~ m/ERROR/;
+            croak "ERROR generating exporter:\n\t$@\n " if $@;
+        }
+
+        $this->{objs}{exporter} = $obj;
+        $err = 1;
+
+        $this->_check_opts; # plugins, generators and exporters can add default options
     }
-
-    eval qq( require $this->{exporter} );
-    croak "ERROR locating exporter module:\n\t$@\n " if $@;
-
-    my $obj;
-    my @opts = map(($_=>$this->{$_}), grep {defined $this->{$_} and $_ ne "objs"  and $_ ne "plugins" } keys %$this);
-
-    eval qq( \$obj = new $this->{exporter} (\@opts); );
-    if( $@ ) {
-        die   "ERROR generating exporter:\n\t$@\n " if $@ =~ m/ERROR/;
-        croak "ERROR generating exporter:\n\t$@\n " if $@;
-    }
-
-    $this->{objs}{exporter} = $obj;
-    $err = 1;
-
-    $this->_check_opts; # plugins, generators and exporters can add default options
-
-    goto __MADE_VIS_OBJ;
 }
 # }}}
 
@@ -318,6 +319,20 @@ sub size {
 
     return ($x, $y) if wantarray;
     return [$x, $y];
+}
+# }}}
+# opts_reref {{{
+sub opts_reref {
+    my ($this, $default) = (shift, shift);
+    if (@_ == 1) {
+        given (ref $_[0]) {
+            when ('ARRAY') { return { @{$_[0]} } }
+            when ('HASH')  { return $_[0] }
+            default        { return $default ? { $default => $_[0] } : { $_[0] }; }
+        }
+    }
+
+    return { @_ };
 }
 # }}}
 

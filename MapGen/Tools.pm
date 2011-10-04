@@ -51,6 +51,7 @@ sub interconnect_map {
        count  => $#$map * 2,
        remove => 1,
        ETA    => 'linear',
+       max_update_rate => .1,
     });
     $progress->minor(0);
     

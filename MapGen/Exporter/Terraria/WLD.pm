@@ -86,8 +86,6 @@ sub genmap {
    # (yep, we're doing this backwards; just so that we can find the spawn point)
    foreach my $x (0 .. $mx-1) {
       foreach my $y (0 .. $my-1) {
-         my $o = length($wld) - $p;
-         
          my $t = { map { $_ => frame_info($tmap->{$_}[$x][$y]) } qw(liquid wall tile) };
          my $tb = $t->{tile};
          
@@ -128,7 +126,6 @@ sub genmap {
          }
       }
    }
-   say "World length = ".length($wld);
    croak "No spawn point!" unless ($opts->{spawn_xy});
    
    ### Header ###  105+s bytes
