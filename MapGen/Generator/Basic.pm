@@ -150,11 +150,13 @@ sub drop_rooms {
         }
     }
 
+    my ($np, $i) = (0, 0);
     my $progress = Term::ProgressBar::Quiet->new({
        name   => 'Adding rooms',
-       count  => $num_rooms,
+       count  => $num_rooms * $#$map,
        remove => 1,
        ETA    => 'linear',
+       max_update_rate => .1,
     });
     $progress->minor(0);
 
@@ -215,6 +217,9 @@ sub drop_rooms {
                     push @possible_locs, [ $x, $y, $score ] if $score <= $lowest_score;
                 }
             }
+            
+            $i = ($rn-1) * $#$map + $y;
+            $np = $progress->update($i) if ($i >= $np);
         }
 
         if( my $loc = &choice( @possible_locs ) ) {
@@ -293,8 +298,8 @@ sub drop_rooms {
 
             push @$groups, $group;
         }
-
-        $progress->update($rn);
+        $i = $rn * $#$map;
+        $np = $progress->update($i) if ($i >= $np);
     }
 }
 # }}}

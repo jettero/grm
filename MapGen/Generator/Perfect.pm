@@ -50,7 +50,7 @@ sub generate_perfect_maze {
     my ($i, $np, $max) = (0, 0, $opts->{x_size} * $opts->{x_size} * 4);
     my $progress = Term::ProgressBar::Quiet->new({
        name   => 'Generating perfect maze',
-       count  => $max,
+       count  => $max * 2,
        remove => 1,
        ETA    => 'linear',
        max_update_rate => .1,
@@ -61,13 +61,14 @@ sub generate_perfect_maze {
         my $nex = $cur->{nb}{$dir};
 
         $opts->{t_cb}->() if exists $opts->{t_cb};
-
+        
         if( $nex and not $nex->{visited} ) {
             $cur->{od}{$dir} = 1;
 
             $cur = $nex;
             $cur->{visited} = 1;
             push @visited, $cur;
+            $np = $progress->update($i) if (++$i >= $np);
 
             $cur->{od}{$Games::RolePlay::MapGen::opp{$dir}} = 1;
             $cur->{type} = 'corridor';
@@ -78,6 +79,7 @@ sub generate_perfect_maze {
 
         } elsif( @togo ) {
             $cur->{_pud}{$dir} = 1; # perfect's used dir
+            $np = $progress->update($i) if (++$i >= $np);
 
             # $opts->{same_node_percent} of the time, we try to use the same node
             if( @visited>1 and (&roll(1, 100) > $opts->{same_node_percent}) ) {
@@ -101,6 +103,7 @@ sub generate_perfect_maze {
             # (@visited can get large pretty quick, so we need to process it as
             # efficiently as possible)
             splice(@visited, (firstidx {$_ == $cur} @visited), 1);
+            $np = $progress->update($i) if (++$i >= $np);
 
             last unless @visited;
 
@@ -115,7 +118,7 @@ sub generate_perfect_maze {
 
     delete $_->{_pud} for (map(@$_, @$map));
     
-    $progress->update($max);
+    $progress->update($max * 2);
 
 }
 # }}}
