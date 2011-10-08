@@ -61,6 +61,14 @@ sub genmap {
     my $or = deg2rad( $do );
     my $sr = sin( $or ); # we'll be using this, kthx...
 
+    my $progress = Term::ProgressBar::Quiet->new({
+        name   => 'Saving image',
+        count  => $#$map + 1,
+        remove => 1,
+        ETA    => 'linear',
+    });
+    $progress->minor(0);
+
     GRID: {
         my $x = @{$map->[0]}*$opts->{x_size};
         my $y;
@@ -284,6 +292,7 @@ sub genmap {
                 $gd->filledRectangle( $xp+$D, $yp+$D => $Xp-$D, $Yp-$D, $purple );
             }
         }
+        $progress->update($i);
     }
 
     for my $t (map(@$_, @$map)) {
@@ -298,6 +307,8 @@ sub genmap {
     $opts->{fname} =~ /\.(png|jpe?g|gif|gd2?)$/i;
     my $sub = lc($1) || 'png';
     $sub = 'jpeg' if ($fn eq 'jpg');
+
+    $progress->update($#$map + 1);
 
     return ($gd, $sub);
 }

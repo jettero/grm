@@ -24,6 +24,18 @@ sub genmap {
 
     my $ah = sub { my %h; tie %h, "Tie::IxHash", (@_); \%h };
 
+    my $i    = 0;
+    my $oend = scalar(keys %$opts);
+    my $gend = $#{ $opts->{_the_groups} };
+    my $iend = $#{ $opts->{_the_map} };
+    my $progress = Term::ProgressBar::Quiet->new({
+        name   => 'Saving XML map',
+        count  => $oend + $gend + $iend + 1,
+        remove => 1,
+        ETA    => 'linear',
+    });
+    $progress->minor(0);
+
     # options {{{
     my $sort_opts = sub {
         my ($c, $d) = map {ref $opts->{$_} ? 1:0} $a, $b;
@@ -47,6 +59,7 @@ sub genmap {
                 push @$options, $ah->( name=>$k, value=>$v );
             }
         }
+        $progress->update(++$i);
     }
     # }}}
     # groups {{{
@@ -61,10 +74,10 @@ sub genmap {
                 )
             } 0 .. $#{ $g->{loc} }],
         );
+        $progress->update(++$i);
     }
     # }}}
-
-    my $iend = $#{ $opts->{_the_map} };
+    
     for my $i (0 .. $iend) {
         my $jend = $#{ $opts->{_the_map}[$i] };
         my $row  = $ah->( ypos=>$i, tile=>[] );
@@ -114,6 +127,7 @@ sub genmap {
         }
 
         push @$map, $row if int @{$row->{tile}}
+        $progress->update(++$i);
     }
 
     my %main; tie %main, "Tie::IxHash", (
@@ -121,6 +135,7 @@ sub genmap {
         tile_group => $groups,
         'map'      => { row => $map },
     );
+    $progress->update(++$i);
 
     return XMLout(\%main, 
         XMLDecl  => 

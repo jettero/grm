@@ -17,6 +17,7 @@ sub genmap {
        my $smap_obj = $opts->{map_input}[$i];
        my $smap     = $smap_obj->{_the_map};
 
+       ### FIXME: Change Stitch options to hash of array of hashes, starting with 'stitch_input' => [ {} ]
        my $xl = $opts->{upper_left}[$i][0];
        my $yl = $opts->{upper_left}[$i][1];
        my $xo = ($opts->{upper_left_submap} && $opts->{upper_left_submap}[$i]) ? ($opts->{upper_left_submap}[$i][0] ||                   0) : 0;

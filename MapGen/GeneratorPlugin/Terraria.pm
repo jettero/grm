@@ -5,7 +5,7 @@ use Carp qw(confess);
 use XML::Parser;
 use Data::Dumper;
 use Games::RolePlay::MapGen::MapQueue::Object;
-use Games::RolePlay::MapGen::Tools qw( choice random );
+use Games::RolePlay::MapGen::Tools qw( choice random _group );
 use List::Util qw( shuffle );
 use Term::ProgressBar::Quiet;
 use Memoize;
@@ -32,7 +32,6 @@ sub new {
    return bless $this, $class;
 }
 
-# this is basically here just to load the settings.xml file
 sub pre {
    my ($this, $opts, $map, $groups) = @_;
 
@@ -49,6 +48,7 @@ sub pre {
    });
    $progress->minor(0);
    
+   # Load XML settings
    $specs = XML::Parser->new(
       Handlers => {
          Init  => sub {
@@ -115,23 +115,34 @@ sub pre {
    };
    $specs->{ByName}{'Spawn Point'} = $specs->{Tile}{'Spawn Point'} = $obj;
    
-   # wall block sanity checks
-   my $wb = 'wall_blocks';  # tired of repeating this...
-   my $val = $opts->{$wb};
-   $opts->{$wb} = frame_info($val);
-   $val = "'$val'";  # for the errors
-   
-   confess "Cannot find $val in the object list to use as a wall_block!" unless ($opts->{$wb});
-   
-   given ($opts->{$wb}{type}) {
-      when ('tile')  { }  # good!
-      when ('frame') { warn  "Unusual wall block $val, as it's a Frame object; using it, anyway"; }
-      when ('wall')  { confess "Nonono, we're not talking about literally a Wall object; we need a Tile object to BUILD walls!"; }
-      default        { confess "Illegal ".$opts->{$wb}{type}." object being used for wall_blocks"; }
+   # add in wall block groups
+   $i = 1;
+   foreach my $wb (@{$opts->{'wall_blocks'}}) {
+      # wall block sanity checks
+      my $val  = $wb->{wall};
+      my $tile = $wb->{wall} = frame_info($val);
+      $val = "'$val'";  # for the errors
+
+      confess "Cannot find $val in the object list to use as a wall_block!" unless ($tile);
+      
+      given ($tile->{type}) {
+         when ('tile')  { }  # good!
+         when ('frame') { warn  "Unusual wall block $val, as it's a Frame object; using it, anyway"; }
+         when ('wall')  { confess "Nonono, we're not talking about literally a Wall object; we need a Tile object to BUILD walls!"; }
+         default        { confess "Illegal ".$tile->{type}." object being used for wall_blocks"; }
+      }
+      
+      my $p = $tile->{placement};
+      confess "Wall block needs to be able to float; this $val object has a placement of $p" unless (!$p || $p eq 'any');
+
+      # everything is good; add it!
+      my $group = &_group;
+      $group->name("Wall Block Range #$i");
+      $group->type('wall_block');
+      $group->add_rectangle( map { $wb->{$_} } qw(loc size));
+      $group->{wall} = $wb->{wall};
+      push @$groups, $group;
    }
-   
-   my $p = $opts->{$wb}{placement};
-   confess "Wall block needs to be able to float; this $val object has a placement of $p" unless (!$p || $p eq 'any');
    
 }
 
@@ -239,7 +250,15 @@ sub tile_convert {
       },
    };
    $door_tile->{$_} = $door_tile->{closed} for qw(secret stuck locked);  # can't really do anything different here, either
-   my $wall_tile = $mo->{'wall_blocks'};   ### FIXME: Walls need to be part of map, not option ###
+   my @wall_tiles = grep { $_->{type} eq 'wall_block' } @$groups;
+
+   my $progress = Term::ProgressBar::Quiet->new({
+      name   => 'Converting GRM-->Terraria tiles',
+      count  => $#$map,
+      remove => 1,
+      ETA    => 'linear',
+   });
+   $progress->minor(0);
 
    # walk through each GRPMG tile
    foreach my $y (0 .. $#$map) {
@@ -283,10 +302,11 @@ sub tile_convert {
          };
 
          $mo->{t_cb}->() if exists $mo->{t_cb};
+         
+         ### FIXME: check @wall_tiles groups ###
 
          # Walls, BG Walls, and corners
          if ($t->{type}) {  # empty space
-            ### FIXME: main parameters needs a "wall tile" option ###
             ### FIXME: make sure bg_wall is added in as well ###
             tile_rect($tmap, $xp, $yp => $Xp, $Yp, wall => $t->{bg_wall});
             tile_rect($tmap, $xp, $yp => $Xp, $Yp, tile => $wall_tile);
@@ -433,6 +453,9 @@ sub tile_convert {
             
          }
       }
+      
+      $progress->update($y);
+
    }
 
    return $tmap;

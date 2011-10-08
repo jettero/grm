@@ -36,20 +36,33 @@ sub trapgen {
    my $mq = $opts->{_the_queue};
    return undef unless ($mq && scalar keys %$specs);
    
+   my ($i, $np) = (0, 0);
+   my @open_loc = grep { my $loc = $_; $map->[$$loc[1]][$$loc[2]]->{type} eq 'corridor' } $mq->all_open_locations;
+   my @room_grp = grep { $_->{type} eq 'room' } @$groups;
+   my $max = (scalar @{$opts->{'terraria_trap_corr_obj_odds'}} ? scalar @open_loc : 0) +
+             (scalar @{$opts->{'terraria_trap_room_obj_odds'}} ? scalar @room_grp : 0);
+   my $progress = Term::ProgressBar::Quiet->new({
+      name   => 'Adding traps',
+      count  => $max + 1,
+      remove => 1,
+      ETA    => 'linear',
+      max_update_rate => .1,
+   });
+   $progress->minor(0);
+
    # Corridor checks
    if (scalar @{$opts->{'terraria_trap_corr_obj_odds'}}) {
-      foreach my $loc ($mq->all_open_locations) {
+      foreach my $loc (@open_loc) {
          my ($x, $y) = @$loc;
          my $t = $map->[$y][$x];
-         next unless ($t->{type} eq 'corridor');
          add_to_tile($t, $mq, odds_pick($opts->{'terraria_trap_corr_obj_odds'}), 'liquid tile');
+         $np = $progress->update($i) if (++$i >= $np);
       }
    }
 
    if (scalar @{$opts->{'terraria_trap_room_obj_odds'}}) {
-      foreach my $grp (@$groups) {
-         next unless ($grp->{type} eq 'room');
-         
+      foreach my $grp (@room_grp) {
+         $i++;
          my $item = odds_pick($opts->{'terraria_trap_room_obj_odds'});
          next unless (my $t = $specs->{ByName}{$item});
          
@@ -73,8 +86,10 @@ sub trapgen {
                }
             }
          }
+         $np = $progress->update($i) if ($i >= $np);
       }
    }
+   $progress->update(++$i);
 }
 
 

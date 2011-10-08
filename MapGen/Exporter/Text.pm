@@ -58,6 +58,14 @@ sub genmap {
     my $rooms    = "";
        $rooms   .= "$_->{name} $_->{loc_size}\n" for (grep /^room$/, @$g);
 
+    my $progress = Term::ProgressBar::Quiet->new({
+        name   => 'Saving text map',
+        count  => $#$m,
+        remove => 1,
+        ETA    => 'linear',
+    });
+    $progress->minor(0);
+
     for my $i (0 .. $#$m) {
         my $p     = $1 if $i =~ m/(\d)$/;
         my $jend  = $#{ $m->[$i] };
@@ -131,7 +139,8 @@ sub genmap {
             }
             $map .= "\n";
         }
-
+        
+        $progress->update($i);
     }
 
     return $map . $rooms;
