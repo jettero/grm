@@ -42,6 +42,14 @@ sub doorgen {
 
      # warn "max_span=$max_span";
 
+    my $progress = Term::ProgressBar::Quiet->new({
+        name   => 'Creating doors',
+        count  => $#$map + 1,
+        remove => 1,
+        ETA    => 'linear',
+    });
+    $progress->minor(0);
+
     for my $i ( 0 .. $#$map ) {
         my $jend = $#{ $map->[$i] };
 
@@ -105,9 +113,11 @@ sub doorgen {
                 }
             }
         }
+        $progress->update($i);
     }
 
     delete $_->{_bchkt} for map(@$_, @$map); # btw, bchkt stands for: basic doors checked tile [direction]
+    $progress->update($#$map + 1);
 }
 # }}}
 # _find_span {{{

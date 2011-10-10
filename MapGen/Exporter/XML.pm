@@ -7,40 +7,10 @@ use Carp;
 use Tie::IxHash;
 use XML::Simple;
 
+use parent qw(Games::RolePlay::MapGen::Exporter);
+
 1;
 
-# new {{{
-sub new {
-    my $class = shift;
-    my $this  = bless {o => {@_}}, $class;
-
-    return $this;
-}
-# }}}
-# go {{{
-sub go {
-    my $this = shift;
-    my $opts = {@_};
-
-    for my $k (keys %{ $this->{o} }) {
-        $opts->{$k} = $this->{o}{$k} if not exists $opts->{$k};
-    }
-
-    croak "ERROR: fname is a required option for " . ref($this) . "::go()" unless $opts->{fname};
-    croak "ERROR: _the_map is a required option for " . ref($this) . "::go()" unless ref($opts->{_the_map});
-
-    my $map = $this->genmap($opts);
-    unless( $opts->{fname} eq "-retonly" ) {
-        open my $out, ">$opts->{fname}" or die "ERROR: couldn't open $opts->{fname} for write: $!";
-        print $out "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n<!DOCTYPE MapGen SYSTEM \"MapGen.dtd\">\n";
-        print $out "<?xml-stylesheet type=\"text/xsl\" href=\"MapGen.xsl\"?>\n\n";
-        print $out "\n", $map;
-        close $out;
-    }
-
-    return $map;
-}
-# }}}
 # genmap {{{
 sub genmap {
     my $this = shift;
@@ -53,6 +23,18 @@ sub genmap {
     my $map     = [];
 
     my $ah = sub { my %h; tie %h, "Tie::IxHash", (@_); \%h };
+
+    my $i    = 0;
+    my $oend = scalar(keys %$opts);
+    my $gend = $#{ $opts->{_the_groups} };
+    my $iend = $#{ $opts->{_the_map} };
+    my $progress = Term::ProgressBar::Quiet->new({
+        name   => 'Saving XML map',
+        count  => $oend + $gend + $iend + 1,
+        remove => 1,
+        ETA    => 'linear',
+    });
+    $progress->minor(0);
 
     # options {{{
     my $sort_opts = sub {
@@ -77,6 +59,7 @@ sub genmap {
                 push @$options, $ah->( name=>$k, value=>$v );
             }
         }
+        $progress->update(++$i);
     }
     # }}}
     # groups {{{
@@ -91,10 +74,10 @@ sub genmap {
                 )
             } 0 .. $#{ $g->{loc} }],
         );
+        $progress->update(++$i);
     }
     # }}}
-
-    my $iend = $#{ $opts->{_the_map} };
+    
     for my $i (0 .. $iend) {
         my $jend = $#{ $opts->{_the_map}[$i] };
         my $row  = $ah->( ypos=>$i, tile=>[] );
@@ -144,6 +127,7 @@ sub genmap {
         }
 
         push @$map, $row if int @{$row->{tile}}
+        $progress->update(++$i);
     }
 
     my %main; tie %main, "Tie::IxHash", (
@@ -151,8 +135,13 @@ sub genmap {
         tile_group => $groups,
         'map'      => { row => $map },
     );
+    $progress->update(++$i);
 
     return XMLout(\%main, 
+        XMLDecl  => 
+            "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n".
+            "<!DOCTYPE MapGen SYSTEM \"MapGen.dtd\">\n".
+            "<?xml-stylesheet type=\"text/xsl\" href=\"MapGen.xsl\"?>\n\n",
         RootName => "MapGen",
         NoSort   => 1, # IxHash does this, please don't help me, kthx
     );

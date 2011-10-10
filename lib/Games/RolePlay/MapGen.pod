@@ -10,10 +10,10 @@ Games::RolePlay::MapGen - The base object for generating dungeons and maps
     $map->add_generator_plugin("BasicDoors"); # however, you must add the doors.
     $map->generate("map.txt");                # It'll generate a text map by default.
 
-    $map->set_exporter( "PNG" );              # But a graphical map is probably more useful.
+    $map->set_exporter( "Image" );            # But a graphical map is probably more useful.
     $map->export("map.png");
 
-Here are some screenshots of the PNG and XML exporters:
+Here are some screenshots of the Image and XML exporters:
 
 L<http://voltar.org/PerlModules/vis1.map.png>
 
@@ -98,8 +98,8 @@ This means you can have a wall between two open tiles, making the text output
 difficult to draw and to interpret.  Fortunately, we can set the exporter to
 dump in png format.
   
-  $map->set_exporter( "PNG" );
-  $map->export( "map.png" );
+  $map->set_exporter( "Image" );
+  $map->export( "map.png" );  # or "map.gif", "map.jpg", etc.
 
 The png exports should be a lot easier to read.  But there's one more way to
 dump, which is the xml exporter.  These files are readable by the
@@ -151,10 +151,10 @@ you'd access the C<{od}{s}>.  It is either a C<0> (meaning a wall), a C<1>
     if( $od_s ) {
         if( ref $od_s ) {
             if( $od_s->{'open'} ) {
-                print "There's a door to the south and it's closed. :(\n";
+                print "There's a door to the south and it's open. :)\n";
 
             } else {
-                print "There's a door to the south but it's open. :)\n";
+                print "There's a door to the south but it's closed. :(\n";
             }
 
         } else {
