@@ -151,10 +151,10 @@ you'd access the C<{od}{s}>.  It is either a C<0> (meaning a wall), a C<1>
     if( $od_s ) {
         if( ref $od_s ) {
             if( $od_s->{'open'} ) {
-                print "There's a door to the south and it's closed. :(\n";
+                print "There's a door to the south and it's open. :)\n";
 
             } else {
-                print "There's a door to the south but it's open. :)\n";
+                print "There's a door to the south but it's closed. :(\n";
             }
 
         } else {

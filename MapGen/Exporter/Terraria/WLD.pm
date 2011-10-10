@@ -36,19 +36,22 @@ sub check_opts {
    
    # find an appropriate spawn
    my $map = $opts->{_the_map};
-   foreach my $y (0 .. $#$map) {
-      my $xend = $#{$map->[$y]};
+   SPAWN_SEARCH: foreach my $d (1 .. 3) {
+      foreach my $y (0 .. $#$map) {
+         my $xend = $#{$map->[$y]};
 
-      foreach my $x (0 .. $xend) {
-         my $t  = $map->[$y][$x];
-         next unless ($t->{type});
-         next unless (scalar(grep { $t->{od}{$_} } qw(n s w e)) == 1);  # find a dead-end
-         
-         $dopts->{spawn_tile} = "$x,$y";  # found a good home
-         last;
+         foreach my $x (0 .. $xend) {
+            my $t  = $map->[$y][$x];
+            next unless ($t->{type});
+            next unless (scalar(grep { $t->{od}{$_} } qw(n s w e)) == $d);  # find a dead-end (to start off with)
+            next if ($t->{od}{s});  # can't be up in the air
+            
+            $dopts->{spawn_tile} = "$x,$y";  # found a good home
+            last SPAWN_SEARCH;
+         }
       }
    }
-
+   
    map { $opts->{$_} //= $dopts->{$_} } keys %$dopts;
    
    # adding spawn tile to objects
@@ -76,11 +79,19 @@ sub genmap {
 
    # Do it!
    my $tmap = tile_convert($opts);
-   
+
    # Okay, now for the easy part...
    my ($mx, $my) = map { $opts->{'pixel_'.$_.'_size'} } qw(x y);
    my $id = random(2 ** 32);
    my $wld = '';
+
+   my $progress = Term::ProgressBar::Quiet->new({
+      name   => 'Saving Terraria WLD map',
+      count  => $mx * $my + 2001 + 5,
+      remove => 1,
+      ETA    => 'linear',
+   });
+   $progress->minor(0);
 
    ### Tiles, Walls, and Liquid layers ###   4 to 12 bytes per tile
    # (yep, we're doing this backwards; just so that we can find the spawn point)
@@ -91,7 +102,7 @@ sub genmap {
          
          # Special case: The Spawn Point
          if ($tb && $tb->{name} eq 'Spawn Point') {
-            $opts->{spawn_xy} ||= "$x,".int($y+2);  # get the bottom-left corner
+            $opts->{spawn_xy} //= "$x,".int($y+2);
             undef $tb;  # not a real tile
          }
          
@@ -103,8 +114,8 @@ sub genmap {
          #    if ([Type].IsFramed) Frame = PointShort(Int16, Int16)
          # }
          if ($tb) {
-            $wld .= pack('C', $tb->{num});
-            $wld .= pack('SS', split(/,/, $tb->{frame_xy}[$x][$y] || '0,0')) if ($tb->{type} eq 'frame' || $tb->{isFramed});
+            $wld .= pack('C', $tb->{tile} ? $tb->{tile}{num} : $tb->{num});
+            $wld .= pack('SS', split(/,/, $tb->{frame_xy}{"$x,$y"} || '0,0')) if ($tb->{type} eq 'frame' || $tb->{isFramed});
          }
          # IsLighted = Boolean
          $wld .= pack('b1', 0);  # still haven't figured out what the hell this property does...
@@ -125,6 +136,7 @@ sub genmap {
             $wld .= pack('b1', bool ($t->{liquid}{name} eq 'Lava'));
          }
       }
+      $progress->update(($x+1) * $my);
    }
    croak "No spawn point!" unless ($opts->{spawn_xy});
    
@@ -176,6 +188,7 @@ sub genmap {
    );
    # (don't forget to link up the Tile data we just collected)
    $wld = $wld_head.$wld;
+   $progress->update($mx * $my + 3);
 
    ### Chests, Signs, NPCs ###
    
@@ -187,6 +200,7 @@ sub genmap {
    #    }
    # }
    $wld .= pack('x2001');  ### FIXME: Support chests/signs/NPCs ###
+   $progress->update($mx * $my + 3 + 2001);
 
    ### Footer ###  6+s bytes
 
@@ -194,6 +208,7 @@ sub genmap {
    # WorldName = String
    # WorldId   = Int32
    $wld .= pack('b1C/A*L', 1, $opts->{world_name}, $id);
+   $progress->update($mx * $my + 5 + 2001);
    
    return $wld;
 }

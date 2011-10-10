@@ -3,10 +3,9 @@ package Games::RolePlay::MapGen::GeneratorPlugin::Terraria;
 use common::sense;  # works every time!
 use Carp qw(confess);
 use XML::Parser;
-use Data::Dumper;
 use Games::RolePlay::MapGen::MapQueue::Object;
 use Games::RolePlay::MapGen::Tools qw( choice random _group );
-use List::Util qw( shuffle );
+use List::Util qw( first shuffle );
 use Term::ProgressBar::Quiet;
 use Memoize;
 
@@ -103,7 +102,7 @@ sub pre {
    
    # add a dummy 'Spawn Point' object to place the player somewhere
    ### FIXME: This might end up being an "NPC" object ###
-   my $obj = $specs->{tile}{'Spawn Point'} = {
+   my $obj = $specs->{Tile}{'Spawn Point'} = {
       num       => 999,
       name      => 'Spawn Point',
       type      => 'tile',
@@ -113,12 +112,12 @@ sub pre {
       placement => 'floor',      # player can't float or start off grappling, or anything like that
       isSolid   => 'true',       # not really using this, but...
    };
-   $specs->{ByName}{'Spawn Point'} = $specs->{Tile}{'Spawn Point'} = $obj;
+   $specs->{ByName}{'Spawn Point'} = $obj;
    
-   # add in wall block groups
+   # add in wall tile groups
    $i = 1;
-   foreach my $wb (@{$opts->{'wall_blocks'}}) {
-      # wall block sanity checks
+   foreach my $wb (@{$opts->{'wall_tiles'}}) {
+      # wall tiles sanity checks
       my $val  = $wb->{wall};
       my $tile = $wb->{wall} = frame_info($val);
       $val = "'$val'";  # for the errors
@@ -127,21 +126,23 @@ sub pre {
       
       given ($tile->{type}) {
          when ('tile')  { }  # good!
-         when ('frame') { warn  "Unusual wall block $val, as it's a Frame object; using it, anyway"; }
+         when ('frame') { warn  "Unusual wall tile $val, as it's a Frame object; using it, anyway"; }
          when ('wall')  { confess "Nonono, we're not talking about literally a Wall object; we need a Tile object to BUILD walls!"; }
-         default        { confess "Illegal ".$tile->{type}." object being used for wall_blocks"; }
+         default        { confess "Illegal ".$tile->{type}." object being used for wall_tiles"; }
       }
       
       my $p = $tile->{placement};
-      confess "Wall block needs to be able to float; this $val object has a placement of $p" unless (!$p || $p eq 'any');
+      confess "Wall tile needs to be able to float; this $val object has a placement of $p" unless (!$p || $p eq 'any');
 
       # everything is good; add it!
       my $group = &_group;
-      $group->name("Wall Block Range #$i");
-      $group->type('wall_block');
+      $group->name("Wall Tile Range #$i");
+      $group->type('wall_tile');
       $group->add_rectangle( map { $wb->{$_} } qw(loc size));
       $group->{wall} = $wb->{wall};
       push @$groups, $group;
+      
+      foreach my $xy ($group->enumerate_tiles) { $map->[$xy->[0]][$xy->[1]]{wall_tile} = $wb->{wall}; }
    }
    
 }
@@ -181,6 +182,7 @@ sub add_to_tile {
       map { $obj->attr($_ => $attr->{$_}); } keys %$attr if ($attr);
       $obj->attr('ref' => ($specs->{Frame}{$item} || $specs->{Tile}{$item}));
       $mq->add($obj => ($t->{x}, $t->{y}));
+
       return 1;
    }
    # Item = as a new MapQueue object
@@ -205,8 +207,8 @@ sub frame_info {
 
    my %hash = %$frm;
    if    ($frm->{type} eq 'tile') {
-      $hash{size}      = '1,1';
-      $hash{upperLeft} = '0,0';
+      $hash{size}      ||= '1,1';
+      $hash{upperLeft} ||= '0,0';
    }
    elsif ($frm->{type} eq 'frame') {
       $hash{$_} ||= $hash{tile}->{$_} for (qw(color name isSolid size placement isSolidTop growsOn hangsOn canMixFrames isHouseItem lightBrightness contactDmg));
@@ -239,8 +241,8 @@ sub tile_convert {
       'open' => {
          n => $specs->{Tile}{'Wooden Platform'},  # no such thing as an 'open' platform
          s => $specs->{Tile}{'Wooden Platform'},
-         w => $specs->{Tile}{'Door Open-l'},
-         e => $specs->{Tile}{'Door Open-r'},
+         w => $specs->{Frame}{'Door Open-Left'},
+         e => $specs->{Frame}{'Door Open-Right'},
       },
       'closed' => {
          n => $specs->{Tile}{'Wooden Platform'},
@@ -250,7 +252,6 @@ sub tile_convert {
       },
    };
    $door_tile->{$_} = $door_tile->{closed} for qw(secret stuck locked);  # can't really do anything different here, either
-   my @wall_tiles = grep { $_->{type} eq 'wall_block' } @$groups;
 
    my $progress = Term::ProgressBar::Quiet->new({
       name   => 'Converting GRM-->Terraria tiles',
@@ -302,14 +303,12 @@ sub tile_convert {
          };
 
          $mo->{t_cb}->() if exists $mo->{t_cb};
-         
-         ### FIXME: check @wall_tiles groups ###
 
          # Walls, BG Walls, and corners
          if ($t->{type}) {  # empty space
             ### FIXME: make sure bg_wall is added in as well ###
             tile_rect($tmap, $xp, $yp => $Xp, $Yp, wall => $t->{bg_wall});
-            tile_rect($tmap, $xp, $yp => $Xp, $Yp, tile => $wall_tile);
+            tile_rect($tmap, $xp, $yp => $Xp, $Yp, tile => $t->{wall_tile});
             foreach my $dir qw(n w e s) {
                tile_line($tmap, @{$dir_line->{$dir}}, tile => undef) if ($empty_dir =~ /$dir/);
             }
@@ -320,7 +319,7 @@ sub tile_convert {
             }
          }
          else {             # complete wall
-            tile_filled_rect($tmap, $xp, $yp => $Xp, $Yp, tile => $wall_tile);
+            tile_filled_rect($tmap, $xp, $yp => $Xp, $Yp, tile => $t->{wall_tile});
             next;
          }
          
@@ -329,38 +328,45 @@ sub tile_convert {
             # figure out the fill amount (fortunately, the liquid layer is all by itself, so this is easy)
             my $tiles = ($t->{liquid_percent} || 100) / 100 * $mo->{x_size} * $mo->{y_size};
             my $lines = int($tiles / $mo->{x_size});
-            my $tmod  = $tiles - $lines;
+            my $tmod  = $tiles % $mo->{x_size};
             
+            my @xy  = (@{$corners->{sw}}, @{$corners->{se}});
             if ($lines) {
-               my @xy  = @{$corners->{sw}} => @{$corners->{se}};
                $xy[1] -= $lines - 1;  # elevate the Y-axis
                tile_filled_rect($tmap, @xy, liquid => $t->{liquid});
-               
-               if ($tmod) {
-                  $xy[3] = ++$xy[1];        # y = next row and single line
-                  $xy[2] = $xy[0] + $tmod;  # x = start + reminder
-                  tile_line($tmap, @xy, liquid => $t->{liquid});
-               }
+
+               $xy[3] = ++$xy[1];        # y = next row and single line
+            }
+            if ($tmod) {
+               $xy[2] = $xy[0] + $tmod;  # x = start + reminder
+               tile_line($tmap, @xy, liquid => $t->{liquid});
             }
          }
 
-         # Doors         
+         # Doors
          foreach my $dir (qw(n w)) {  # NOTE: we never need to draw s and e doors, that just duplicates efforts
             if (ref($t->{od}{$dir})) {
                my $d = $t->{od}{$dir};
-               my $door_type = 'open' unless ($d->{'open'});  # ironic, I know...
+               my $door_type = 'open' if ($d->{'open'});
                for (qw(locked stuck secret)) { $door_type ||= $_ if ($d->{$_}) };
-               $door_type ||= 'closed';               
+               $door_type ||= 'closed';
                
                if ($t->{nb}{$dir} && $t->{nb}{$dir}{type} eq 'room') {  # needs to go on the closest tile to the room
                   my $opp = $Games::RolePlay::MapGen::opp{$dir};  # use opposite door
                   
-                  tile_line($tmap, @{$dir_line_door_space->{$dir}}, tile => $door_tile->{$door_type}{$opp});  # using the room's tile's opposite direction for the door
                   tile_line($tmap, @{$dir_line->{$dir}},            tile => undef);
+                  tile_line($tmap, @{$dir_line_door_space->{$dir}}, tile => $door_tile->{$door_type}{$opp});  
                }
                else {
+                  # make sure it fits
+                  my $frm = frame_info($door_tile->{$door_type}{$dir});
+                  my ($sx, $sy, $ex, $ey) = @{$dir_line->{$dir}};
+                  my ($w, $h) = split(/\s*,\s*/, $frm->{size} || '1,1');
+                  if ($dir eq 'n') { $sy -= $h-1; }
+                  else             { $sx -= $w-1; }
+                  
                   tile_line($tmap, @{$dir_line_door_space->{$dir}}, tile => undef);
-                  tile_line($tmap, @{$dir_line->{$dir}},            tile => $door_tile->{$door_type}{$dir});
+                  tile_line($tmap, $sx, $sy, $ex, $ey,              tile => $frm);
                }
             }
          }
@@ -372,6 +378,7 @@ sub tile_convert {
          # this sort works out: undef/any is first, and surface is last
          # (oh and thank Perl we have Memoize for frame_info...)
          foreach my $obj (sort { frame_info($a)->{placement} cmp frame_info($b)->{placement} } $mq->objs_at_location($x, $y)) {
+            ### FIXME: Debug "Spawn Point" not appearing with right size ###
             my $tag = uc($obj->{v});
             my $frm = frame_info($obj->attr('ref'));
 
@@ -386,10 +393,9 @@ sub tile_convert {
                when (/floor/i)   { push(@dirs, 's');     continue; }
                when (/surface/i) { push(@dirs, 'S');     continue; }
                when (/CFBoth/)   { warn "CFBoth objects (besides doors) not supported yet!"; next; }
-               default {  # any
-                  @dirs = ('A');  # special case; not affected by gravity
-               }
+               when (/any/)      { @dirs = ('A'); }  # special case; not affected by gravity
             }
+            @dirs = ('A') unless ($frm->{placement});
             @dirs = shuffle(@dirs);
          
             ### TODO: Support for isSolid isSolidTop ###
@@ -398,13 +404,14 @@ sub tile_convert {
                given ($dir) {
                   when ('A') {            # 'any' tile; scattered pattern along the empty space
                      # no such thing as an 'any' tile with a size greater than 1x1, so we aren't doing that check
-                     ### FIXME: Use amount_per attr here ###
+                     
+                     my $per = $obj->attr('amount_per') || 50;
                      
                      # main space
                      foreach my $yy (($yp+1) .. ($Yp-1)) {
                         foreach my $xx (($xp+1) .. ($Xp-1)) {
                            # (a little wasteful using tile_pixel, but it's kinda hard to detail an abstract shape any other way)
-                           tile_pixel($tmap, $xx, $yy, tile => $frm) if (random(2));  
+                           tile_pixel($tmap, $xx, $yy, tile => $frm) if (random(100) < $per);
                         }
                      }
 
@@ -414,7 +421,7 @@ sub tile_convert {
                            my ($sx, $sy, $ex, $ey) = @{$dir_line->{$dir}};
                            foreach my $yy ($sy .. $ey) {
                               foreach my $xx ($sx .. $ex) {
-                                 tile_pixel($tmap, $xx, $yy, tile => $frm) if (random(2));
+                                 tile_pixel($tmap, $xx, $yy, tile => $frm) if (random(100) < $per);
                               }
                            }
                         }
@@ -428,18 +435,32 @@ sub tile_convert {
                      
                      my ($sx, $sy, $ex, $ey) = @{$dir_line_wall_space->{$dir}};
                      
-                     ### FIXME: Use amount_per attr here; might need multiple $dir ###
+                     ### FIXME: Don't clobber objects that already exist ###
                      ### FIXME: What to do about objects bigger than the mini 3x3 space we have? ###
                      ### FIXME: If no floor space, these objects can still be put on a tile ###
 
-                     # make sure it fits
-                     if ($dir =~ /[ns]/) { $sx += $w - 1; $ex -= $w - 1; }
-                     else                { $sy += $h - 1; $ey -= $h - 1; }
-                     
-                     my $xx = choice($sx .. $ex);
-                     my $yy = choice($sy .. $ey);
-                     tile_pixel($tmap, $xx, $yy, tile => $frm);
-                     last;
+                     if ($obj->attr('amount_per') && $w+$h == 2) {
+                        my $per = $obj->attr('amount_per');
+                        foreach my $yy ($sy .. $ey) {
+                           foreach my $xx ($sx .. $ex) {
+                              tile_pixel($tmap, $xx, $yy, tile => $frm) if (random(100) < $per);
+                           }
+                        }
+                     }
+                     else {
+                        # make sure it fits
+                        my ($ax, $ay) = ($w-1, $h-1);
+                        if ($dir =~ /ns/) { $ex -= $ax; }
+                        else              { $ey -= $ay; }
+                        
+                        if ($dir =~ /s/)  { $sy -= $ay; $ey -= $ay; }
+                        if ($dir =~ /e/)  { $sx -= $ax; $ex -= $ax; }
+                        
+                        my $xx = choice($sx .. $ex);
+                        my $yy = choice($sy .. $ey);
+                        tile_pixel($tmap, $xx, $yy, tile => $frm);
+                        last;
+                     }
                   }
                   when (/S/) {
                      ### FIXME: Need object detection/records first ###
@@ -513,7 +534,7 @@ sub tile_pixel {
                my ($fx, $fy) = ($ux + $ox * 18, $uy + $oy * 18);  # skip by 18 frame points
                my ($tx, $ty) = ($x+$ox, $y+$oy);
 
-               $frm_obj->{frame_xy}[$tx][$ty] = "$fx,$fy";  # (this also saves on memory, since the hash doesn't get warped while putting XY in there.)
+               $frm_obj->{frame_xy}{"$tx,$ty"} = "$fx,$fy";  # (this also saves on memory, since the hash doesn't get warped while putting XY in there.)
                $tmap->{tile}[$tx][$ty] = $frm_obj;
             }
          }

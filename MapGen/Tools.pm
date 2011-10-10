@@ -246,6 +246,7 @@ sub add_rectangle {
                 $Mloc->[0] = $xc if $xc > $Mloc->[0];
                 $Mloc->[1] = $yc if $yc > $Mloc->[1];
 
+                ### TODO: This should be a group arrayref ###
                 $mapo->[ $yc ][ $xc ]{group} = $this if $mapo;
             }
 

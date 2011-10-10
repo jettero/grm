@@ -55,7 +55,10 @@ sub trapgen {
       foreach my $loc (@open_loc) {
          my ($x, $y) = @$loc;
          my $t = $map->[$y][$x];
-         add_to_tile($t, $mq, odds_pick($opts->{'terraria_trap_corr_obj_odds'}), 'liquid tile');
+         my %attr;
+         $attr{amount_per} = 100;
+
+         add_to_tile($t, $mq, odds_pick($opts->{'terraria_trap_corr_obj_odds'}), 'liquid tile', \%attr);
          $np = $progress->update($i) if (++$i >= $np);
       }
    }
@@ -69,22 +72,17 @@ sub trapgen {
          my $fi = frame_info($item);
          my %attr;
          $attr{amount_per} = 100;
-         $attr{placement} = $fi->{placement} || 'any';
-         my $p = $attr{placement};
+         my $p = $fi->{placement} || 'any';
          
-         for (my $l = 0; $l < @{$grp->{loc}}; $l++) {
-            my @e = ($grp->{loc}[$l][0,1], map { $grp->{loc}[$l][$_] + $grp->{size}[$l][$_] - 1 } (0, 1));
-
-            foreach my $y ($e[1] .. $e[3]) {
-               foreach my $x ($e[0] .. $e[2]) {
-                  next unless ($p eq 'any' ||
-                              ($p =~ /wall/i    && (!$map->[$y][$x]{od}{w} || !$map->[$y][$x]{od}{e})) ||
-                              ($p =~ /floor/i   && !$map->[$y][$x]{od}{s}) ||
-                              ($p =~ /ceiling/i && !$map->[$y][$x]{od}{n}));
-                  
-                  add_to_tile($map->[$y][$x], $mq, $item, 'liquid tile', \%attr);
-               }
-            }
+         foreach my $xy ($grp->enumerate_tiles) {
+            my ($x, $y) = @$xy;
+            
+            next unless ($p eq 'any' ||
+                        ($p =~ /wall/i    && (!$map->[$y][$x]{od}{w} || !$map->[$y][$x]{od}{e})) ||
+                        ($p =~ /floor/i   && !$map->[$y][$x]{od}{s}) ||
+                        ($p =~ /ceiling/i && !$map->[$y][$x]{od}{n}));
+            
+            add_to_tile($map->[$y][$x], $mq, $item, 'liquid tile', \%attr);
          }
          $np = $progress->update($i) if ($i >= $np);
       }
