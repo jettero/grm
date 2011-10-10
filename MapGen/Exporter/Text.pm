@@ -5,38 +5,10 @@ package Games::RolePlay::MapGen::Exporter::Text;
 use common::sense;
 use Carp;
 
+use parent qw(Games::RolePlay::MapGen::Exporter);
+
 1;
 
-# new {{{
-sub new {
-    my $class = shift;
-    my $this  = bless {o => {@_}}, $class;
-
-    return $this;
-}
-# }}}
-# go {{{
-sub go {
-    my $this = shift;
-    my $opts = {@_};
-
-    for my $k (keys %{ $this->{o} }) {
-        $opts->{$k} = $this->{o}{$k} if not exists $opts->{$k};
-    }
-
-    croak "ERROR: fname is a required option for " . ref($this) . "::go()" unless $opts->{fname};
-    croak "ERROR: _the_map is a required option for " . ref($this) . "::go()" unless ref($opts->{_the_map});
-
-    my $map = $this->genmap($opts);
-    unless( $opts->{fname} eq "-retonly" ) {
-        open _MAP_OUT, ">$opts->{fname}" or die "ERROR: couldn't open $opts->{fname} for write: $!";
-        print _MAP_OUT $map;
-        close _MAP_OUT;
-    }
-
-    return $map;
-}
-# }}}
 # _show_by_od {{{
 sub _show_by_od {
     my $this = shift;
@@ -85,6 +57,14 @@ sub genmap {
     my $map      = "[m"; $map = "" if $nocolor;
     my $rooms    = "";
        $rooms   .= "$_->{name} $_->{loc_size}\n" for (grep /^room$/, @$g);
+
+    my $progress = Term::ProgressBar::Quiet->new({
+        name   => 'Saving text map',
+        count  => $#$m,
+        remove => 1,
+        ETA    => 'linear',
+    });
+    $progress->minor(0);
 
     for my $i (0 .. $#$m) {
         my $p     = $1 if $i =~ m/(\d)$/;
@@ -159,7 +139,8 @@ sub genmap {
             }
             $map .= "\n";
         }
-
+        
+        $progress->update($i);
     }
 
     return $map . $rooms;
