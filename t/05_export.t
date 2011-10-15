@@ -8,7 +8,7 @@ my $map = new Games::RolePlay::MapGen({bounding_box => join("x", 25, 25) });
    $map->add_generator_plugin("BasicDoors");
    $map->generate;
 
-plan tests => 3 + (25*25) + 1 + 2;
+plan tests => 3 + (25*25) + 7 + 2;
 
 # if you know of a way to actually test these, you go ahead and email me, ok?
 
@@ -25,12 +25,22 @@ ok( $txt, $tnc );
 
 eval "use GD;"; 
 if( $@ ) {
-    ok( 1 ); # this should probably be a skip() instead... meh
+    skip('Skip since no GD', 1) for 1 .. 7;
 
 } else {
     set_exporter $map("PNG");
     export $map("map.png"); 
     ok( -f "map.png" );
+    unlink "map.png";
+
+    set_exporter $map("Image");
+    
+    foreach my $ext (qw(png jpg jpeg gif gd gd2)) {
+        my $fn = "map.$ext";
+        export $map($fn);
+        ok( ($ext eq 'gd') ? -f $fn : GD::Image->new($fn) );  # GD version 1 cannot be recognized automatically at this time
+    }
+
 }
 
 # However, this I could actually test... if I got around to it.
