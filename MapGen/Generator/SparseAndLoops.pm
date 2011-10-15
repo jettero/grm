@@ -19,8 +19,9 @@ sub remove_deadends {
     my $map  = shift;
 
     my @dirs = (qw(n s e w));
+    my @endians = &_endian_tiles($map);
 
-    for my $tile ( &_endian_tiles( $map ) ) {
+    for my $tile (@endians) {
         if( &roll(1, 100) <= $opts->{remove_deadend_percent} ) {
 
             DO_THIS_TILE_ALSO:
@@ -68,27 +69,24 @@ sub sparsify {
     my $opts = shift;
     my $map  = shift;
 
-    my $sparseness = $opts->{sparseness};
-
-    SPARSIFY: 
-    for my $tile ( &_endian_tiles( $map ) ) {
-        my($dir)= grep { $tile->{od}{$_} } (qw(n s e w)); # grep returns the resulting list size unless you evaluate in list context
-        my $nex = ($tile->{od}{n} ? $map->[$tile->{y}-1][$tile->{x}] :
-                   $tile->{od}{s} ? $map->[$tile->{y}+1][$tile->{x}] :
-                   $tile->{od}{e} ? $map->[$tile->{y}][$tile->{x}+1] :
-                                    $map->[$tile->{y}][$tile->{x}-1] );
-
-        $opts->{t_cb}->() if exists $opts->{t_cb};
-
-        $tile->{od} = {n=>0, s=>0, e=>0, w=>0};
-        delete $tile->{type};
-
-        die "incomplete open direction found during sparseness calculation" unless defined $nex;
-
-        $nex->{od}{$Games::RolePlay::MapGen::opp{$dir}} = 0;
+    for my $s (1 .. $opts->{sparseness}) {
+        for my $tile ( &_endian_tiles( $map ) ) {
+            my($dir)= grep { $tile->{od}{$_} } (qw(n s e w)); # grep returns the resulting list size unless you evaluate in list context
+            my $nex = ($tile->{od}{n} ? $map->[$tile->{y}-1][$tile->{x}] :
+                       $tile->{od}{s} ? $map->[$tile->{y}+1][$tile->{x}] :
+                       $tile->{od}{e} ? $map->[$tile->{y}][$tile->{x}+1] :
+                                        $map->[$tile->{y}][$tile->{x}-1] );
+ 
+            $opts->{t_cb}->() if exists $opts->{t_cb};
+ 
+            $tile->{od} = {n=>0, s=>0, e=>0, w=>0};
+            delete $tile->{type};
+ 
+            die "incomplete open direction found during sparseness calculation" unless defined $nex;
+ 
+            $nex->{od}{$Games::RolePlay::MapGen::opp{$dir}} = 0;
+        }
     }
-
-    goto SPARSIFY if --$sparseness > 0;
 }
 # }}}
 # genmap {{{

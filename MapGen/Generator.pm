@@ -5,14 +5,12 @@ package Games::RolePlay::MapGen::Generator;
 use common::sense;
 use Carp;
 
-our @ISA;
-
 1;
 
 # new {{{
 sub new {
-    my $class = shift;
-    my $this  = bless {o => {@_}}, $class;
+    my ($class, $opts) = (shift, {@_});
+    my $this  = bless {o => $opts}, $class;
 
     $this->{plugins} = {
          pre => [ ], # after the entire map is built, this executes on the topnode (before treasure and traps are added)
@@ -30,8 +28,7 @@ sub new {
 # }}}
 # gen_opts {{{
 sub gen_opts {
-    my $this = shift;
-    my $opts = {@_};
+    my ($this, $opts) = (shift, {@_});
 
     for my $k (keys %{ $this->{o} }) {
         $opts->{$k} = $this->{o}{$k} if not exists $opts->{$k};
@@ -64,8 +61,7 @@ sub go {
 # }}}
 # gen_bounding_size {{{
 sub gen_bounding_size {
-    my $this = shift;
-    my $opts = shift;
+    my ($this, $opts) = @_;
 
     if( $opts->{bounding_box} ) {
         die "ERROR: illegal bounding box description '$opts->{bounding_box}'" unless $opts->{bounding_box} =~ m/^(\d+)x(\d+)/;
@@ -76,8 +72,7 @@ sub gen_bounding_size {
 # }}}
 # post_genmap  {{{
 sub post_genmap  {
-    my $this = shift;
-    my ($opts, $map, $groups) = @_;
+    my ($this, $opts, $map, $groups) = @_;
 
     $this->pre( $opts, $map, $groups );
 
