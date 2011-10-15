@@ -1,3 +1,10 @@
+2.0000: Fri Oct 14 2011
+   - pulled in a bunch of changes from SineSwiper
+     - mostly optimizations
+     - some OOP fixes 
+     - seems the maps are going 2D scroller, if you choose to
+       picture it that way.
+
 1.5005: Sun Jul 10 2011
    - use common::sense and use parent
    - no AutoLoader
