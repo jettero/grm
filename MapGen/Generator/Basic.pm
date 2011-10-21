@@ -122,7 +122,7 @@ sub drop_rooms {
     $opts->{y_size} = $#$map;
     $opts->{x_size} = $#{ $map->[0] };
 
-    my $num_rooms = &str_eval( $opts->{num_rooms} );
+    my $num_rooms = str_eval( $opts->{num_rooms} );
     my $room_groups = grep { $_->{type} eq 'room' } @$groups;  # (pairwise likes to complain about args, hence the @{[ ]} syntax)
     my @room_locs = pairwise { [@$a, @$b] } @{[map { @{$_->{loc}} } @$room_groups]}, @{[map { @{$_->{size}} } @$room_groups]};  # [ $x, $y, $sx, $sy ]
 
@@ -197,7 +197,7 @@ sub drop_rooms {
             }
         }
 
-        if( my $loc = &choice( @possible_locs ) ) {
+        if( my $loc = choice( @possible_locs ) ) {
             my @corridors = ();
 
             pop @$loc; # ditch the score.
