@@ -8,9 +8,9 @@ log
 Makefile
 Makefile.old
 *.map
+map.*
 MapGen.bs
 MapGen/Exporter/SVG.pm
-map.tnc
 maze.log
 META.yml
 mq.[co]
