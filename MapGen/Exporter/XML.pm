@@ -7,40 +7,10 @@ use Carp;
 use Tie::IxHash;
 use XML::Simple;
 
+use parent qw(Games::RolePlay::MapGen::Exporter);
+
 1;
 
-# new {{{
-sub new {
-    my $class = shift;
-    my $this  = bless {o => {@_}}, $class;
-
-    return $this;
-}
-# }}}
-# go {{{
-sub go {
-    my $this = shift;
-    my $opts = {@_};
-
-    for my $k (keys %{ $this->{o} }) {
-        $opts->{$k} = $this->{o}{$k} if not exists $opts->{$k};
-    }
-
-    croak "ERROR: fname is a required option for " . ref($this) . "::go()" unless $opts->{fname};
-    croak "ERROR: _the_map is a required option for " . ref($this) . "::go()" unless ref($opts->{_the_map});
-
-    my $map = $this->genmap($opts);
-    unless( $opts->{fname} eq "-retonly" ) {
-        open my $out, ">$opts->{fname}" or die "ERROR: couldn't open $opts->{fname} for write: $!";
-        print $out "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n<!DOCTYPE MapGen SYSTEM \"MapGen.dtd\">\n";
-        print $out "<?xml-stylesheet type=\"text/xsl\" href=\"MapGen.xsl\"?>\n\n";
-        print $out "\n", $map;
-        close $out;
-    }
-
-    return $map;
-}
-# }}}
 # genmap {{{
 sub genmap {
     my $this = shift;
@@ -153,6 +123,10 @@ sub genmap {
     );
 
     return XMLout(\%main, 
+        XMLDecl  => 
+            "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n".
+            "<!DOCTYPE MapGen SYSTEM \"MapGen.dtd\">\n".
+            "<?xml-stylesheet type=\"text/xsl\" href=\"MapGen.xsl\"?>\n\n",
         RootName => "MapGen",
         NoSort   => 1, # IxHash does this, please don't help me, kthx
     );
