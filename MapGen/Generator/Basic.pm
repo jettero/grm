@@ -119,7 +119,7 @@ sub drop_rooms {
     $opts->{y_size} = $#$map;
     $opts->{x_size} = $#{ $map->[0] };
 
-    for my $rn (1 .. &str_eval( $opts->{num_rooms} )) {
+    for my $rn (1 .. str_eval( $opts->{num_rooms} )) {
         my @size    = $this->gen_room_size( $opts );
            $size[0] = $opts->{x_size} if $size[0] > $opts->{x_size};
            $size[1] = $opts->{y_size} if $size[1] > $opts->{y_size};
@@ -191,7 +191,7 @@ sub drop_rooms {
            }
         }
 
-        if( my $loc = &choice( @possible_locs ) ) {
+        if( my $loc = choice( @possible_locs ) ) {
             my @corridors = ();
 
             pop @$loc; # ditch the score.
