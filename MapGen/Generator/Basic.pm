@@ -322,7 +322,7 @@ sub cleanup_pseudo_rooms {
 # genmap {{{
 sub genmap {
     my $this = shift;
-    my $opts = $this->gen_opts;
+    my $opts = $this->gen_opts(%{ $_[0] });
     my ($map, $groups) = $this->SUPER::genmap(@_);
 
     # There are a few types of random corridors that look enough like rooms
