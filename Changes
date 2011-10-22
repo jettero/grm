@@ -1,3 +1,7 @@
+2.0000: Sat Oct 22 2011
+   - pulled in the new exporter changes
+   - fixed various options parsing bugs from the editor
+
 2.0000: Fri Oct 14 2011
    - pulled in a bunch of changes from SineSwiper
      - mostly optimizations
