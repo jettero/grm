@@ -10,10 +10,8 @@
   <option name="fname" value="vis1.map.xml" />
   <option name="generator" value="Games::RolePlay::MapGen::Generator::Basic" />
   <option name="max_room_size" value="7x7" />
-  <option name="max_size" value="9x9" />
   <option name="max_span" value="50" />
   <option name="min_room_size" value="2x2" />
-  <option name="min_size" value="2x2" />
   <option name="num_rooms" value="2d4" />
   <option name="remove_deadend_percent" value="60" />
   <option name="same_node_percent" value="30" />
