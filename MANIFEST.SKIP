@@ -1,5 +1,6 @@
-MANIFEST.SKIP
+2.vis1.ap
 ^\.git
 ^\.todo
 make_svg
-2.vis1.ap
+MANIFEST.SKIP
+run_grmed_local.sh
