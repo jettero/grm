@@ -50,10 +50,10 @@ sub go {
     croak "ERROR: bounding_box is a required option for " . ref($this) . "::go()" unless $opts->{x_size} and $opts->{y_size};
     croak "ERROR: num_rooms is a required option for " . ref($this) . "::go()" unless $opts->{num_rooms};
 
-    $opts->{min_size} = "2x2" unless $opts->{min_size};
-    $opts->{max_size} = "9x9" unless $opts->{max_size};
+    $opts->{min_room_size} = "2x2" unless $opts->{min_room_size};
+    $opts->{max_room_size} = "9x9" unless $opts->{max_room_size};
 
-    croak "ERROR: room sizes are of the form 9x9, 3x10, 2x2, etc" unless $opts->{min_size} =~ m/^\d+x\d+$/ and $opts->{max_size} =~ m/^\d+x\d+$/;
+    croak "ERROR: room sizes are of the form 9x9, 3x10, 2x2, etc" unless $opts->{min_room_size} =~ m/^\d+x\d+$/ and $opts->{max_room_size} =~ m/^\d+x\d+$/;
 
     my ($map, $groups) = $this->genmap( $opts );
 
