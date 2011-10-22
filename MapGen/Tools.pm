@@ -427,7 +427,7 @@ sub irange {
 }
 # }}}
 # str_eval {{{
-sub _str_eval {
+sub str_eval {
     my $str = shift;
 
     return int $str if $str =~ m/^\d+$/;
@@ -438,8 +438,6 @@ sub _str_eval {
     return undef if $str =~ m/\D/;
     return int $str;
 }
-
-sub str_eval { my $x = _str_eval(@_); open my $out, ">>", "/tmp/file"; print $out "str_eval(@_) = $x\n"; $x }
 # }}}
 
 sub _group { return new Games::RolePlay::MapGen::_group(@_) }
