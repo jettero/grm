@@ -1,5 +1,5 @@
 2.0000: Sat Oct 22 2011
-   - pulled in the new exporter changes
+   - pulled in the new SS Exporter object (for better subclassing)
    - fixed various options parsing bugs from the editor
 
 2.0000: Fri Oct 14 2011
