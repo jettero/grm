@@ -1,3 +1,7 @@
+1.5006: Sun Dec 09 2012
+   - added some experimental things, maybe develop later,
+     maybe not
+
 1.5005: Sun Jul 10 2011
    - use common::sense and use parent
    - no AutoLoader

@@ -1093,6 +1093,30 @@ sub closure_lline_of_sight {
 }
 # }}}
 
+# {{{ sub build_queue_from_hash
+
+##################
+# XXX: experimental, undocumented, crazy thing, do not use, may change
+######
+
+sub build_queue_from_hash {
+    my $this = shift;
+    my $that = @_==1 && ref($_[0])eq"HASH" ? $_[0] : { @_ };
+
+    delete $this->{l};
+    delete $this->{c};
+
+    for my $k (keys %$that) {
+        $this->{l} = $k;
+        my $loc = $that->{$k}{l};
+        my $itm = $that->{$k}{i};
+
+        push @{$this->{c}[ $loc->[1] ][ $loc->[0] ]}, $itm;
+    }
+}
+
+# }}}
+
 # add {{{
 sub add {
     my $this = shift;
