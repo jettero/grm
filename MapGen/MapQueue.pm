@@ -1155,6 +1155,15 @@ sub replace {
     $this->add($that => @loc);
 }
 # }}}
+# {{{ is_on_map
+sub is_on_map {
+    my $this = shift;
+    my $that = shift;
+
+    return exists($this->{l}{$that}) ? 1:0;
+}
+
+# }}}
 
 # objs_at_location {{{
 sub objs_at_location {

@@ -1,6 +1,7 @@
-1.5006: Sun Dec 09 2012
+1.5006: Sat Dec 29 2012
    - added some experimental things, maybe develop later,
      maybe not
+   - added is_on_map(target) to mapqueue
 
 1.5005: Sun Jul 10 2011
    - use common::sense and use parent
