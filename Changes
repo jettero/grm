@@ -1,3 +1,7 @@
+1.5008: Mon Apr 22 2013
+   - provide fix for bug in Storable:
+     https://rt.cpan.org/Ticket/Display.html?id=84705
+
 1.5006: Sat Dec 29 2012
    - added some experimental things, maybe develop later,
      maybe not

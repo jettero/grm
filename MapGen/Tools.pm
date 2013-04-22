@@ -41,7 +41,11 @@ sub interconnect_map {
 
     # This interconnected array stuff is _REALLY_ handy, but it needs to be cleaned up, so it gets it's own class
 
-    tie @$_, "Games::RolePlay::MapGen::_disallow_autoviv", $_ for $map, @$map;
+    for($map, @$map) {
+        my @a;
+        tie @a, "Games::RolePlay::MapGen::_disallow_autoviv", $_;
+        $_ = \@a;
+    }
 
     for my $i (0 .. $#$map) {
         my $jend = $#{ $map->[$i] };
