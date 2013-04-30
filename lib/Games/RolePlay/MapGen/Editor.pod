@@ -33,7 +33,11 @@ converted to corridor tiles -- although their closures can be modified.
 
 =head1 COPYRIGHT
 
-Copyright (c) 2008 Paul Miller -- LGPL [Software::License::LGPL_2_1]
+Copyright © 2013 Paul Miller
+
+=head1 LICENSE
+
+LGPL2
 
 =head1 SEE ALSO
 

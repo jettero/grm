@@ -369,7 +369,7 @@ C<$#array>) or an array of all the rows on the map (like C<0 .. $#array>).
 
 =head1 AUTHOR
 
-Paul Miller C<jettero@cpan.org>
+Paul Miller C<< <jettero@cpan.org> >>
 
 I am using this software in my own projects...  If you find bugs, please please
 please let me know.
@@ -379,12 +379,11 @@ gratification there if you like.  L<irc://irc.freenode.net/perl>
 
 =head1 COPYRIGHT
 
-Copyright (c) 2008 Paul Miller -- LGPL [Software::License::LGPL_2_1]
+Copyright © 2013 Paul Miller
 
-    perl -MSoftware::License::LGPL_2_1 \
-         -e '$l = Software::License::LGPL_2_1->new({
-             holder=>"Paul Miller"});
-             print $l->fulltext' | less
+=head1 LICENSE
+
+LGPL2
 
 =head1 SEE ALSO
 
