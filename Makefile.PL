@@ -84,6 +84,7 @@ sub prompt_more_modules {
         'Gtk2'                         => 0,
         'Gtk2::Ex::Dialogs'            => 0,
         'Gtk2::Ex::Simple::Menu'       => 0,
+        'Gtk2::Ex::PodViewer'          => 0,
         Storable                       => 0,
         'Data::Dump'                   => 0,
         'HTTP::Status'                 => 0,
